@@ -1,0 +1,7 @@
+Empira Blue  #3B4CFF  primary
+Spark Amber  #FFB21E  accent
+Lab Ink      #0B1026  text, dark backgrounds
+Blue 300     #8B96FF  symbol on dark
+Signal Coral #FF6A4D  alerts only
+Paper        #F6F7FB  light backgrounds
+Wordmark: Sora Bold, letter-spacing -0.02em (Google Fonts)

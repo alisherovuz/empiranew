@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>3D laboratoriya — Empira</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/app-icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top: back + names only -->
+  <header class="labbar">
+    <a class="icon-btn" href="../topic/index.html" data-back aria-label="Orqaga — mavzu sahifasi">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    </a>
+    <div class="labbar__text">
+      <h1 class="labbar__title" data-title>3D laboratoriya</h1>
+      <p class="labbar__meta" data-meta></p>
+    </div>
+    <button class="icon-btn labbar__fs" type="button" data-fullscreen aria-label="To‘liq ekran" title="To‘liq ekran (proyektor uchun)">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    </button>
+  </header>
+
+  <main class="lab">
+
+    <!-- The experiment dominates -->
+    <section class="stage" data-stage aria-label="3D laboratoriya">
+      <canvas class="stage__canvas" data-canvas></canvas>
+      <div class="stage__loading" data-loading role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Laboratoriya yuklanmoqda…</span>
+      </div>
+      <div class="readouts" aria-live="polite" data-readouts></div>
+      <p class="stage__hint" data-hint>Aylantirish uchun suring</p>
+      <button class="icon-btn stage__reset" type="button" data-reset-view aria-label="Ko‘rinishni tiklash" title="Ko‘rinishni tiklash">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <p class="stage__fallback" data-fallback hidden>3D ko‘rinish yuklanmadi. Internet aloqasini tekshirib, sahifani yangilang.</p>
+    </section>
+
+    <!-- Only what the experiment needs -->
+    <aside class="panel" aria-label="Tajriba">
+
+      <section class="block block--question">
+        <p class="label">Tajriba savoli</p>
+        <p class="question" data-question></p>
+      </section>
+
+      <section class="block block--controls" aria-label="Boshqaruv">
+        <div data-fields></div>
+        <button class="btn btn--primary btn--large" type="button" data-run></button>
+      </section>
+
+      <section class="block block--steps" aria-labelledby="steps-title">
+        <h2 class="block__title" id="steps-title">Bosqichlar</h2>
+        <ol class="steps" role="list" data-steps></ol>
+      </section>
+
+      <section class="block block--runs" aria-labelledby="runs-title" data-runs-block hidden>
+        <h2 class="block__title" id="runs-title">O‘lchovlar</h2>
+        <p class="runs__empty" data-runs-empty>Hali o‘lchov yo‘q.</p>
+        <table class="runs" data-runs hidden>
+          <thead><tr data-runs-head></tr></thead>
+          <tbody data-runs-body></tbody>
+        </table>
+      </section>
+
+      <!-- Quiet way forward during class: next curriculum topic (no skipping) -->
+      <nav class="block block--next" aria-label="Keyingi mavzu" data-next hidden></nav>
+
+    </aside>
+  </main>
+
+  <script src="../class-plan/data.js"></script>
+  <script src="../topic/content.js"></script>
+  <!-- three.js 0.170 + OrbitControls bundled locally (vendor/): works offline and when opened as a local file -->
+  <script src="vendor/three-0.170.0-bundle.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

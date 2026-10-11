@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><style>body{margin:0;background:#EEF0F5;color:#0B1026;font-family:'Sora',sans-serif;-webkit-font-smoothing:antialiased}a{color:#3B4CFF}a:hover{color:#0B1026}</style></helmet>
+<div style="padding:72px 80px 120px;display:flex;flex-direction:column;gap:72px;width:2336px;box-sizing:border-box">
+
+<header style="display:flex;justify-content:space-between;align-items:flex-end;gap:48px">
+<div style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:0.08em;color:#5A6285">EMPIRA · LOGO EXPLORATION · SEP 2026</div>
+<h1 style="margin:0;font-size:64px;font-weight:700;letter-spacing:-0.03em;line-height:1.05">Three marks for a lab you can hold in any textbook.</h1>
+<p style="margin:0;font-size:20px;line-height:1.5;color:#5A6285;text-wrap:pretty">Empira, from "empirical": learning through experiment. Each concept pairs one electric primary with one amber "result" moment.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#5A6285">PALETTE</div>
+<div style="display:flex;gap:12px">
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#3B4CFF"></div><div style="font-size:14px;font-weight:600">Empira Blue</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#3B4CFF · primary</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#FFB21E"></div><div style="font-size:14px;font-weight:600">Spark Amber</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#FFB21E · accent</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#0B1026"></div><div style="font-size:14px;font-weight:600">Lab Ink</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#0B1026 · text, dark bg</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#8B96FF"></div><div style="font-size:14px;font-weight:600">Blue 300</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#8B96FF · mark on dark</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#FF6A4D"></div><div style="font-size:14px;font-weight:600">Signal Coral</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#FF6A4D · alerts only</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;width:132px"><div style="height:96px;border-radius:14px;background:#F6F7FB;box-shadow:inset 0 0 0 1px #D9DCE8"></div><div style="font-size:14px;font-weight:600">Paper</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5A6285">#F6F7FB · light bg</div></div>
+</div>
+</div>
+</header>
+
+<section style="display:flex;gap:48px;align-items:flex-start">
+
+<div id="1a" style="width:720px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#0B1026;color:#fff;padding:4px 10px;border-radius:6px">1a</span><h2 style="margin:0;font-size:28px;font-weight:700;letter-spacing:-0.02em">Flask E</h2></div>
+<p style="margin:0;font-size:17px;line-height:1.55;color:#3A4166;text-wrap:pretty">An Erlenmeyer flask cut into an E. The neck is the top arm; the flask's sloping wall makes each arm longer than the one above, like graduation marks. The base is filled with amber liquid: the experiment in progress.</p>
+<div style="height:260px;border-radius:20px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:22px"><dc-import name="EmpiraMark" concept="flask" size="96" hint-size="96px,96px"></dc-import><span style="font-size:84px;font-weight:700;letter-spacing:-0.02em;line-height:1">Empira</span></div>
+<div style="height:260px;border-radius:20px;background:#0B1026;display:flex;align-items:center;justify-content:center;gap:22px"><dc-import name="EmpiraMark" concept="flask" size="96" main="#8B96FF" hint-size="96px,96px"></dc-import><span style="font-size:84px;font-weight:700;letter-spacing:-0.02em;line-height:1;color:#fff">Empira</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="flask" size="68" main="#FFFFFF" hint-size="68px,68px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">APP ICON</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#F6F7FB;box-shadow:inset 0 0 0 1px #D9DCE8;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="flask" size="68" hint-size="68px,68px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">SYMBOL · LIGHT</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px"><div style="display:flex;align-items:flex-end;gap:20px"><dc-import name="EmpiraMark" concept="flask" size="32" small="{{ true }}" hint-size="32px,32px"></dc-import><dc-import name="EmpiraMark" concept="flask" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import></div><div style="display:flex;align-items:center;gap:8px;background:#EEF0F5;border-radius:8px 8px 0 0;padding:8px 14px"><dc-import name="EmpiraMark" concept="flask" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import><span style="font-size:12px">Empira · Lab</span></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">FAVICON 32 / 16</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="height:150px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;gap:14px"><dc-import name="EmpiraMark" concept="flask" size="56" main="#0B1026" accent="#0B1026" hint-size="56px,56px"></dc-import><span style="font-size:48px;font-weight:700;letter-spacing:-0.02em;line-height:1">Empira</span></div>
+<div style="height:150px;border-radius:20px;background:#3B4CFF;display:flex;align-items:center;justify-content:center;gap:14px"><dc-import name="EmpiraMark" concept="flask" size="56" main="#FFFFFF" accent="#FFFFFF" hint-size="56px,56px"></dc-import><span style="font-size:48px;font-weight:700;letter-spacing:-0.02em;line-height:1;color:#fff">Empira</span></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">ONE-COLOR · INK / REVERSED</div>
+</div>
+
+<div id="1b" style="width:720px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#0B1026;color:#fff;padding:4px 10px;border-radius:6px">1b</span><h2 style="margin:0;font-size:28px;font-weight:700;letter-spacing:-0.02em">Circuit E</h2><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:#FFB21E;color:#0B1026;padding:4px 10px;border-radius:6px">RECOMMENDED</span></div>
+<p style="margin:0;font-size:17px;line-height:1.55;color:#3A4166;text-wrap:pretty">The E is drawn as a wire. A solder dot marks the junction, and the middle arm closes into an amber node with a ring of light: the moment a student's circuit works. The wordmark is set in tracked capitals to match the engineered line.</p>
+<div style="height:260px;border-radius:20px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:26px"><dc-import name="EmpiraMark" concept="circuit" size="96" hint-size="96px,96px"></dc-import><span style="font-size:72px;font-weight:600;letter-spacing:0.12em;line-height:1">EMPIRA</span></div>
+<div style="height:260px;border-radius:20px;background:#0B1026;display:flex;align-items:center;justify-content:center;gap:26px"><dc-import name="EmpiraMark" concept="circuit" size="96" main="#8B96FF" hint-size="96px,96px"></dc-import><span style="font-size:72px;font-weight:600;letter-spacing:0.12em;line-height:1;color:#fff">EMPIRA</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="68" main="#FFFFFF" hint-size="68px,68px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">APP ICON</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#F6F7FB;box-shadow:inset 0 0 0 1px #D9DCE8;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="68" hint-size="68px,68px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">SYMBOL · LIGHT</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px"><div style="display:flex;align-items:flex-end;gap:20px"><dc-import name="EmpiraMark" concept="circuit" size="32" small="{{ true }}" hint-size="32px,32px"></dc-import><dc-import name="EmpiraMark" concept="circuit" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import></div><div style="display:flex;align-items:center;gap:8px;background:#EEF0F5;border-radius:8px 8px 0 0;padding:8px 14px"><dc-import name="EmpiraMark" concept="circuit" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import><span style="font-size:12px">Empira · Lab</span></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">FAVICON 32 / 16</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="height:150px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;gap:16px"><dc-import name="EmpiraMark" concept="circuit" size="56" main="#0B1026" accent="#0B1026" hint-size="56px,56px"></dc-import><span style="font-size:40px;font-weight:600;letter-spacing:0.12em;line-height:1">EMPIRA</span></div>
+<div style="height:150px;border-radius:20px;background:#3B4CFF;display:flex;align-items:center;justify-content:center;gap:16px"><dc-import name="EmpiraMark" concept="circuit" size="56" main="#FFFFFF" accent="#FFFFFF" hint-size="56px,56px"></dc-import><span style="font-size:40px;font-weight:600;letter-spacing:0.12em;line-height:1;color:#fff">EMPIRA</span></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">ONE-COLOR · INK / REVERSED</div>
+</div>
+
+<div id="1c" style="width:720px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#0B1026;color:#fff;padding:4px 10px;border-radius:6px">1c</span><h2 style="margin:0;font-size:28px;font-weight:700;letter-spacing:-0.02em">Spark Mark</h2></div>
+<p style="margin:0;font-size:17px;line-height:1.55;color:#3A4166;text-wrap:pretty">A single tilted orbit around a four-point spark. It borrows the atom without drawing one, and leaves room for every future subject. The heavy title-case wordmark carries the name, since the symbol doesn't spell it.</p>
+<div style="height:260px;border-radius:20px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:24px"><dc-import name="EmpiraMark" concept="spark" size="100" hint-size="100px,100px"></dc-import><span style="font-size:84px;font-weight:800;letter-spacing:-0.03em;line-height:1">Empira</span></div>
+<div style="height:260px;border-radius:20px;background:#0B1026;display:flex;align-items:center;justify-content:center;gap:24px"><dc-import name="EmpiraMark" concept="spark" size="100" main="#8B96FF" hint-size="100px,100px"></dc-import><span style="font-size:84px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:#fff">Empira</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="spark" size="72" main="#FFFFFF" hint-size="72px,72px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">APP ICON</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><div style="width:112px;height:112px;border-radius:26px;background:#F6F7FB;box-shadow:inset 0 0 0 1px #D9DCE8;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="spark" size="72" hint-size="72px,72px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">SYMBOL · LIGHT</span></div>
+<div style="height:200px;border-radius:20px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px"><div style="display:flex;align-items:flex-end;gap:20px"><dc-import name="EmpiraMark" concept="spark" size="32" small="{{ true }}" hint-size="32px,32px"></dc-import><dc-import name="EmpiraMark" concept="spark" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import></div><div style="display:flex;align-items:center;gap:8px;background:#EEF0F5;border-radius:8px 8px 0 0;padding:8px 14px"><dc-import name="EmpiraMark" concept="spark" size="16" small="{{ true }}" hint-size="16px,16px"></dc-import><span style="font-size:12px">Empira · Lab</span></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">FAVICON 32 / 16</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="height:150px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;gap:14px"><dc-import name="EmpiraMark" concept="spark" size="58" main="#0B1026" accent="#0B1026" hint-size="58px,58px"></dc-import><span style="font-size:48px;font-weight:800;letter-spacing:-0.03em;line-height:1">Empira</span></div>
+<div style="height:150px;border-radius:20px;background:#3B4CFF;display:flex;align-items:center;justify-content:center;gap:14px"><dc-import name="EmpiraMark" concept="spark" size="58" main="#FFFFFF" accent="#FFFFFF" hint-size="58px,58px"></dc-import><span style="font-size:48px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:#fff">Empira</span></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">ONE-COLOR · INK / REVERSED</div>
+</div>
+
+</section>
+
+<section style="display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;gap:64px;align-items:flex-start">
+<div style="width:520px;display:flex;flex-direction:column;gap:16px;flex-shrink:0">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.08em;color:#5A6285">RECOMMENDATION</div>
+<h2 style="margin:0;font-size:40px;font-weight:700;letter-spacing:-0.02em;line-height:1.1"><a href="#1b" style="color:inherit;text-decoration:none">1b</a> Circuit E</h2>
+<p style="margin:0;font-size:17px;line-height:1.6;color:#3A4166;text-wrap:pretty">It is the only concept that is both a letter and an experiment. The E reads instantly at 16px because it is three thick strokes with nothing inside them, and the amber node gives the brand a built-in "it works" moment that can animate in the product.</p>
+<p style="margin:0;font-size:17px;line-height:1.6;color:#3A4166;text-wrap:pretty">It maps directly to the Physics launch (batteries, bulbs, circuits) without locking Empira to one subject the way a flask points to chemistry. The spark mark is the most flexible but needs the wordmark to say "E", which weakens it as an app icon.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="width:420px;height:540px;border-radius:28px;background:#0B1026;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px"><div style="width:180px;height:180px;border-radius:42px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="110" main="#FFFFFF" hint-size="110px,110px"></dc-import></div><span style="font-size:18px;color:#fff;font-weight:500">Empira</span></div>
+<div style="display:flex;align-items:flex-end;gap:28px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:76px;height:76px;border-radius:18px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="46" main="#FFFFFF" hint-size="46px,46px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B96FF">76</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:48px;height:48px;border-radius:12px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="30" main="#FFFFFF" small="{{ true }}" hint-size="30px,30px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B96FF">48</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:8px;background:#3B4CFF;display:flex;align-items:center;justify-content:center"><dc-import name="EmpiraMark" concept="circuit" size="21" main="#FFFFFF" small="{{ true }}" hint-size="21px,21px"></dc-import></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8B96FF">32</span></div>
+</div>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">APP ICON MOCKUP</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div data-screen-label="Title slide" style="width:960px;height:540px;border-radius:12px;background:#3B4CFF;padding:56px 64px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;color:#fff">
+<div style="display:flex;align-items:center;gap:14px"><dc-import name="EmpiraMark" concept="circuit" size="44" main="#FFFFFF" hint-size="44px,44px"></dc-import><span style="font-size:28px;font-weight:600;letter-spacing:0.12em">EMPIRA</span></div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<h3 style="margin:0;font-size:60px;font-weight:700;letter-spacing:-0.03em;line-height:1.05;max-width:760px;text-wrap:balance">Any textbook topic becomes a hands-on lab.</h3>
+<p style="margin:0;font-size:22px;line-height:1.4;color:#fff;max-width:640px">AI-powered virtual labs for students and teachers in Uzbekistan</p>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:15px"><span>Hackathon pitch · 2026</span><span style="display:flex;align-items:center;gap:10px"><span style="width:12px;height:12px;border-radius:50%;background:#FFB21E"></span>Physics · live</span></div>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6285">PRESENTATION TITLE SLIDE MOCKUP</span>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>8-sinf · Fizika — Empira</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/app-icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top bar: Back · logo · Scan (as in IA §1) -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="icon-btn" href="../home/index.html" aria-label="Orqaga — bosh sahifa">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </a>
+
+      <a class="logo" href="../home/index.html" aria-label="Empira — bosh sahifa">
+        <!-- Official Flask E full logo (desktop / tablet) -->
+        <svg class="logo__full" viewBox="0 0 440 112" aria-hidden="true" focusable="false">
+          <g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)">
+            <path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/>
+            <path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/>
+          </g></g>
+          <text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text>
+        </svg>
+        <!-- Official Flask E symbol (mobile inner pages) -->
+        <svg class="logo__symbol" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <g transform="translate(-2.5 0)">
+            <path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/>
+            <path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/>
+          </g>
+        </svg>
+      </a>
+
+      <a class="scan-btn" href="../scan/index.html" aria-label="Kitobni skanerlash">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <path d="M7 12h10"/>
+        </svg>
+        <span class="scan-btn__label">Skanerlash</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Class + subject -->
+    <section class="plan-head">
+      <p class="eyebrow">Yillik o‘quv reja</p>
+      <h1 class="plan-head__title" data-grade-title>8-sinf</h1>
+
+      <nav class="subjects" aria-label="Fan">
+        <ul role="list" data-subjects></ul>
+      </nav>
+
+
+      <!-- This week's topic: same row pattern as Home's "Davom ettirish" -->
+      <a class="now-row" data-now hidden></a>
+    </section>
+
+    <!-- Prototype only: grades without mock data -->
+    <section class="empty" data-empty hidden>
+      <p class="empty__title">Bu sinfning yillik rejasi prototipda hali yo‘q.</p>
+      <p class="hint">Namuna sifatida faqat 8-sinf Fizika rejasi tayyorlangan.</p>
+      <a class="btn btn--secondary" href="../home/index.html">Bosh sahifaga qaytish</a>
+    </section>
+
+    <!-- Chapters → topics -->
+    <section class="plan" aria-labelledby="plan-title" data-plan>
+      <div class="plan__bar">
+        <div>
+          <h2 class="section-title" id="plan-title">Boblar va mavzular</h2>
+        </div>
+        <button class="text-btn" type="button" data-toggle-all aria-pressed="false">Barcha boblarni ochish</button>
+      </div>
+
+      <ol class="chapters" role="list" data-chapters></ol>
+    </section>
+
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
