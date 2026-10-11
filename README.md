@@ -2,7 +2,7 @@
 
 Empira turns textbook topics into interactive 3D laboratories for school lessons (Physics first; Chemistry, Biology and other subjects later).
 
-This repository contains the **design prototype** prepared for teacher demos and usability testing. It is not production code: data is mock, and scanning is simulated.
+This repository contains the Empira **8-sinf Fizika** pilot: the full annual plan from the 2019 textbook, 10 interactive 3D labs (every lab work and practical in the book), and live textbook scanning with Gemini.
 
 ## Run it
 
@@ -22,7 +22,9 @@ This repository contains the **design prototype** prepared for teacher demos and
 | `design-prototype/class-plan/` | 8-sinf annual plan (chapters → topics, "Shu hafta") |
 | `design-prototype/topic/` | Topic page (with lab / "Tez orada") |
 | `design-prototype/scan/` | Textbook scanner (mock detection, presenter mode) |
-| `design-prototype/lab/` | 3D labs: Nyutonning ikkinchi qonuni, Om qonuni, Guk qonuni (three.js bundled locally) |
+| `design-prototype/lab/` | 10 interactive 3D labs for 8-sinf Fizika (engine `app.js`, equipment `kit.js`, labs `labs-8.js`; three.js bundled locally) |
+| `api/scan.js` | Vercel function: textbook photo → Gemini → matched 8-sinf topic + lab (needs `GEMINI_API_KEY`) |
+| `design-prototype/class-plan/data.js`, `topic/content.js` | Real 8-sinf curriculum (5 chapters, 60 topics) and lab-topic content |
 | `design-prototype/_simplicity-pass/` | Before/after screenshots of the simplicity pass |
 | `EMPIRA_PRODUCT_CONTEXT.md` | What Empira is, MVP scope, constraints |
 | `EMPIRA_INFORMATION_ARCHITECTURE.md` | Screens, navigation, flows |

@@ -1,77 +1,106 @@
-# Empira: Teacher Demo Guide
+# Empira: Teacher Demo Guide (8-sinf Fizika)
 
-The demo runs at **https://test.empira.uz** on any laptop or phone with internet. Scanning is **simulated**: a fresh browser window always "detects" **Nyutonning ikkinchi qonuni** on the first scan. The demo uses that: you open Newton's 2nd law from the annual plan, then scan the same topic's textbook page and Empira finds that same topic and lab, as the MVP plan's ideal demo describes.
+The demo runs at **https://test.empira.uz** on any laptop or phone with internet.
+
+- **Content:** the real 8-sinf Fizika textbook (2019): 5 chapters, 60 topics, and **10 interactive 3D labs**, one for every lab work and practical in the book.
+- **Scanning:** **real**. The photo goes to Gemini, which reads the page, and Empira opens the matching topic and lab. This needs the Gemini key to be set (see §9).
 
 ---
 
 ## 1. What you need
 
 - A laptop with **Chrome or Edge**, connected to the projector at 100 % zoom.
-- The 8-sinf Fizika textbook, open at the **Nyutonning ikkinchi qonuni** page.
-- *(Backup)* A photo of that same page saved on the laptop desktop.
-- *(Optional)* A phone with internet (see §5).
-- **Internet** to open test.empira.uz. *(No internet? Use the offline backup in §7.)*
+- The **8-sinf Fizika textbook**, opened at **61-bet** (19-§ «Laboratoriya ishi. Om qonunini o‘rganish»).
+- *(Backup)* A clear photo of that page saved on the laptop.
+- *(Optional)* A phone with internet.
 
 ## 2. Before the teachers arrive (10 minutes)
 
-1. Do a **private rehearsal** in one window: run the whole script once. Allow camera access when Chrome asks.
-2. **Close that window completely.** Each scan moves the mock to the next topic, so the real demo must start fresh.
-3. Open a **new window** and go to **test.empira.uz**. It opens Home automatically.
-4. Put the window on the projector. Press F11 for full screen if you like.
-5. Don't open any other Empira tabs. Use this one window for the whole demo.
+1. Open **test.empira.uz** and do a private rehearsal: run the whole script once, and allow camera access when Chrome asks.
+2. **Test one scan** of page 61. It should show *19-§ · Om qonunini o‘rganish*.
+3. Go back to Home, put the window on the projector, and press F11 for full screen if you like.
 
-## 3. The demo script (about 3 minutes)
+## 3. The demo script (about 4 minutes)
 
 | # | You do | Teachers see / you say |
 |---|---|---|
 | 1 | Show **Home** | "Ikki yo‘l bor: sinfni tanlash yoki kitobni skanerlash." (Two ways in: choose a class or scan the book.) |
-| 2 | Tap **8-sinf** | The annual plan. **Fizika** is already selected. |
-| 3 | Point to the **"Shu hafta"** row at the top | "Bu haftaning mavzusi shu yerda turadi." (This week's topic is right here.) |
-| 4 | Tap the **Shu hafta** row | Topic page: short explanation, formula F = m·a, lab card |
-| 5 | Tap **"3D laboratoriyani ochish"** | A short "Laboratoriya yuklanmoqda…" (Loading the lab…), then the cart lab |
-| 6 | Move **Kuch, F** to 1,0 → **Boshlash** → move F to 2,0 → **Boshlash** | Measurements: a = 1,0 → 2,0 m/s². "Kuch 2 marta oshdi — tezlanish ham 2 marta oshdi." (Force doubled, so acceleration doubled.) |
-| 7 | **←** (top left), then the **Empira logo** | Back to the topic, then Home |
-| 8 | Tap **"Kitobni skanerlash"** | The scanner |
-| 9 | Laptop: tap the big **"Kamera orqali skanerlash"** tile. Hold the page flat, about 30 cm from the webcam, and press **"Suratga olish"** (Take photo). | "Sahifa aniqlanmoqda…" (Identifying the page…), then **Mavzu topildi**: 8-sinf · Fizika · Nyutonning ikkinchi qonuni · Aravachaning tezlanishi |
-| 10 | Tap **"3D laboratoriyani ochish"** | The same cart lab opens. "Kitobdan to‘g‘ridan-to‘g‘ri laboratoriyaga." (Straight from the book to the lab.) |
+| 2 | Tap **8-sinf** | The real annual plan from the textbook: 5 chapters, 60 topics, 10 with a 3D lab. **Fizika** is already selected. |
+| 3 | Point to the **"Shu hafta"** row | "Bu haftaning mavzusi: Om qonunini o‘rganish." (This week's topic: studying Ohm's law.) |
+| 4 | Tap it, then **"3D laboratoriyani ochish"** | "Laboratoriya yuklanmoqda…" (Loading the lab…), then the Ohm's law circuit: power supply, switch, milliammeter, resistor, voltmeter |
+| 5 | **Kalitni ulash** (Close the switch) at 4 V → move U to 6, 8, 10 V → **Kalitni ulash** each time | I = 20 → 30 → 40 → 50 mA, R = 200 Ω every time. After 4 voltages, **Rₒ‘ᵣₜ** (average R) appears. "Kuchlanish ortsa, tok ham ortadi — qarshilik o‘zgarmaydi." (Voltage up, current up; resistance stays the same.) |
+| 6 | Tap **"Keyingi mavzu"** at the bottom of the panel | 20-§ Reostat practical. Optionally open its lab too. |
+| 7 | **←** back, then the **Empira logo** | Home |
+| 8 | Tap **"Kitobni skanerlash"** → **"Kamera orqali skanerlash"**. Hold page 61 flat, about 30 cm from the webcam, and press **"Suratga olish"** (Take photo). | "Sahifa aniqlanmoqda…" (Identifying the page…), then **Mavzu topildi**: 8-sinf · Fizika · Om qonunini o‘rganish |
+| 9 | Tap **"3D laboratoriyani ochish"** | The same lab opens. "Kitobdan to‘g‘ridan-to‘g‘ri laboratoriyaga." (Straight from the book to the lab.) |
 
-**Webcam backup:** if the camera doesn't open, tap **"Rasm yuklash"** (Upload a photo) and choose the saved photo of the page. The result is the same.
+**Webcam backup:** if the camera doesn't open, tap **"Rasm yuklash"** (Upload a photo) and choose the saved photo.
 
-## 4. Rules that keep the demo correct
+**Other good pages to scan** (each opens a lab):
 
-- **Scan only once per window.** Scans cycle Newton → Guk → Om. A second scan in the same window will "find" Guk qonuni. To scan again, close the window and open a fresh one.
-- **Stay in 8-sinf.** The other grades show "Bu sinfning yillik rejasi prototipda hali yo‘q" (This grade's plan isn't in the prototype yet), which is honest but breaks the flow.
-- Topics marked **"Tez orada"** (Coming soon) open a simple "laboratoriya hali mavjud emas" (lab not available yet) page. Showing one is fine, and it shows Empira is honest.
-- In a lab, **"Keyingi mavzu"** (Next topic) at the bottom of the right panel goes to the next topic in the plan.
+| Page | Lab |
+|---|---|
+| 24 | Elektr shamoli (6-§) |
+| 46 | Zanjir yig‘ish (14-§) |
+| 63 | Reostat (20-§) |
+| 71 | Tok manbalarini ulash (23-§) |
+| 72–74 | Ketma-ket / parallel ulash (24-§). Shows both labs. |
+| 96 | Lampochka quvvati (33-§) |
+| 142 | Magnitlar ta’siri (49-§) |
+| 161 | Elektromagnit (58-§) |
 
-## 5. Running it on a phone (optional)
+Any other page of the book opens its topic, marked "Tez orada" (Coming soon).
 
-1. On the phone, open a **new tab** and go to **test.empira.uz**.
-2. On the scanner, **"Kamera orqali skanerlash"** opens the phone's own camera: shoot the page and confirm.
-3. The same rule applies: one scan per fresh tab.
+## 4. The 10 labs
 
-## 6. Presenter scan mode (private backup only)
+| § | Lab | What to show |
+|---|---|---|
+| 6 | Elektr shamolini kuzatish | Turn the electrophore machine; the candle flame bends away from the point. Closer and faster mean more bending. |
+| 14 | Zanjir yig‘ish | Move the ammeter: I stays the same. Voltmeter on L₁, L₂ and both: U = U₁ + U₂. |
+| 19 | Om qonuni | 4 → 10 V: I grows, R = U/I stays 200 Ω. |
+| 20 | Reostat | Slider positions 1–4: current 0,31 → 1,00 A. |
+| 23 | Tok manbalarini ulash | Each cell is about 1,5 V; three in series give 4,52 V. |
+| 24 | Ketma-ket ulash | Same current everywhere; U₁ + U₂ = Uᴬᴮ. |
+| 24 | Parallel ulash | Same voltage; I₁ + I₂ = I. |
+| 33 | Lampochka quvvati | P = I·U, stopwatch, W = I·U·t, 3 repeats → Pₒ‘ᵣₜ ≈ the lamp's rating "3,5 V; 0,26 A". |
+| 49 | Magnitlar ta’siri | Dynamometer: attraction vs repulsion, and the force grows as the distance shrinks. |
+| 58 | Elektromagnit | Compass deflection grows with current and an iron core, and falls with distance. |
 
-Use this only if you want to scan a **different** prepared page: Guk qonuni or Om qonuni.
+## 5. Running it on a phone
 
-1. **Before projecting**, open `test.empira.uz/design-prototype/scan/index.html?taqdimot=1` in the demo window.
-2. A small chooser appears under the scan buttons: **1 Nyutonning ikkinchi qonuni · 2 Guk qonuni · 3 Om qonuni**. Tap one, or press **1 / 2 / 3** on the laptop keyboard. Every following scan in that window "finds" that topic.
-3. To turn it off: open `test.empira.uz/design-prototype/scan/index.html?taqdimot=0`, or close the window.
+Open **test.empira.uz** in the phone browser. On the scanner, **"Kamera orqali skanerlash"** opens the phone's own camera: shoot the page and confirm.
 
-> ⚠️ **The chooser stays on the scanner screen while presenter mode is on.** It was measured as visible at every screen size, from 375×667 phones to 1080p projectors. Teachers will see it whenever the scanner is on screen. If you can't hide the scanner screen, use the default method in §3 (scan the Newton page in a fresh window) instead.
+## 6. Presenter scan mode (backup only)
+
+Use this only if live scanning fails, for example because of no internet or a missing key.
+
+1. Open `test.empira.uz/design-prototype/scan/index.html?taqdimot=1` **before projecting**.
+2. A chooser with the 9 lab topics appears under the scan buttons. Tap one, or press **1–9** on the keyboard. The next scans "find" that topic without calling Gemini.
+3. To turn it off: open the same address with `?taqdimot=0`, or close the window.
+
+> ⚠️ The chooser is visible on the scanner screen while presenter mode is on.
 
 ## 7. If something goes wrong
 
 | Problem | Do this |
 |---|---|
-| Lab stays on "Laboratoriya yuklanmoqda…" for more than 5 s | Press reload (⌘R / Ctrl+R) |
-| "Kamera ochilmadi" (Camera didn't open) | Tap **"Rasm yuklash"** and choose the saved photo |
-| Scanner found the wrong topic | You've scanned before in this window. Close it, open a fresh window, start from Home. |
-| Chooser visible on the scanner | Presenter mode is on. Open `test.empira.uz/design-prototype/scan/index.html?taqdimot=0` (off-screen if possible). |
-| **No internet / test.empira.uz won't load** | **Offline backup:** on the laptop, open `Desktop/empira/design-prototype/home/index.html` (drag it into Chrome). Everything works offline, including the 3D; only the font changes to the system font. Phones can't use this backup. |
+| Lab stays on "Laboratoriya yuklanmoqda…" for more than 5 s | Reload (⌘R / Ctrl+R) |
+| "Kamera ochilmadi" (Camera didn't open) | **"Rasm yuklash"** + the saved photo |
+| "Mavzu topilmadi" (Topic not found) | Hold the page flat and in good light, with the page number and heading fully in frame. Then **Qayta skanerlash** (Scan again). |
+| "Skanerlash xizmati hozir javob bermadi" (The scanning service didn't respond) | No internet, or the key isn't set. Use presenter mode (§6) or choose by class. |
+| No internet at all | Open `Desktop/empira/design-prototype/home/index.html` on the laptop. Labs work offline; scanning is then simulated. |
 
 ## 8. What not to promise
 
-- Scanning is a mock. Real page recognition isn't built yet.
-- 3 demo labs exist: Nyutonning ikkinchi qonuni, Om qonuni and Guk qonuni. Everything else is "Tez orada".
-- Only 8-sinf Fizika has a prepared plan. The "Shu hafta" week is a demo setting, not a real calendar.
+- Only **8-sinf Fizika** is complete. The other grades are not ready yet.
+- 10 of 60 topics have a 3D lab; the rest are "Tez orada".
+- "Shu hafta" is a demo setting (week 10), not the school calendar yet.
+- Weeks in the annual plan are approximate (2 lessons a week) until the official yearly plan is added.
+
+## 9. One-time setup: the Gemini key (developer)
+
+In Vercel → project **empiratest** → **Settings → Environment Variables**, add:
+- `GEMINI_API_KEY` = your Google AI Studio key (Production + Preview)
+- *(optional)* `GEMINI_MODEL` = the Gemini model to use (default `gemini-2.5-flash`)
+
+Then redeploy. Until the key is set, live scans show "Skanerlash xizmati hozir javob bermadi".

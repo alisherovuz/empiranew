@@ -1,5 +1,15 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/design-prototype/home/index.html", "permanent": false }
-  ]
+    {
+      "source": "/",
+      "destination": "/design-prototype/home/index.html",
+      "permanent": false
+    }
+  ],
+  "functions": {
+    "api/scan.js": {
+      "includeFiles": "design-prototype/{class-plan/data.js,topic/content.js}",
+      "maxDuration": 30
+    }
+  }
 }

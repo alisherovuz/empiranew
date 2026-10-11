@@ -1,9 +1,11 @@
-// Empira — Scan prototype. Detection is SIMULATED: each scan returns the next of the 3 topics that have a demo lab
-// (Nyutonning ikkinchi qonuni → Om qonuni → Guk qonuni → …). The result and the lab it opens always match.
+// Empira — Scanner.
+// LIVE (https, e.g. test.empira.uz): the photo is resized and sent to /api/scan → Gemini reads the page → matched to 8-sinf.
+// OFFLINE (opened as a local file): detection is simulated, cycling through the topics that have a 3D lab.
+// Presenter mode or ?mavzu= always uses the chosen mock result (safe for live demos).
 // Prototype URL options: ?holat=kamera|aniqlanmoqda|natija|topilmadi shows a state directly;
 // ?mavzu=<topic slug> fixes the mock result (e.g. ?holat=natija&mavzu=om-qonuni); ?natija=yoq makes detection fail.
 // PRESENTER MODE: ?taqdimot=1 (remembered for the browser session, ?taqdimot=0 to leave) shows a small chooser for the
-// next result, so the mock matches the page actually being scanned. Keys 1/2/3 also choose it.
+// next result, so the mock matches the page actually being scanned. Number keys 1–9 also choose it.
 (function () {
   const page = document.querySelector('[data-state]');
   const q = new URLSearchParams(location.search);
@@ -23,7 +25,8 @@
   const slug = (s) => s.toLowerCase().replace(/[‘’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const RESULTS = plan.chapters.flatMap((c) => c.topics)
     .filter((t) => t.lab && content[slug(t.t)])
-    .map((t) => ({ slug: slug(t.t), topic: t.t, lab: content[slug(t.t)].labs[0].title }));
+    .map((t) => ({ slug: slug(t.t), topic: t.t, labs: content[slug(t.t)].labs.map((l) => ({ slug: l.slug, title: l.title })) }));
+  const LIVE = /^https?:$/.test(location.protocol);
 
   // Presenter mode (session-wide, hidden from teachers)
   if (q.get('taqdimot') === '1') sessionStorage.setItem('empira-presenter', '1');
@@ -64,13 +67,59 @@
     return RESULTS[n % RESULTS.length];
   }
 
+  // m = { slug, topic, labs: [{ slug, title }] }
   function showResult(m) {
+    const cta = $('.result__cta');
     $('[data-r-class]').textContent = `${plan.grade}-sinf`;
     $('[data-r-subject]').textContent = plan.subjects[0].name;
     $('[data-r-topic]').textContent = m.topic;
-    $('[data-r-lab]').textContent = m.lab;
-    $('.result__cta').href = `../lab/index.html?lab=${m.slug}`;
+    $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Tez orada';
+    if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = '3D laboratoriyani ochish'; }
+    else if (m.labs.length > 1) { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = '3D laboratoriyalarni ko‘rish'; }
+    else { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = 'Mavzuni ochish'; }
     $('[data-r-other]').href = `../class-plan/index.html?sinf=${plan.grade}`;
+  }
+
+  // Resize the photo (≤ 1600 px, JPEG) before upload: small and fast on school Wi-Fi
+  function toJpegBase64(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  const nfHint = $('.view--notfound .hint');
+  const nfHintDefault = nfHint.textContent;
+  function notFound(reason) {
+    nfHint.textContent = reason === 'error'
+      ? 'Skanerlash xizmati hozir javob bermadi. Internetni tekshirib, qayta urinib ko‘ring yoki sinf bo‘yicha tanlang.'
+      : nfHintDefault;
+    setState('notfound');
+  }
+
+  async function recognise(imageUrl) {
+    const started = Date.now();
+    try {
+      const image = await toJpegBase64(imageUrl);
+      const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image, mime: 'image/jpeg' }) });
+      const data = await res.json().catch(() => ({}));
+      await new Promise((r) => setTimeout(r, Math.max(0, 900 - (Date.now() - started))));   // keep the loading state readable
+      if (data.status === 'found') { showResult({ slug: data.topic.slug, topic: data.topic.title, labs: data.labs }); return setState('result'); }
+      if (data.status === 'notfound') return notFound('notfound');
+      console.error('scan error', res.status, data);
+      return notFound('error');
+    } catch (err) {
+      console.error('scan failed', err);
+      return notFound('error');
+    }
   }
 
   function setState(state) {
@@ -101,8 +150,11 @@
     if (previewUrl) preview.src = previewUrl; else preview.removeAttribute('src');
     setState('processing');
 
+    const mockChosen = q.get('mavzu') || (presenter && sessionStorage.getItem('empira-scan-pick'));
+    if (LIVE && !mockChosen && q.get('natija') !== 'yoq') return recognise(imageUrl);
+
     setTimeout(() => {
-      if (q.get('natija') === 'yoq') return setState('notfound');
+      if (q.get('natija') === 'yoq') return notFound('notfound');
       showResult(nextMatch());
       setState('result');
     }, 1600);

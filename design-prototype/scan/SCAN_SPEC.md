@@ -1,11 +1,15 @@
 # Empira Scan (S5): High-fidelity specification
 
 Prototype: `index.html`. This is a separate design prototype, not production code. Follows `HOME_DESIGN_RULES.md` (locked).
-Detection is **simulated**. Each scan returns the next of the 3 topics that have a demo lab, in plan order: Nyutonning ikkinchi qonuni → Guk qonuni → Om qonuni → … The result appears after 1.6 s. The result rows and the lab that "3D laboratoriyani ochish" opens come from the same data as the Class Plan, Topic and Lab, so **they always match**. `?mavzu=<slug>` fixes the result (e.g. `?holat=natija&mavzu=om-qonuni`).
+**Detection is live** on the deployed site: the photo is resized (≤ 1600 px JPEG) and sent to `/api/scan` (Vercel function). There, **Gemini** reads the printed page number, the § label and the heading, and the server matches them to the real 8-sinf curriculum: § number first, then the page range, then fuzzy heading match, with Uzbek apostrophes normalised. The result opens:
+- the lab, if the topic has 1 lab
+- the topic page, if it has 2 labs ("3D laboratoriyalarni ko‘rish") or none ("Mavzuni ochish")
+
+Opened as a local file, detection is **simulated** (it cycles through the 9 lab topics). `?mavzu=<topic slug>` or presenter mode always uses the chosen mock result. If the service fails, the not-found screen says "Skanerlash xizmati hozir javob bermadi".
 
 **Presenter mode (for live demos, never shown to teachers):**
 - Open the scanner once with `?taqdimot=1`. It stays on for that browser session; `?taqdimot=0` turns it off.
-- Below the scan actions, behind a dashed divider, a small chooser appears: "Namoyish rejimi · keyingi skan natijasi" (Demo mode · next scan result), with numbered chips **1 Nyutonning ikkinchi qonuni · 2 Guk qonuni · 3 Om qonuni**.
+- Below the scan actions, behind a dashed divider, a small chooser appears: "Namoyish rejimi · keyingi skan natijasi" (Demo mode · next scan result), with numbered chips **the 9 lab topics (keys 1–9)**.
 - Tap a chip, or press **1 / 2 / 3** on a laptop, before scanning. The next scan then "finds" exactly that topic, so the result matches the page being held up.
 - With no choice made, scans cycle through the three topics.
 

@@ -8,9 +8,9 @@
 
 ## 1. Before each teacher (observer only)
 
-1. Open a **new browser window** and go to **test.empira.uz** (it opens Home). Use a new window for every teacher, because the mock scanner gives the right result only on the first scan in a fresh window. *(No internet: open `design-prototype/home/index.html` from the laptop instead.)*
+1. Open **test.empira.uz** (it opens Home). Scanning is live (Gemini), so any 8-sinf page works. Check one scan before the session. *(No internet: open `design-prototype/home/index.html` from the laptop instead; scanning is then simulated.)*
 2. Leave the screen on **Home**. Do not open any other page.
-3. Have the 8-sinf Fizika textbook ready, open at the **Nyutonning ikkinchi qonuni** page.
+3. Have the 8-sinf Fizika textbook ready, open at **page 61** (19-§ «Om qonunini o‘rganish»).
 4. Use the **same device type for every teacher** (all laptop or all phone), so the times are comparable.
 5. Do **not** use presenter mode (`?taqdimot=1`). Its chooser would be visible to the teacher.
 6. Start a stopwatch per task, or record the screen if the teacher agrees.
@@ -33,9 +33,9 @@
 
 | # | Read to the teacher | Starts on | Success = |
 |---|---|---|---|
-| **1** | *"8-sinfdagi bugungi fizika mavzusini toping va 3D laboratoriyani oching."* | Home | The **Aravachaning tezlanishi** lab is open (Nyutonning ikkinchi qonuni) |
-| **2** | *"Mana shu darslik sahifasini Empira orqali skaner qilib, laboratoriyani oching."* (hand over the book open at Nyutonning ikkinchi qonuni) | Observer returns the screen to **Home** (neutral reset; say nothing) | The scan result is shown **and** the lab opened from it |
-| **3** | *"Keyingi mavzuga o‘ting."* | The lab the teacher opened in Task 2 (don't reset) | The **Nyutonning uchinchi qonuni** topic page is open (it's marked "Tez orada") |
+| **1** | *"8-sinfdagi bugungi fizika mavzusini toping va 3D laboratoriyani oching."* | Home | The **Om qonunini o‘rganish** lab is open (19-§, the demo's "Shu hafta") |
+| **2** | *"Mana shu darslik sahifasini Empira orqali skaner qilib, laboratoriyani oching."* (hand over the book open at page 61) | Observer returns the screen to **Home** (neutral reset; say nothing) | The scan result is shown **and** the lab opened from it |
+| **3** | *"Keyingi mavzuga o‘ting."* | The lab the teacher opened in Task 2 (don't reset) | The **20-§ Reostat** topic page is open (it has a lab) |
 
 **Shortest paths** (for the observer only; never show them):
 - **Task 1:** 8-sinf → "Shu hafta" row → "3D laboratoriyani ochish". 3 taps.

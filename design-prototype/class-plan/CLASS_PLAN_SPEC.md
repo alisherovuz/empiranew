@@ -11,9 +11,9 @@ Prototype URL options:
 | `?ochiq=hammasi` | All chapters open |
 | `#bob-3` | Opens chapter 3 and scrolls to it |
 
-**Data:** `data.js` holds **sample** 8-sinf content shaped like the MVP curriculum map: chapter → topic → week → lab flag. `lab: true` is set **only** for the 3 topics that have a demo lab screen: Nyutonning ikkinchi qonuni, Guk qonuni and Om qonuni. All 25 other topics are "Tez orada". The data must be replaced with the team's real Day-1 curriculum map.
+**Data:** `data.js` holds the **real 8-sinf Fizika plan** from the 2019 textbook: 5 chapters and 60 sections, each with its first page (used by scanning) and an approximate week (2 lessons a week). `lab: true` is set for the **9 topics with labs** (10 labs: 6, 14, 19, 20, 23, 24 ×2, 33, 49, 58). The other 51 are "Tez orada". Replace the weeks with the official yearly plan when available.
 
-**"Shu hafta" is a prototype setting, not calendar logic.** It's set with `demoThisWeek` in `data.js` (default 7), or per session with `?hafta=N`.
+**"Shu hafta" is a prototype setting, not calendar logic.** It's set with `demoThisWeek` in `data.js` (default 10 → 19-§ Om qonuni), or per session with `?hafta=N`.
 
 ## Structure (top → bottom)
 1. **Top bar:** Back (to Home) · Flask E logo (full on tablet and desktop; the symbol on mobile) · "Skanerlash" (Scan) secondary button (icon-only on mobile).

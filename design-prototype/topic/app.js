@@ -42,7 +42,7 @@
         <p class="question__label">Tajriba savoli</p>
         <p class="question__text">${lab.task}</p>
       </div>
-      <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${topic.slug}"${n === 0 ? ' data-main-cta' : ''}>
+      <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${lab.slug}"${n === 0 ? ' data-main-cta' : ''}>
         ${n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
       </a>
     </article>`).join('');
@@ -120,7 +120,7 @@
 
   /* ---------- Mobile sticky CTA: appears only after the card's button has scrolled out of view ---------- */
   const mainCta = document.querySelector('[data-main-cta]');
-  document.querySelector('[data-sticky-link]').href = `../lab/index.html?lab=${topic.slug}`;
+  if (data) document.querySelector('[data-sticky-link]').href = `../lab/index.html?lab=${data.labs[0].slug}`;
   const sticky = document.querySelector('[data-sticky]');
   if (mainCta && 'IntersectionObserver' in window) {
     new IntersectionObserver(([entry]) => {

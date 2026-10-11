@@ -1,17 +1,30 @@
-# Empira 3D Laboratory (S4): High-fidelity specification
+# Empira 3D Laboratory (S4): Specification
 
-Prototype: `index.html?lab=<topic slug>`. This is a separate design prototype, not production code. Follows `HOME_DESIGN_RULES.md` (locked).
-**One screen design, three demo labs.** These are mock experiences that show what each lab would feel like. They are not physics engines; the values use the textbook formula.
+Prototype: `index.html?lab=<lab slug>`. **One screen design, 10 labs for 8-sinf Fizika**, one for every lab work and practical in the 2019 textbook. These are mock experiences: the values use the textbook formulas; they are not full physics simulators.
 
-| `?lab=` | Lab | Scene | Controls | Action | Measured |
-|---|---|---|---|---|---|
-| `nyutonning-ikkinchi-qonuni` | Aravachaning tezlanishi | Cart on a 1 m track, blue force arrow, weight blocks, amber finish line | F 0,5–4 N · m 0,5–2 kg | "Boshlash" → the cart accelerates | a = F/m, t (1 m) |
-| `om-qonuni` | Om qonuni | Board with battery cells (one per 1,5 V), switch, resistor (longer for larger R), ammeter dial, bulb (amber glow ∝ I), blue wires | U 1,5–6 V · R 5–20 Ω | "Zanjirni ulash" → the switch closes, the needle swings, the bulb lights | I = U/R |
-| `elastiklik-kuchi-guk-qonuni` | Prujinaning cho‘zilishi | Stand, blue spring, ruler (0–15 sm), weight discs (50 g each), blue pointer at the spring end | m 50–300 g (k = 20 N/m) | "Yukni osish" → the discs move to the hook and the spring stretches and settles | F = m·g, x = F/k |
+| Files | Role |
+|---|---|
+| `app.js` | Engine: panel (range + choice controls, steps, measurements), stage, camera framing, loading state, next topic |
+| `kit.js` | 3D equipment kit, built once: power supply, cells, switch, lamp, resistor, rheostat, A/mA/V meters, stopwatch, coil + iron core, compass, bar magnets, stand, dynamometer, electrophore machine, candle, wires |
+| `labs-8.js` | The 10 lab definitions (controls, physics, steps, table, layout) |
+| `vendor/three-0.170.0-bundle.js` | three.js + OrbitControls, local (works offline and from file://) |
 
-- Titles, questions and the back link come from the same data as the Topic page and Scanner.
-- **3D:** three.js 0.170 + OrbitControls, **bundled locally** in `vendor/three-0.170.0-bundle.js` (classic script, MIT licence in `vendor/three-LICENSE.txt`). No internet is needed, and it works when the prototype is opened straight from disk. Only the Sora webfont still comes from Google Fonts; offline, it falls back to the system font.
-- **Prototype URL option:** `&holat=tugadi` shows the state after two measurements (the second doubles the studied quantity).
+| `?lab=` | § | Lab | Controls | Measured |
+|---|---|---|---|---|
+| `elektr-shamoli` | 6 | Elektr shamolini kuzatish | speed, distance | flame deflection |
+| `elektr-zanjir` | 14 | Zanjir yig‘ish (2 lamps in series) | U, ammeter position, voltmeter on L₁/L₂/both | I, U₁, U₂, U |
+| `om-qonuni` | 19 | Om qonunini o‘rganish (R = 200 Ω) | U 4–10 V | I (mA), R, Rₒ‘ᵣₜ |
+| `reostat` | 20 | Reostat yordamida tok kuchini rostlash (8 V, 6 Ω) | slider position 1–4 | Rᵣ, I |
+| `tok-manbalari` | 23 | Tok manbalarini ulash (3 × 1,5 V) | voltmeter on cell 1/2/3/series | U₁, U₂, U₃, Uᵤₘ |
+| `ketma-ket-ulash` | 24 | Ketma-ket ulash (100 Ω + 150 Ω) | U, voltmeter on R₁/R₂/AB | I, U₁, U₂, Uᴬᴮ |
+| `parallel-ulash` | 24 | Parallel ulash (200 Ω ‖ 300 Ω) | U, ammeter total/R₁/R₂ | I, I₁, I₂ |
+| `lampochka-quvvati` | 33 | Lampochka quvvati (3,5 V; 0,26 A lamp) | U | I, P, t, W, Pₒ‘ᵣₜ (3 repeats) |
+| `magnitlar-tasiri` | 49 | Doimiy magnitlar ta’siri (dynamometer) | poles, distance | Fₜ, F |
+| `elektromagnit` | 58 | Eng oddiy elektromagnit | current, iron core, compass distance | compass deflection |
+
+- **Steps:** each lab's 3 steps follow its textbook procedure and tick off automatically from the measurements.
+- **Prototype URL option:** `&holat=tugadi` shows the lab's demo measurements already taken.
+- **Archived:** the earlier Newton / Hooke mock labs (7-sinf topics) are in `../_archive-7sinf/`.
 
 ## Structure
 | Area | Contents |
