@@ -1,6 +1,6 @@
 # Empira: Teacher Demo Guide
 
-The demo runs from the prototype in `design-prototype/`. Scanning is **simulated**: a fresh browser window always "detects" **Nyutonning ikkinchi qonuni** on the first scan. The demo uses that: you open Newton's 2nd law from the annual plan, then scan the same topic's textbook page and Empira finds that same topic and lab, as the MVP plan's ideal demo describes.
+The demo runs at **https://test.empira.uz** on any laptop or phone with internet. Scanning is **simulated**: a fresh browser window always "detects" **Nyutonning ikkinchi qonuni** on the first scan. The demo uses that: you open Newton's 2nd law from the annual plan, then scan the same topic's textbook page and Empira finds that same topic and lab, as the MVP plan's ideal demo describes.
 
 ---
 
@@ -9,14 +9,14 @@ The demo runs from the prototype in `design-prototype/`. Scanning is **simulated
 - A laptop with **Chrome or Edge**, connected to the projector at 100 % zoom.
 - The 8-sinf Fizika textbook, open at the **Nyutonning ikkinchi qonuni** page.
 - *(Backup)* A photo of that same page saved on the laptop desktop.
-- *(Optional)* A phone on the same Wi-Fi (see §5).
-- No internet needed: the 3D runs locally. Without internet, only the font falls back to the system font.
+- *(Optional)* A phone with internet (see §5).
+- **Internet** to open test.empira.uz. *(No internet? Use the offline backup in §7.)*
 
 ## 2. Before the teachers arrive (10 minutes)
 
 1. Do a **private rehearsal** in one window: run the whole script once. Allow camera access when Chrome asks.
 2. **Close that window completely.** Each scan moves the mock to the next topic, so the real demo must start fresh.
-3. Open a **new window** and load `design-prototype/home/index.html` (drag the file into Chrome).
+3. Open a **new window** and go to **test.empira.uz**. It opens Home automatically.
 4. Put the window on the projector. Press F11 for full screen if you like.
 5. Don't open any other Empira tabs. Use this one window for the whole demo.
 
@@ -46,24 +46,17 @@ The demo runs from the prototype in `design-prototype/`. Scanning is **simulated
 
 ## 5. Running it on a phone (optional)
 
-The phone needs the laptop to serve the files:
-
-1. On the laptop, run in Terminal:
-   `python3 -m http.server 8000 --directory ~/Desktop/empira/design-prototype`
-2. Find the laptop's address: `ipconfig getifaddr en0` (e.g. `192.168.1.23`).
-3. On the phone (same Wi-Fi), open `http://192.168.1.23:8000/home/index.html`.
-4. On the scanner, **"Kamera orqali skanerlash"** opens the phone's own camera: shoot the page and confirm.
-5. The same rule applies: one scan per fresh tab.
-
-School Wi-Fi often blocks phone-to-laptop connections, so test this before the day. If it's blocked, do the scan part on the laptop.
+1. On the phone, open a **new tab** and go to **test.empira.uz**.
+2. On the scanner, **"Kamera orqali skanerlash"** opens the phone's own camera: shoot the page and confirm.
+3. The same rule applies: one scan per fresh tab.
 
 ## 6. Presenter scan mode (private backup only)
 
 Use this only if you want to scan a **different** prepared page: Guk qonuni or Om qonuni.
 
-1. **Before projecting**, open `design-prototype/scan/index.html?taqdimot=1` in the demo window.
+1. **Before projecting**, open `test.empira.uz/design-prototype/scan/index.html?taqdimot=1` in the demo window.
 2. A small chooser appears under the scan buttons: **1 Nyutonning ikkinchi qonuni · 2 Guk qonuni · 3 Om qonuni**. Tap one, or press **1 / 2 / 3** on the laptop keyboard. Every following scan in that window "finds" that topic.
-3. To turn it off: open `scan/index.html?taqdimot=0`, or close the window.
+3. To turn it off: open `test.empira.uz/design-prototype/scan/index.html?taqdimot=0`, or close the window.
 
 > ⚠️ **The chooser stays on the scanner screen while presenter mode is on.** It was measured as visible at every screen size, from 375×667 phones to 1080p projectors. Teachers will see it whenever the scanner is on screen. If you can't hide the scanner screen, use the default method in §3 (scan the Newton page in a fresh window) instead.
 
@@ -74,8 +67,8 @@ Use this only if you want to scan a **different** prepared page: Guk qonuni or O
 | Lab stays on "Laboratoriya yuklanmoqda…" for more than 5 s | Press reload (⌘R / Ctrl+R) |
 | "Kamera ochilmadi" (Camera didn't open) | Tap **"Rasm yuklash"** and choose the saved photo |
 | Scanner found the wrong topic | You've scanned before in this window. Close it, open a fresh window, start from Home. |
-| Chooser visible on the scanner | Presenter mode is on. Open `scan/index.html?taqdimot=0` (off-screen if possible). |
-| Font looks different | No internet; the system font is used. Everything still works. |
+| Chooser visible on the scanner | Presenter mode is on. Open `test.empira.uz/design-prototype/scan/index.html?taqdimot=0` (off-screen if possible). |
+| **No internet / test.empira.uz won't load** | **Offline backup:** on the laptop, open `Desktop/empira/design-prototype/home/index.html` (drag it into Chrome). Everything works offline, including the 3D; only the font changes to the system font. Phones can't use this backup. |
 
 ## 8. What not to promise
 

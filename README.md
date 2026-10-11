@@ -6,7 +6,8 @@ This repository contains the **design prototype** prepared for teacher demos and
 
 ## Run it
 
-- **Laptop:** open `design-prototype/home/index.html` in Chrome or Edge. No install, no server, works offline (only the Sora font needs internet).
+- **Live:** **https://test.empira.uz** (also empiratest.vercel.app). It redeploys automatically on every push to `main`.
+- **Laptop, offline:** open `design-prototype/home/index.html` in Chrome or Edge. No install, no server, works offline (only the Sora font needs internet).
 - **Phone (same Wi-Fi):**
   ```
   python3 -m http.server 8000 --directory design-prototype

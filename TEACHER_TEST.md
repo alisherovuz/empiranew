@@ -8,7 +8,7 @@
 
 ## 1. Before each teacher (observer only)
 
-1. Open a **new browser window** and load `design-prototype/home/index.html`. Use a new window for every teacher, because the mock scanner gives the right result only on the first scan in a fresh window.
+1. Open a **new browser window** and go to **test.empira.uz** (it opens Home). Use a new window for every teacher, because the mock scanner gives the right result only on the first scan in a fresh window. *(No internet: open `design-prototype/home/index.html` from the laptop instead.)*
 2. Leave the screen on **Home**. Do not open any other page.
 3. Have the 8-sinf Fizika textbook ready, open at the **Nyutonning ikkinchi qonuni** page.
 4. Use the **same device type for every teacher** (all laptop or all phone), so the times are comparable.
