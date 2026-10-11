@@ -707,12 +707,149 @@ window.EMPIRA_KIT = function (THREE, scene) {
     };
   }
 
+  /* ================= Chapter IV tools (current in different media) ================= */
+  const glass = (o = 0.25) => new THREE.MeshStandardMaterial({ color: 0xE8EEF8, roughness: 0.1, transparent: true, opacity: o, depthWrite: false, side: THREE.DoubleSide });
+  const glowMat = (color, i = 0) => new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: i, transparent: true, opacity: 0.9 });
+
+  /* ---------- Metal conductor, magnified: fixed ions + drifting free electrons ---------- */
+  function conductorView(x, z, len = 0.22) {
+    const g = group(x, BY, z), Y = 0.04;
+    [-1, 1].forEach((s) => { add(g, box(0.02, Y, 0.03, C.ink700), s * (len / 2 + 0.01), Y / 2, 0); post(g, s * (len / 2 + 0.01), Y, 0.0); });
+    const tube = add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, len, 32, 1, true), glass(0.3)), 0, Y, 0); tube.rotation.z = Math.PI / 2;
+    const ionM = mat(0xC9CED9, { metalness: 0.6, roughness: 0.35 }), eM = mat(C.blue, { emissive: C.blue, emissiveIntensity: 0.4 });
+    for (let i = 0; i < 11; i++) for (const [dy, dz] of [[0.008, 0], [-0.008, 0.006], [0, -0.009]]) add(g, new THREE.Mesh(new THREE.SphereGeometry(0.0034, 10, 8), ionM), -len / 2 + 0.01 + i * (len - 0.02) / 10 + (dz ? 0.008 : 0), Y + dy, dz);
+    const el = [];
+    for (let i = 0; i < 26; i++) { const m = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.0022, 8, 6), eM), -len / 2 + ((i * 37) % 100) / 100 * len, Y + (((i * 13) % 7) - 3) * 0.004, (((i * 11) % 7) - 3) * 0.004); el.push(m); }
+    label('Metall (kattalashtirilgan)', V(0, 0.1, 0), { parent: g, minor: true });
+    return {
+      group: g, get a() { return world(g, V(-len / 2 - 0.01, Y + 0.012, 0)); }, get b() { return world(g, V(len / 2 + 0.01, Y + 0.012, 0)); },
+      drift(d) { el.forEach((m) => { m.position.x += d; if (m.position.x > len / 2) m.position.x -= len; if (m.position.x < -len / 2) m.position.x += len; }); }
+    };
+  }
+
+  /* ---------- Electrolytic bath: glass tank, liquid, anode (left, +) and cathode (right, −) ---------- */
+  function bath(x, z, { liquid = 0x7FA8E8, item = 'plate', anode = C.copper } = {}) {
+    const g = group(x, BY, z);
+    add(g, new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.1, 0.09), glass(0.22)), 0, 0.05, 0);
+    add(g, box(0.15, 0.004, 0.1, C.ink700), 0, 0.002, 0);
+    const liqMat = new THREE.MeshStandardMaterial({ color: liquid, roughness: 0.2, transparent: true, opacity: 0.45, depthWrite: false });
+    add(g, new THREE.Mesh(new THREE.BoxGeometry(0.134, 0.074, 0.084), liqMat), 0, 0.041, 0);
+    add(g, box(0.17, 0.008, 0.014, C.navy), 0, 0.108, 0);
+    const anM = mat(anode, { metalness: 0.6, roughness: 0.35 });
+    add(g, new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.09, 0.05), anM), -0.045, 0.06, 0);
+    const coatMat = mat(C.copper, { metalness: 0.65, roughness: 0.35, transparent: true, opacity: 0 });
+    let coat;
+    if (item === 'spoon') {
+      add(g, box(0.004, 0.07, 0.01, 0x9AA1BC, { metalness: 0.7, roughness: 0.3 }), 0.045, 0.07, 0);
+      const bowl = add(g, sphere(0.02, 0x9AA1BC, { metalness: 0.7, roughness: 0.3 }), 0.045, 0.03, 0); bowl.scale.set(0.35, 1.2, 0.9);
+      coat = add(g, new THREE.Group(), 0, 0, 0);
+      const cb = add(coat, new THREE.Mesh(new THREE.SphereGeometry(0.0215, 24, 16), coatMat), 0.045, 0.03, 0); cb.scale.set(0.42, 1.22, 0.92);
+      add(coat, new THREE.Mesh(new THREE.BoxGeometry(0.0055, 0.045, 0.0115), coatMat), 0.045, 0.06, 0);
+    } else {
+      add(g, new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.09, 0.05), mat(0x9AA1BC, { metalness: 0.7, roughness: 0.3 })), 0.045, 0.06, 0);
+      coat = add(g, new THREE.Mesh(new THREE.BoxGeometry(0.0062, 0.064, 0.0525), coatMat), 0.045, 0.043, 0);
+    }
+    post(g, -0.045, 0.112, 0, C.red); post(g, 0.045, 0.112, 0, C.ink);
+    label('Anod', V(-0.045, 0.16, 0), { parent: g, minor: true }); label('Katod', V(0.045, 0.16, 0), { parent: g, minor: true });
+    const ions = [];
+    const pM = mat(C.red, { emissive: C.red, emissiveIntensity: 0.3 }), nM = mat(C.blue, { emissive: C.blue, emissiveIntensity: 0.3 });
+    for (let i = 0; i < 20; i++) { const s = i % 2 ? 1 : -1; const m = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.0032, 10, 8), s > 0 ? pM : nM), -0.04 + ((i * 29) % 80) / 1000, 0.012 + ((i * 17) % 55) / 1000, -0.035 + ((i * 23) % 70) / 1000); ions.push({ m, s }); }
+    const ionG = { set visible(v) { ions.forEach((o) => { o.m.visible = v; }); } };
+    return {
+      group: g, get a() { return world(g, V(-0.045, 0.124, 0)); }, get b() { return world(g, V(0.045, 0.124, 0)); },
+      setLiquid(color, op = 0.45) { liqMat.color.set(color); liqMat.opacity = op; },
+      setCoat(f, color) { if (color !== undefined) coatMat.color.set(color); coatMat.opacity = Math.min(1, f * 1.4); coat.visible = f > 0; },
+      showIons(v) { ionG.visible = v; },
+      stepIons(d) { ions.forEach((o) => { o.m.position.x += o.s * d; if (o.m.position.x > 0.04) o.m.position.x = -0.04; if (o.m.position.x < -0.04) o.m.position.x = 0.04; }); }
+    };
+  }
+
+  /* ---------- Vacuum diode (Edison): glass bulb, heated cathode filament, anode plate ---------- */
+  function vacuumTube(x, z) {
+    const g = group(x, BY, z);
+    add(g, cyl(0.035, 0.02, C.navy, { roughness: 0.5 }), 0, 0.01, 0);
+    const bulb = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.045, 32, 24), glass(0.22)), 0, 0.085, 0); bulb.scale.set(1, 1.45, 1);
+    const filM = glowMat(C.amber, 0);
+    const fil = add(g, new THREE.Mesh(new THREE.TorusGeometry(0.008, 0.0015, 6, 20), filM), -0.022, 0.08, 0); fil.rotation.y = Math.PI / 2;
+    add(g, cyl(0.0012, 0.06, C.steel, {}, 6), -0.022, 0.045, 0.006); add(g, cyl(0.0012, 0.06, C.steel, {}, 6), -0.022, 0.045, -0.006);
+    add(g, box(0.003, 0.055, 0.032, 0x9AA1BC, { metalness: 0.6, roughness: 0.3 }), 0.024, 0.085, 0);
+    add(g, cyl(0.0012, 0.05, C.steel, {}, 6), 0.024, 0.04, 0);
+    const light = add(g, new THREE.PointLight(C.amber, 0, 0.3, 2), -0.022, 0.08, 0);
+    post(g, -0.022, 0.02, 0.03, C.ink); post(g, 0.022, 0.02, 0.03, C.red);
+    label('Katod', V(-0.04, 0.17, 0), { parent: g, minor: true }); label('Anod', V(0.04, 0.17, 0), { parent: g, minor: true });
+    const eM = mat(C.blue, { emissive: C.blue, emissiveIntensity: 0.5 });
+    const el = [...Array(12)].map((_, i) => { const m = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.0022, 8, 6), eM), 0, 0.08 + ((i * 7) % 5 - 2) * 0.006, ((i * 3) % 5 - 2) * 0.006); m.userData.t = i / 12; return m; });
+    return {
+      group: g, get k() { return world(g, V(-0.022, 0.032, 0.03)); }, get an() { return world(g, V(0.022, 0.032, 0.03)); },
+      heat(h) { filM.emissiveIntensity = h * 2.2; light.intensity = h * 0.02; },
+      flow(d, on) { el.forEach((m) => { m.visible = on; if (!on) return; m.userData.t = (m.userData.t + d) % 1; m.position.x = -0.014 + m.userData.t * 0.034; }); }
+    };
+  }
+
+  /* ---------- Gas discharge tube with pump hose (glow discharge at low pressure) ---------- */
+  function dischargeTube(x, z) {
+    const g = group(x, BY, z), L = 0.28, Y = 0.08;
+    [-1, 1].forEach((s) => { add(g, box(0.02, Y - 0.02, 0.03, C.ink700), s * 0.1, (Y - 0.02) / 2, 0); add(g, cyl(0.007, 0.01, C.steel, { metalness: 0.6 }), s * (L / 2 + 0.004), Y, 0).rotation.z = Math.PI / 2; post(g, s * (L / 2 + 0.012), Y - 0.02, 0); });
+    const tube = add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, L, 32, 1, true), glass(0.28)), 0, Y, 0); tube.rotation.z = Math.PI / 2;
+    const gm = glowMat(0xC77DFF, 0); gm.opacity = 0;
+    const glow = add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, L - 0.02, 24), gm), 0, Y, 0); glow.rotation.z = Math.PI / 2;
+    const light = add(g, new THREE.PointLight(0xC77DFF, 0, 0.4, 2), 0, Y, 0);
+    add(g, cyl(0.004, 0.06, C.ink700, {}, 8), 0, Y + 0.045, 0);
+    const hose = add(g, cyl(0.004, 0.15, C.ink700, {}, 8), 0, Y + 0.075, -0.075); hose.rotation.x = Math.PI / 2;
+    const pump = group(x, BY, z - 0.18); add(pump, box(0.09, 0.07, 0.07, C.navy, { roughness: 0.5 }), 0, 0.035, 0); add(pump, cyl(0.004, 0.09, C.ink700, {}, 8), 0, 0.115, 0.03); add(pump, cyl(0.004, 0.02, C.ink700, {}, 8), 0, 0.16, 0.03);
+    label('Vakuum nasos', V(0, 0.12, 0), { parent: pump, minor: true });
+    let lv = 0, t = 0;
+    return {
+      group: g, pump, get a() { return world(g, V(-L / 2 - 0.012, Y - 0.008, 0)); }, get b() { return world(g, V(L / 2 + 0.012, Y - 0.008, 0)); },
+      set(v) { lv = v; gm.emissiveIntensity = v * 1.6; gm.opacity = v * 0.75; light.intensity = v * 0.08; },
+      animate(dt) { t += dt; if (lv > 0) gm.opacity = lv * (0.7 + Math.sin(t * 40) * 0.05); }
+    };
+  }
+
+  /* ---------- Spark gap: two metal balls on insulating posts; zigzag spark ---------- */
+  function sparkGap(x, z, gap = 0.04) {
+    const g = group(x, BY, z), Y = 0.12;
+    [-1, 1].forEach((s) => { add(g, box(0.04, 0.01, 0.04, C.ink700), s * (gap / 2 + 0.04), 0.005, 0); add(g, cyl(0.004, Y, 0xF2F4F8, {}, 10), s * (gap / 2 + 0.04), Y / 2, 0); add(g, cyl(0.002, 0.04, C.steel, { metalness: 0.6 }, 8), s * (gap / 2 + 0.02), Y, 0).rotation.z = Math.PI / 2; add(g, sphere(0.01, 0xC9CED9, { metalness: 0.8, roughness: 0.25 }), s * gap / 2, Y, 0); });
+    const sm = glowMat(0xFFC94D, 2.5);
+    const pts = [-1, -0.5, -0.1, 0.3, 0.6, 1].map((u, i) => V(u * (gap / 2 - 0.01), Y + (i % 2 ? 0.006 : -0.004), (i % 3 - 1) * 0.003));
+    const spark = add(g, new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 20, 0.0024, 6), sm));
+    const light = add(g, new THREE.PointLight(0xFFE6A0, 0, 0.4, 2), 0, Y, 0.02);
+    spark.visible = false;
+    let on = false, t = 0;
+    return {
+      group: g, get a() { return world(g, V(-gap / 2 - 0.04, 0.02, 0)); }, get b() { return world(g, V(gap / 2 + 0.04, 0.02, 0)); },
+      set(v) { on = v; spark.visible = v; light.intensity = v ? 0.3 : 0; },
+      animate(dt) { t += dt; if (!on) return; const vis = Math.sin(t * 31) + Math.sin(t * 17) > 0.2; spark.visible = vis; light.intensity = vis ? 0.3 : 0; spark.rotation.x = (t * 7) % 1 - 0.5; }
+    };
+  }
+
+  /* ---------- Electric arc between two carbon rods ---------- */
+  function arcLamp(x, z) {
+    const g = group(x, BY, z), Y = 0.1;
+    [-1, 1].forEach((s) => {
+      add(g, box(0.03, 0.01, 0.04, C.ink700), s * 0.09, 0.005, 0);
+      add(g, cyl(0.004, Y, C.steel, { metalness: 0.5 }, 10), s * 0.09, Y / 2, 0);
+      const rod = add(g, cyl(0.005, 0.085, 0x2A2D36, { roughness: 0.8 }, 12), s * 0.047, Y, 0); rod.rotation.z = Math.PI / 2;
+    });
+    const gm = glowMat(C.amber, 0); gm.opacity = 0.55;
+    const arc = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.014, 20, 14), gm), 0, Y, 0); arc.scale.set(1.4, 0.8, 0.8); arc.visible = false;
+    add(arc, new THREE.Mesh(new THREE.SphereGeometry(0.007, 16, 12), glowMat(0xFFF6DA, 3)));
+    const light = add(g, new THREE.PointLight(0xFFE6A0, 0, 0.4, 2), 0, Y + 0.01, 0.02);
+    let on = false, t = 0;
+    return {
+      group: g, get a() { return world(g, V(-0.09, 0.02, 0)); }, get b() { return world(g, V(0.09, 0.02, 0)); },
+      set(v) { on = v; arc.visible = v; gm.emissiveIntensity = v ? 2 : 0; light.intensity = v ? 0.3 : 0; },
+      animate(dt) { t += dt; if (on) { const f = 1 + Math.sin(t * 50) * 0.08; arc.scale.set(1.4 * f, 0.8 * f, 0.8 * f); } }
+    };
+  }
+
   return {
     C, V, THREE, mat, box, cyl, sphere, add, group, label, sizeLabels, table, board, BY,
     wire, clearWires, powerSupply, cells, switchK, lamp, resistor, rheostat, meter, stopwatch,
     coil, compass, barMagnet, stand, dynamometer, electrophore, candle,
     neonLamp, voltaCell, wireBoard, capacitor, calorimeter, socketTester, glassMat, world, post,
     needle, flatMagnet, fieldLines, horseshoe, swing, frameMeter, liftMagnet, motor,
-    chargeRod, hangingRod, electroscope, torsionBalance, fieldFibres, faceTexture
+    chargeRod, hangingRod, electroscope, torsionBalance, fieldFibres, faceTexture,
+    conductorView, bath, vacuumTube, dischargeTube, sparkGap, arcLamp
   };
 };

@@ -76,15 +76,15 @@
     {
       n: 4, title: 'Turli muhitlarda elektr toki',
       topics: [
-        { n: 40, p: 115, w: 20, t: 'Metallarda elektr toki' },
-        { n: 41, p: 117, w: 21, t: 'Suyuqliklarda elektr toki' },
-        { n: 42, p: 120, w: 21, t: 'Elektroliz. Faradeyning birinchi qonuni' },
-        { n: 43, p: 123, w: 22, t: 'Faradeyning ikkinchi qonuni' },
+        { n: 40, p: 115, w: 20, t: 'Metallarda elektr toki', lab: true },
+        { n: 41, p: 117, w: 21, t: 'Suyuqliklarda elektr toki', lab: true },
+        { n: 42, p: 120, w: 21, t: 'Elektroliz. Faradeyning birinchi qonuni', lab: true },
+        { n: 43, p: 123, w: 22, t: 'Faradeyning ikkinchi qonuni', lab: true },
         { n: 44, p: 125, w: 22, t: 'Masalalar yechish (elektroliz)' },
-        { n: 45, p: 127, w: 23, t: 'Elektrolizdan turmushda va texnikada foydalanish' },
-        { n: 46, p: 129, w: 23, t: 'Vakuumda elektr toki' },
-        { n: 47, p: 131, w: 24, t: 'Gazlarda elektr toki' },
-        { n: 48, p: 133, w: 24, t: 'Elektr razryadlarning turlari va ulardan foydalanish' }
+        { n: 45, p: 127, w: 23, t: 'Elektrolizdan turmushda va texnikada foydalanish', lab: true },
+        { n: 46, p: 129, w: 23, t: 'Vakuumda elektr toki', lab: true },
+        { n: 47, p: 131, w: 24, t: 'Gazlarda elektr toki', lab: true },
+        { n: 48, p: 133, w: 24, t: 'Elektr razryadlarning turlari va ulardan foydalanish', lab: true }
       ]
     },
     {

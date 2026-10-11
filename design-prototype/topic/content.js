@@ -394,3 +394,79 @@ Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPIC
     labs: [{ slug: 'chaqmoq-masofasi', title: 'Chaqmoqgacha masofani aniqlash', goal: 'Chaqmoq chaqnagandan momaqaldiroq eshitilguncha vaqtni o‘lchab, chaqmoqgacha masofani hisoblang.', task: 'Momaqaldiroq 5 s dan keyin eshitilsa, chaqmoq qancha uzoqda?', minutes: 5 }]
   }
 });
+
+// Batch 5 — Chapter IV (current in different media) topics with a demonstration lab.
+Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPICS, {
+  'metallarda-elektr-toki': {
+    explain: [
+      'Metallarda elektr toki — erkin elektronlarning tartibli harakati. Musbat ionlar kristall panjarada o‘z joyida tebranadi.',
+      'Tok yo‘nalishi deb musbat zaryadlar harakati yo‘nalishi qabul qilingan, shuning uchun elektronlar tok yo‘nalishiga teskari harakatlanadi.'
+    ],
+    formulas: ['I = q / t'],
+    terms: [['I', 'tok kuchi', 'A'], ['e⁻', 'erkin elektron', '—'], ['+', 'kristall panjara ionlari', '—']],
+    labs: [{ slug: 'metall-elektronlar', title: 'Metallda erkin elektronlar harakati', goal: 'Kalitni ulab, kattalashtirilgan metall o‘tkazgichda elektronlar qaysi tomonga harakatlanishini kuzating.', task: 'Elektronlar tok yo‘nalishi bo‘yicha harakatlanadimi yoki teskari?', minutes: 5 }]
+  },
+  'suyuqliklarda-elektr-toki': {
+    explain: [
+      'Distillangan suv tokni deyarli o‘tkazmaydi. Unga osh tuzi yoki mis kuporosi solinsa, eritma tok o‘tkaza boshlaydi.',
+      'Bunday eritmalar elektrolitlar deyiladi: ularda molekulalar musbat va manfiy ionlarga ajraladi va tokni ana shu ionlar tashiydi. Shakar eritmasi ionlarga ajralmaydi.'
+    ],
+    formulas: ['NaCl → Na⁺ + Cl⁻'],
+    terms: [['Na⁺, Cu²⁺', 'musbat ionlar (katodga boradi)', '—'], ['Cl⁻, SO₄²⁻', 'manfiy ionlar (anodga boradi)', '—']],
+    labs: [{ slug: 'suyuqlik-otkazuvchanligi', title: 'Suyuqliklarning elektr o‘tkazuvchanligi', goal: 'Idishga turli suyuqliklar solib, zanjirdagi lampochka yonish-yonmasligini tekshiring.', task: 'Qaysi suyuqliklar tok o‘tkazadi va nima uchun?', minutes: 5 }]
+  },
+  'elektroliz-faradeyning-birinchi-qonuni': {
+    explain: [
+      'Elektroliz — elektrolitdan tok o‘tganda elektrodlarda modda ajralib chiqishi. Mis kuporosi eritmasida katodda sof mis o‘tiradi.',
+      'Faradeyning birinchi qonuni: ajralgan modda massasi elektrolitdan o‘tgan zaryad miqdoriga proporsional.'
+    ],
+    formulas: ['m = k · q = k · I · t'],
+    terms: [['m', 'ajralgan modda massasi', 'kg'], ['k', 'elektrokimyoviy ekvivalent (mis: 0,33 mg/Kl)', 'kg/Kl'], ['I', 'tok kuchi', 'A'], ['t', 'vaqt', 's']],
+    labs: [{ slug: 'elektroliz', title: 'Mis kuporosi eritmasining elektrolizi', goal: 'Tok kuchi va vaqtni o‘zgartirib, katodda ajralgan mis massasini o‘lchang.', task: 'Tok kuchi 2 marta ortsa, ajralgan mis massasi qanday o‘zgaradi?', minutes: 7 }]
+  },
+  'faradeyning-ikkinchi-qonuni': {
+    explain: [
+      'Ketma-ket ulangan vannalardan bir xil zaryad o‘tadi, lekin ularda turli massadagi moddalar ajraladi.',
+      'Faradeyning ikkinchi qonuni: elektrokimyoviy ekvivalent moddaning molyar massasiga to‘g‘ri, valentligiga teskari proporsional.'
+    ],
+    formulas: ['k = M / (F · n)', 'F = 96 500 Kl/mol'],
+    terms: [['M', 'molyar massa (Cu: 64, Ag: 108 g/mol)', 'kg/mol'], ['n', 'valentlik (Cu: 2, Ag: 1)', '—'], ['F', 'Faradey doimiysi', 'Kl/mol']],
+    labs: [{ slug: 'faradey-ikkinchi', title: 'Ketma-ket ulangan ikki elektrolitik vanna', goal: 'Mis va kumush eritmali vannalardan bir xil zaryad o‘tkazib, ajralgan massalarni solishtiring.', task: 'Nima uchun kumush misdan taxminan 3,4 marta ko‘p ajraladi?', minutes: 7 }]
+  },
+  'elektrolizdan-turmushda-va-texnikada-foydalanish': {
+    explain: [
+      'Galvanostegiya — buyumlarni elektroliz yordamida metallning yupqa qatlami bilan qoplash (nikellash, kumushlash, oltin suvi berish).',
+      'Qoplanadigan buyum katod qilib, qoplama metali esa anod qilib olinadi. Qoplama qalinligi tok kuchi va vaqtga bog‘liq.'
+    ],
+    formulas: ['m = k · I · t', 'd = m / (ρ · S)'],
+    terms: [['d', 'qoplama qalinligi', 'm'], ['ρ', 'metall zichligi', 'kg/m³'], ['S', 'buyum yuzasi (20 sm²)', 'm²']],
+    labs: [{ slug: 'galvanostegiya', title: 'Qoshiqni metall bilan qoplash', goal: 'Qoshiqni mis, nikel yoki kumush bilan qoplab, qoplama qalinligini hisoblang.', task: 'Qoplash vaqti 3 marta ortsa, qatlam qalinligi qanday o‘zgaradi?', minutes: 6 }]
+  },
+  'vakuumda-elektr-toki': {
+    explain: [
+      'Vakuumda zaryad tashuvchilar yo‘q, shuning uchun tok o‘tmaydi. Katod qizdirilsa, undan elektronlar uchib chiqadi — termoelektron emissiya.',
+      'Elektronlar faqat anod musbat bo‘lganda unga tortiladi. Shuning uchun vakuumli diod tokni faqat bir yo‘nalishda o‘tkazadi.'
+    ],
+    formulas: ['katod (qizdirilgan) → anod (+)'],
+    terms: [['K', 'katod (qizdiriladigan sim)', '—'], ['A', 'anod', '—'], ['I', 'anod toki', 'mA']],
+    labs: [{ slug: 'vakuum-diod', title: 'Edison tajribasi: vakuumli diod', goal: 'Katodni qizdirib va anod qutbini o‘zgartirib, vakuumdan tok o‘tish shartlarini aniqlang.', task: 'Qanday holatda vakuumli lampadan tok o‘tadi?', minutes: 5 }]
+  },
+  'gazlarda-elektr-toki': {
+    explain: [
+      'Oddiy sharoitda havo dielektrik: zaryadlangan elektrometr uzoq vaqt zaryadsizlanmaydi.',
+      'Alanga, ultrabinafsha yoki rentgen nurlari havo molekulalarini ionlashtiradi. Ionlar paydo bo‘lgach, havo tok o‘tkaza boshlaydi va elektrometr tez zaryadsizlanadi.'
+    ],
+    formulas: ['molekula → ion⁺ + e⁻'],
+    terms: [['ionlashish', 'neytral molekuladan elektron ajralishi', '—'], ['ionizator', 'alanga, nurlar', '—']],
+    labs: [{ slug: 'gaz-ionlash', title: 'Alanga havoni ionlashtiradi', goal: 'Zaryadlangan elektrometrga ulangan plastinkalar orasiga sham qo‘yib, nima bo‘lishini kuzating.', task: 'Nima uchun sham qo‘yilganda elektrometr zaryadsizlanadi?', minutes: 5 }]
+  },
+  'elektr-razryadlarning-turlari-va-ulardan-foydalanish': {
+    explain: [
+      'Gazdagi mustaqil razryadning turlari: uchqun (juda yuqori kuchlanishda), elektr yoyi (katta tok va cho‘g‘langan elektrodlar) va miltillama razryad (past bosimdagi gazda).',
+      'Uchqun razryadi — chaqmoq va dvigatel shamlarida, elektr yoyi — payvandlashda, miltillama razryad — reklama va kunduzgi yorug‘lik lampalarida uchraydi.'
+    ],
+    formulas: ['U(uchqun) ≈ 30 kV/sm havoda'],
+    terms: [['uchqun', 'qisqa, yorqin razryad', '—'], ['yoy', 'uzluksiz, juda issiq razryad', '—'], ['miltillama', 'siyrak gazdagi nurlanish', '—']],
+    labs: [{ slug: 'razryad-turlari', title: 'Elektr razryadlarining turlari', goal: 'Uchqun, elektr yoyi va miltillama razryadni navbatma-navbat kuzating.', task: 'Har bir razryad turi qayerda qo‘llaniladi?', minutes: 5 }]
+  }
+});
