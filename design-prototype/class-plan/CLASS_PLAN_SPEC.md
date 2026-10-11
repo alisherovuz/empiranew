@@ -11,7 +11,7 @@ Prototype URL options:
 | `?ochiq=hammasi` | All chapters open |
 | `#bob-3` | Opens chapter 3 and scrolls to it |
 
-**Data:** `data.js` holds the **real 8-sinf Fizika plan** from the 2019 textbook: 5 chapters and 60 sections, each with its first page (used by scanning) and an approximate week (2 lessons a week). `lab: true` is set for the **9 topics with labs** (10 labs: 6, 14, 19, 20, 23, 24 ×2, 33, 49, 58). The other 51 are "Tez orada". Replace the weeks with the official yearly plan when available.
+**Data:** `data.js` holds the **real 8-sinf Fizika plan** from the 2019 textbook: 5 chapters and 60 sections, each with its first page (used by scanning) and an approximate week (2 lessons a week). `lab: true` is set for the **42 topics with labs** (43 labs; §24 has two): every lab work and practical, and every topic with a book experiment. The other 18 (12 problem-solving lessons and 6 theory topics: 25, 28, 30, 31, 38, 56) are "Tez orada". Replace the weeks with the official yearly plan when available.
 
 **"Shu hafta" is a prototype setting, not calendar logic.** It's set with `demoThisWeek` in `data.js` (default 10 → 19-§ Om qonuni), or per session with `?hafta=N`.
 

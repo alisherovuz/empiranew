@@ -5,11 +5,11 @@ Prototype: `index.html`. This is a separate design prototype, not production cod
 - the lab, if the topic has 1 lab
 - the topic page, if it has 2 labs ("3D laboratoriyalarni ko‘rish") or none ("Mavzuni ochish")
 
-Opened as a local file, detection is **simulated** (it cycles through the 9 lab topics). `?mavzu=<topic slug>` or presenter mode always uses the chosen mock result. If the service fails, the not-found screen says "Skanerlash xizmati hozir javob bermadi".
+Opened as a local file, detection is **simulated** (it cycles through the 42 lab topics). `?mavzu=<topic slug>` or presenter mode always uses the chosen mock result. If the service fails, the not-found screen says "Skanerlash xizmati hozir javob bermadi".
 
 **Presenter mode (for live demos, never shown to teachers):**
 - Open the scanner once with `?taqdimot=1`. It stays on for that browser session; `?taqdimot=0` turns it off.
-- Below the scan actions, behind a dashed divider, a small chooser appears: "Namoyish rejimi · keyingi skan natijasi" (Demo mode · next scan result), with numbered chips **the 9 lab topics (keys 1–9)**.
+- Below the scan actions, behind a dashed divider, a small chooser appears: "Namoyish rejimi · keyingi skan natijasi" (Demo mode · next scan result), with numbered chips **the 9 lab-work and practical topics (6, 14, 19, 20, 23, 24, 33, 49, 58; keys 1–9)**.
 - Tap a chip, or press **1 / 2 / 3** on a laptop, before scanning. The next scan then "finds" exactly that topic, so the result matches the page being held up.
 - With no choice made, scans cycle through the three topics.
 

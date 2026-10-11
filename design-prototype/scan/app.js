@@ -25,7 +25,9 @@
   const slug = (s) => s.toLowerCase().replace(/[‘’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const RESULTS = plan.chapters.flatMap((c) => c.topics)
     .filter((t) => t.lab && content[slug(t.t)])
-    .map((t) => ({ slug: slug(t.t), topic: t.t, labs: content[slug(t.t)].labs.map((l) => ({ slug: l.slug, title: l.title })) }));
+    .map((t) => ({ n: t.n, slug: slug(t.t), topic: t.t, labs: content[slug(t.t)].labs.map((l) => ({ slug: l.slug, title: l.title })) }));
+  // Presenter chooser: only the book's lab works / practicals (keys 1–9), not every lab topic
+  const PICKS = RESULTS.filter((r) => [6, 14, 19, 20, 23, 24, 33, 49, 58].includes(r.n));
   const LIVE = /^https?:$/.test(location.protocol);
 
   // Presenter mode (session-wide, hidden from teachers)
@@ -35,7 +37,7 @@
 
   function renderPresenter() {
     const pick = sessionStorage.getItem('empira-scan-pick');
-    $('[data-presenter-chips]').innerHTML = RESULTS.map((r, i) => `
+    $('[data-presenter-chips]').innerHTML = PICKS.map((r, i) => `
       <button class="chip" type="button" role="radio" aria-checked="${r.slug === pick}" data-pick="${r.slug}">
         <span class="chip__key">${i + 1}</span>${r.topic}
       </button>`).join('');
@@ -52,7 +54,7 @@
       if (b) pick(b.dataset.pick);
     });
     document.addEventListener('keydown', (e) => {
-      const r = RESULTS[Number(e.key) - 1];
+      const r = PICKS[Number(e.key) - 1];
       if (r && !e.metaKey && !e.ctrlKey && !e.altKey) pick(r.slug);
     });
   }

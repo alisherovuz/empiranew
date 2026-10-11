@@ -2,7 +2,7 @@
 
 The demo runs at **https://test.empira.uz** on any laptop or phone with internet.
 
-- **Content:** the real 8-sinf Fizika textbook (2019): 5 chapters, 60 topics, and **10 interactive 3D labs**, one for every lab work and practical in the book.
+- **Content:** the real 8-sinf Fizika textbook (2019): 5 chapters, 60 topics, and **43 interactive 3D labs**: one for every lab work and practical, and one for every topic that has an experiment in the book (42 of 60 topics).
 - **Scanning:** **real**. The photo goes to Gemini, which reads the page, and Empira opens the matching topic and lab. This needs the Gemini key to be set (see §9).
 
 ---
@@ -25,7 +25,7 @@ The demo runs at **https://test.empira.uz** on any laptop or phone with internet
 | # | You do | Teachers see / you say |
 |---|---|---|
 | 1 | Show **Home** | "Ikki yo‘l bor: sinfni tanlash yoki kitobni skanerlash." (Two ways in: choose a class or scan the book.) |
-| 2 | Tap **8-sinf** | The real annual plan from the textbook: 5 chapters, 60 topics, 10 with a 3D lab. **Fizika** is already selected. |
+| 2 | Tap **8-sinf** | The real annual plan from the textbook: 5 chapters, 60 topics, 42 with a 3D lab. **Fizika** is already selected. |
 | 3 | Point to the **"Shu hafta"** row | "Bu haftaning mavzusi: Om qonunini o‘rganish." (This week's topic: studying Ohm's law.) |
 | 4 | Tap it, then **"3D laboratoriyani ochish"** | "Laboratoriya yuklanmoqda…" (Loading the lab…), then the Ohm's law circuit: power supply, switch, milliammeter, resistor, voltmeter |
 | 5 | **Kalitni ulash** (Close the switch) at 4 V → move U to 6, 8, 10 V → **Kalitni ulash** each time | I = 20 → 30 → 40 → 50 mA, R = 200 Ω every time. After 4 voltages, **Rₒ‘ᵣₜ** (average R) appears. "Kuchlanish ortsa, tok ham ortadi — qarshilik o‘zgarmaydi." (Voltage up, current up; resistance stays the same.) |
@@ -51,7 +51,9 @@ The demo runs at **https://test.empira.uz** on any laptop or phone with internet
 
 Any other page of the book opens its topic, marked "Tez orada" (Coming soon).
 
-## 4. The 10 labs
+## 4. The labs
+
+The 10 labs for the book's lab works and practicals (the strongest for a demo):
 
 | § | Lab | What to show |
 |---|---|---|
@@ -65,6 +67,16 @@ Any other page of the book opens its topic, marked "Tez orada" (Coming soon).
 | 33 | Lampochka quvvati | P = I·U, stopwatch, W = I·U·t, 3 repeats → Pₒ‘ᵣₜ ≈ the lamp's rating "3,5 V; 0,26 A". |
 | 49 | Magnitlar ta’siri | Dynamometer: attraction vs repulsion, and the force grows as the distance shrinks. |
 | 58 | Elektromagnit | Compass deflection grows with current and an iron core, and falls with distance. |
+
+The other 33 labs recreate the book's demonstrations, one per topic:
+
+| Chapter | Topics → lab |
+|---|---|
+| I. Elektr zaryad | 1 two kinds of charge · 2 electroscope · 3 Coulomb's torsion balance · 5 field-line fibres · 8 lightning distance (d = 340·t) |
+| II. Elektr toki | 9 neon lamp · 10 Volta cell · 11 voltmeter · 12 ammeter · 15 wire resistance · 16 potentiometer · 17 current vs resistance · 21 lamps in series · 22 lamps in parallel · 27 parallel-plate capacitor |
+| III. Ish va quvvat | 34 incandescent vs LED energy · 36 Joule–Lenz calorimeter · 37 phase tester |
+| IV. Turli muhitlar | 40 electrons in a metal · 41 which liquids conduct · 42 copper electrolysis (m = k·I·t) · 43 two baths in series · 45 electroplating a spoon · 46 vacuum diode · 47 flame ionises air · 48 spark, arc and glow discharges |
+| V. Magnit maydon | 50 field lines · 51 compass and Earth's field · 52 Oersted · 53 Ampère force · 55 current loop (meter) · 57 electromagnet lifting force · 59 DC motor |
 
 ## 5. Running it on a phone
 
@@ -93,7 +105,7 @@ Use this only if live scanning fails, for example because of no internet or a mi
 ## 8. What not to promise
 
 - Only **8-sinf Fizika** is complete. The other grades are not ready yet.
-- 10 of 60 topics have a 3D lab; the rest are "Tez orada".
+- 42 of 60 topics have a 3D lab. The other 18 are problem-solving or theory lessons without an experiment, marked "Tez orada".
 - "Shu hafta" is a demo setting (week 10), not the school calendar yet.
 - Weeks in the annual plan are approximate (2 lessons a week) until the official yearly plan is added.
 

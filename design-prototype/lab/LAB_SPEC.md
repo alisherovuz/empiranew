@@ -1,12 +1,13 @@
 # Empira 3D Laboratory (S4): Specification
 
-Prototype: `index.html?lab=<lab slug>`. **One screen design, 10 labs for 8-sinf Fizika**, one for every lab work and practical in the 2019 textbook. These are mock experiences: the values use the textbook formulas; they are not full physics simulators.
+Prototype: `index.html?lab=<lab slug>`. **One screen design, 43 labs for 8-sinf Fizika**: one for every lab work and practical in the 2019 textbook, and one for every topic with a book demonstration or home experiment (42 of 60 topics). These are mock experiences: the values use the textbook formulas; they are not full physics simulators.
 
 | Files | Role |
 |---|---|
 | `app.js` | Engine: panel (range + choice controls, steps, measurements), stage, camera framing, loading state, next topic |
 | `kit.js` | 3D equipment kit, built once: power supply, cells, switch, lamp, resistor, rheostat, A/mA/V meters, stopwatch, coil + iron core, compass, bar magnets, stand, dynamometer, electrophore machine, candle, wires |
-| `labs-8.js` | The 10 lab definitions (controls, physics, steps, table, layout) |
+| `labs-8.js` | The 10 lab-work / practical labs (controls, physics, steps, table, layout) |
+| `labs-8b.js` … `labs-8e.js` | Demonstration labs by chapter: II–III (13), V (7), I (5), IV (8) |
 | `vendor/three-0.170.0-bundle.js` | three.js + OrbitControls, local (works offline and from file://) |
 
 | `?lab=` | § | Lab | Controls | Measured |

@@ -2,7 +2,7 @@
 
 Empira turns textbook topics into interactive 3D laboratories for school lessons (Physics first; Chemistry, Biology and other subjects later).
 
-This repository contains the Empira **8-sinf Fizika** pilot: the full annual plan from the 2019 textbook, 10 interactive 3D labs (every lab work and practical in the book), and live textbook scanning with Gemini.
+This repository contains the Empira **8-sinf Fizika** pilot: the full annual plan from the 2019 textbook, 43 interactive 3D labs (every lab work and practical in the book, plus one lab for every topic with a book experiment: 42 of 60 topics), and live textbook scanning with Gemini.
 
 ## Run it
 
@@ -22,7 +22,7 @@ This repository contains the Empira **8-sinf Fizika** pilot: the full annual pla
 | `design-prototype/class-plan/` | 8-sinf annual plan (chapters → topics, "Shu hafta") |
 | `design-prototype/topic/` | Topic page (with lab / "Tez orada") |
 | `design-prototype/scan/` | Textbook scanner (mock detection, presenter mode) |
-| `design-prototype/lab/` | 10 interactive 3D labs for 8-sinf Fizika (engine `app.js`, equipment `kit.js`, labs `labs-8.js`; three.js bundled locally) |
+| `design-prototype/lab/` | 43 interactive 3D labs for 8-sinf Fizika (engine `app.js`, equipment `kit.js`, labs `labs-8.js` … `labs-8e.js`; three.js bundled locally) |
 | `api/scan.js` | Vercel function: textbook photo → Gemini → matched 8-sinf topic + lab (needs `GEMINI_API_KEY`) |
 | `design-prototype/class-plan/data.js`, `topic/content.js` | Real 8-sinf curriculum (5 chapters, 60 topics) and lab-topic content |
 | `design-prototype/_simplicity-pass/` | Before/after screenshots of the simplicity pass |
