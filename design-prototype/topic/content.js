@@ -278,3 +278,70 @@ Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPIC
     labs: [{ slug: 'faza-indikator', title: 'Indikator bilan faza simini aniqlash', goal: 'Otvyortka-indikator yordamida rozetkaning qaysi teshigida faza borligini xavfsiz, virtual tarzda aniqlang.', task: 'Indikator lampasi qaysi simga tekkizilganda yonadi?', minutes: 5 }]
   }
 });
+
+// Batch 3 — Chapter V (magnetism) topics with a demonstration lab.
+Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPICS, {
+  'magnit-maydonni-xarakterlovchi-parametrlar': {
+    explain: [
+      'Magnit maydonni magnit kuch chiziqlari bilan tasvirlash mumkin. Magnit strelkalar shu chiziqlarga urinma bo‘ylab joylashadi.',
+      'Kuch chiziqlari magnitning shimoliy (N) qutbidan chiqib, janubiy (S) qutbiga kiradi. Ular qutblar yonida zichroq — u yerda maydon kuchliroq.'
+    ],
+    formulas: ['B = F / (I · l)'],
+    terms: [['B', 'magnit induksiya', 'T (tesla)'], ['N', 'shimoliy qutb', '—'], ['S', 'janubiy qutb', '—']],
+    labs: [{ slug: 'magnit-kuch-chiziqlari', title: 'Magnit kuch chiziqlarini kuzatish', goal: 'Magnit atrofidagi strelkalar va temir qipig‘i yordamida kuch chiziqlari shaklini ko‘ring.', task: 'Magnit teskari aylantirilsa, strelkalar qanday buriladi?', minutes: 5 }]
+  },
+  'yerning-magnit-maydoni': {
+    explain: [
+      'Yer katta magnitga o‘xshaydi. Shuning uchun kompas strelkasining shimoliy uchi doim geografik shimolga qaraydi.',
+      'Yerning janubiy magnit qutbi geografik Shimoliy qutb yaqinida joylashgan. Yaqindagi magnit yoki temir buyumlar kompas ko‘rsatishini buzadi.'
+    ],
+    formulas: ['B ≈ 5 · 10⁻⁵ T'],
+    terms: [['B', 'Yer magnit maydonining induksiyasi', 'T'], ['N', 'strelkaning shimoliy uchi', '—']],
+    labs: [{ slug: 'yer-magnit-maydoni', title: 'Kompas va Yerning magnit maydoni', goal: 'Stolni burib, kompas strelkasi doim shimolni ko‘rsatishini tekshiring. Yoniga magnit qo‘yib, nima bo‘lishini kuzating.', task: 'Kompas yoniga magnit qo‘yilsa, strelka nima uchun og‘adi?', minutes: 5 }]
+  },
+  'tokning-magnit-maydoni': {
+    explain: [
+      'Tokli o‘tkazgich atrofida magnit maydon hosil bo‘ladi. Buni 1820-yilda Ersted kompas strelkasining og‘ishidan aniqlagan.',
+      'Tok yo‘nalishi o‘zgarsa, strelka teskari tomonga og‘adi. Tok kuchi ortsa, maydon kuchayadi va og‘ish ortadi.'
+    ],
+    formulas: ['B ~ I'],
+    terms: [['I', 'tok kuchi', 'A'], ['B', 'tok hosil qilgan magnit maydon', 'T']],
+    labs: [{ slug: 'ersted', title: 'Ersted tajribasi', goal: 'Kompas ustidan o‘tgan simdan tok o‘tkazib, strelka og‘ishini kuzating.', task: 'Tok yo‘nalishi o‘zgarsa, strelka qaysi tomonga og‘adi?', minutes: 5 }]
+  },
+  'magnit-maydonning-tokli-otkazgichga-tasiri': {
+    explain: [
+      'Magnit maydonda turgan tokli o‘tkazgichga kuch ta’sir qiladi — Amper kuchi. U tok kuchiga, o‘tkazgich uzunligiga va magnit induksiyaga proporsional.',
+      'Kuch yo‘nalishi chap qo‘l qoidasi bilan aniqlanadi. Tok yo‘nalishi o‘zgarsa, kuch ham teskari tomonga yo‘naladi.'
+    ],
+    formulas: ['F = B · I · l'],
+    terms: [['F', 'Amper kuchi', 'N'], ['B', 'magnit induksiya (0,1 T)', 'T'], ['I', 'tok kuchi', 'A'], ['l', 'o‘tkazgich uzunligi (5 sm)', 'm']],
+    labs: [{ slug: 'amper', title: 'Magnit maydonning tokli o‘tkazgichga ta’siri', goal: 'Taqasimon magnit qutblari orasidagi o‘tkazgichdan tok o‘tkazib, uning harakatini kuzating.', task: 'Tok yo‘nalishi o‘zgarsa, o‘tkazgich qayerga harakatlanadi?', minutes: 6 }]
+  },
+  'bir-jinsli-magnit-maydonda-tokli-ramkaning-aylanma-harakati': {
+    explain: [
+      'Magnit maydondagi tokli ramkaga juft kuch ta’sir qiladi va u aylanadi. Prujina bu aylanishga qarshilik qiladi.',
+      'Burilish burchagi tok kuchiga proporsional. Elektr o‘lchov asboblari — ampermetr va voltmetr — shu tamoyil asosida ishlaydi.'
+    ],
+    formulas: ['φ ~ I'],
+    terms: [['φ', 'ramka (strelka) burilish burchagi', '°'], ['I', 'ramkadagi tok kuchi', 'A']],
+    labs: [{ slug: 'tokli-ramka', title: 'Magnit maydonda tokli ramka', goal: 'Ramkadan turli tok o‘tkazib, uning burilish burchagini kuzating.', task: 'Tok kuchi 2 marta ortsa, burilish burchagi qanday o‘zgaradi?', minutes: 5 }]
+  },
+  'elektromagnitlar-elektromagnit-rele': {
+    explain: [
+      'Elektromagnit — ichida temir o‘zagi bo‘lgan g‘altak. Tok o‘tganda u magnitga aylanadi, tok uzilganda magnitlik yo‘qoladi.',
+      'Elektromagnitning ko‘tarish kuchi tok kuchi va o‘ramlar soni ortishi bilan ortadi. Elektromagnit rele, qo‘ng‘iroq va kranlarda ishlatiladi.'
+    ],
+    formulas: ['F ~ I · N'],
+    terms: [['I', 'tok kuchi', 'A'], ['N', 'o‘ramlar soni', '—'], ['F', 'ko‘tarish kuchi', 'N']],
+    labs: [{ slug: 'elektromagnit-kuchi', title: 'Elektromagnitning ko‘tarish kuchi', goal: 'Tok kuchi va o‘ramlar sonini o‘zgartirib, elektromagnit nechta skrepka ko‘tarishini sanang.', task: 'Ko‘tarish kuchi qaysi kattaliklarga bog‘liq?', minutes: 6 }]
+  },
+  'ozgarmas-tok-elektr-dvigateli': {
+    explain: [
+      'Elektr dvigatel elektr energiyani mexanik energiyaga aylantiradi. Uning asosiy qismlari: stator (magnit), rotor (ramka), kollektor va cho‘tkalar.',
+      'Kollektor tok yo‘nalishini har yarim aylanishda almashtirib, rotorni bir tomonga aylantiradi. Manba qutblari almashtirilsa, dvigatel teskari aylanadi.'
+    ],
+    formulas: ['P = U · I'],
+    terms: [['U', 'kuchlanish', 'V'], ['n', 'aylanish tezligi', 'ayl/min']],
+    labs: [{ slug: 'elektr-dvigatel', title: 'O‘zgarmas tok elektr dvigateli', goal: 'Kuchlanishni o‘zgartirib, dvigatel tezligini kuzating. Manba qutblarini almashtirib ko‘ring.', task: 'Dvigatelni teskari aylantirish uchun nima qilish kerak?', minutes: 5 }]
+  }
+});

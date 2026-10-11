@@ -91,16 +91,16 @@
       n: 5, title: 'Magnit maydon',
       topics: [
         { n: 49, p: 139, w: 25, t: 'Magnit maydon. Doimiy magnit va uning qutblari', lab: true },
-        { n: 50, p: 143, w: 25, t: 'Magnit maydonni xarakterlovchi parametrlar' },
-        { n: 51, p: 145, w: 26, t: 'Yerning magnit maydoni' },
-        { n: 52, p: 146, w: 26, t: 'Tokning magnit maydoni' },
-        { n: 53, p: 149, w: 27, t: 'Magnit maydonning tokli o‘tkazgichga ta’siri' },
+        { n: 50, p: 143, w: 25, t: 'Magnit maydonni xarakterlovchi parametrlar', lab: true },
+        { n: 51, p: 145, w: 26, t: 'Yerning magnit maydoni', lab: true },
+        { n: 52, p: 146, w: 26, t: 'Tokning magnit maydoni', lab: true },
+        { n: 53, p: 149, w: 27, t: 'Magnit maydonning tokli o‘tkazgichga ta’siri', lab: true },
         { n: 54, p: 151, w: 27, t: 'Masalalar yechish (magnit maydon)' },
-        { n: 55, p: 153, w: 28, t: 'Bir jinsli magnit maydonda tokli ramkaning aylanma harakati' },
+        { n: 55, p: 153, w: 28, t: 'Bir jinsli magnit maydonda tokli ramkaning aylanma harakati', lab: true },
         { n: 56, p: 155, w: 28, t: 'Magnit maydonda zaryadli zarraning harakati' },
-        { n: 57, p: 157, w: 29, t: 'Elektromagnitlar. Elektromagnit rele' },
+        { n: 57, p: 157, w: 29, t: 'Elektromagnitlar. Elektromagnit rele', lab: true },
         { n: 58, p: 161, w: 29, t: 'Laboratoriya ishi. Eng oddiy elektromagnitni yig‘ish', lab: true },
-        { n: 59, p: 162, w: 30, t: 'O‘zgarmas tok elektr dvigateli' },
+        { n: 59, p: 162, w: 30, t: 'O‘zgarmas tok elektr dvigateli', lab: true },
         { n: 60, p: 165, w: 30, t: 'Masalalar yechish (V bob)' }
       ]
     }

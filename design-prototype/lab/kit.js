@@ -464,10 +464,136 @@ window.EMPIRA_KIT = function (THREE, scene) {
     };
   }
 
+  /* ================= Chapter V tools (magnetism) ================= */
+
+  /* ---------- Small compass needle (for arrays / field maps) ---------- */
+  function needle(x, z, y = 0.004, size = 1) {
+    const g = group(x, y, z);
+    add(g, cyl(0.012 * size, 0.003, C.white, { roughness: 0.8 }, 20), 0, 0.0015, 0);
+    const n = add(g, new THREE.Group(), 0, 0.006, 0);
+    const half = (color, sgn) => { const m = add(n, new THREE.Mesh(new THREE.ConeGeometry(0.0035 * size, 0.011 * size, 4), mat(color)), sgn * 0.0055 * size, 0, 0); m.rotation.z = -sgn * Math.PI / 2; };
+    half(C.red, 1); half(C.blue, -1);
+    return { group: g, set(rad) { n.rotation.y = rad; } };   // rad: angle of the N end in the x–z plane (0 = +x)
+  }
+
+  /* ---------- Bar magnet lying on the table (N red at +x) ---------- */
+  function flatMagnet(x, z, len = 0.12) {
+    const g = group(x, 0, z);
+    const nM = add(g, box(len / 2, 0.016, 0.026, C.red, { roughness: 0.5 }), len / 4, 0.008, 0);
+    const sM = add(g, box(len / 2, 0.016, 0.026, C.blue, { roughness: 0.5 }), -len / 4, 0.008, 0);
+    const lN = label('N', V(len / 4, 0.035, 0), { parent: g }), lS = label('S', V(-len / 4, 0.035, 0), { parent: g });
+    return { group: g, setFlip(f) { nM.position.x = f ? -len / 4 : len / 4; sM.position.x = f ? len / 4 : -len / 4; lN.position.x = nM.position.x; lS.position.x = sM.position.x; } };
+  }
+
+  /* ---------- Field lines of a dipole drawn on a card (iron filings look) ---------- */
+  function fieldLines(x, z, len = 0.12) {
+    const g = group(x, 0.0015, z);
+    const m = new THREE.LineBasicMaterial({ color: 0x5A6285, transparent: true, opacity: 0.75 });
+    const B = (px, pz) => {           // 2-D field of two opposite poles at ±len/2
+      const f = (cx, sgn) => { const dx = px - cx, dz = pz, r3 = Math.pow(dx * dx + dz * dz, 1.5) + 1e-9; return [sgn * dx / r3, sgn * dz / r3]; };
+      const a = f(len / 2, 1), b = f(-len / 2, -1); return [a[0] + b[0], a[1] + b[1]];
+    };
+    for (let i = 0; i < 14; i++) {
+      const ang = (i / 14) * Math.PI * 2;
+      let px = len / 2 + Math.cos(ang) * 0.008, pz = Math.sin(ang) * 0.008; const pts = [V(px, 0, pz)];
+      for (let s = 0; s < 220; s++) {
+        const [bx, bz] = B(px, pz); const n = Math.hypot(bx, bz); if (!n) break;
+        px += (bx / n) * 0.003; pz += (bz / n) * 0.003; pts.push(V(px, 0, pz));
+        if (Math.hypot(px + len / 2, pz) < 0.008 || Math.abs(px) > 0.3 || Math.abs(pz) > 0.2) break;
+      }
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m));
+    }
+    g.visible = false;
+    return { group: g, field: B, show(v) { g.visible = v; } };
+  }
+
+  /* ---------- Horseshoe magnet (U-shape, N red / S blue arms) ---------- */
+  function horseshoe(x, z, gap = 0.08, h = 0.1) {
+    const g = group(x, 0, z);
+    add(g, box(0.03, 0.02, gap + 0.06, C.ink700), 0, 0.01, 0);
+    const armN = add(g, box(0.03, h, 0.03, C.red, { roughness: 0.5 }), 0, 0.02 + h / 2, gap / 2 + 0.015);
+    const armS = add(g, box(0.03, h, 0.03, C.blue, { roughness: 0.5 }), 0, 0.02 + h / 2, -gap / 2 - 0.015);
+    label('N', V(0, h + 0.05, gap / 2 + 0.015), { parent: g }); label('S', V(0, h + 0.05, -gap / 2 - 0.015), { parent: g });
+    return { group: g, armN, armS, top: 0.02 + h };
+  }
+
+  /* ---------- Swinging conductor hung on two wires (Ampère) ---------- */
+  function swing(x, z, y0, len = 0.1, drop = 0.09) {
+    const pivot = group(x, y0, z);
+    const arm = add(pivot, new THREE.Group(), 0, 0, 0);
+    [-len / 2, len / 2].forEach((s) => add(arm, cyl(0.0012, drop, C.steel, { metalness: 0.6 }, 6), s, -drop / 2, 0));
+    const rod = add(arm, cyl(0.004, len + 0.01, C.copper, { metalness: 0.6, roughness: 0.3 }, 12), 0, -drop, 0); rod.rotation.z = Math.PI / 2;
+    add(pivot, cyl(0.003, len + 0.08, C.steel, { metalness: 0.6 }, 8), 0, 0, 0).rotation.z = Math.PI / 2;
+    return { group: pivot, get a() { return world(pivot, V(-len / 2 - 0.04, 0, 0)); }, get b() { return world(pivot, V(len / 2 + 0.04, 0, 0)); }, set(rad) { arm.rotation.x = rad; } };
+  }
+
+  /* ---------- Frame (ramka) on an axle with spring + pointer, between magnet poles ---------- */
+  function frameMeter(x, z) {
+    const g = group(x, BY, z);
+    const poleN = add(g, box(0.035, 0.08, 0.05, C.red, { roughness: 0.5 }), -0.07, 0.06, 0);
+    const poleS = add(g, box(0.035, 0.08, 0.05, C.blue, { roughness: 0.5 }), 0.07, 0.06, 0);
+    label('N', V(-0.07, 0.12, 0), { parent: g }); label('S', V(0.07, 0.12, 0), { parent: g });
+    const rot = add(g, new THREE.Group(), 0, 0.06, 0);
+    const fm = mat(C.copper, { metalness: 0.6, roughness: 0.3 });
+    [[0, 0.035, 0.06, 0.004], [0, -0.035, 0.06, 0.004]].forEach(([bx, by, w, t]) => add(rot, new THREE.Mesh(new THREE.BoxGeometry(t, t, w), fm), bx, by, 0));
+    [-0.03, 0.03].forEach((zz) => add(rot, new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.07, 0.004), fm), 0, 0, zz));
+    add(g, cyl(0.002, 0.12, C.steel, { metalness: 0.6 }, 8), 0, 0.06, 0);
+    const ptr = add(rot, box(0.002, 0.002, 0.07, C.ink), 0, 0.06, 0.035);
+    // scale arc
+    const arc = add(g, new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.0015, 6, 40, Math.PI * 0.8), mat(C.ink700)), 0, 0.12, 0);
+    arc.rotation.x = -Math.PI / 2; arc.rotation.z = Math.PI * 0.1;
+    add(g, box(0.05, 0.004, 0.012, C.white), 0, 0.122, 0.075);
+    label('0', V(0, 0.14, 0.085), { parent: g, minor: true });
+    post(g, -0.03, 0, 0.07); post(g, 0.03, 0, 0.07);
+    return { group: g, get a() { return world(g, V(-0.03, 0.012, 0.07)); }, get b() { return world(g, V(0.03, 0.012, 0.07)); }, set(rad) { rot.rotation.y = rad; } };
+  }
+
+  /* ---------- Electromagnet (vertical coil with core) + paper clips ---------- */
+  function liftMagnet(x, z, h = 0.3) {
+    const st = stand(x, z, h, 0.19);
+    const g = group(st.tip.x, st.tip.y - 0.01, st.tip.z);
+    add(g, cyl(0.014, 0.08, 0x9AA1BC, { metalness: 0.6, roughness: 0.35 }), 0, -0.05, 0);
+    const wind = add(g, cyl(0.022, 0.06, C.copper, { metalness: 0.55, roughness: 0.35 }), 0, -0.05, 0);
+    label('Elektromagnit', V(0.07, -0.02, 0), { parent: g, minor: true });
+    const clips = [];
+    const clipMat = mat(0xC9CED9, { metalness: 0.8, roughness: 0.3 });
+    for (let i = 0; i < 24; i++) {
+      const c = new THREE.Mesh(new THREE.TorusGeometry(0.006, 0.0012, 6, 16), clipMat); c.castShadow = true;
+      c.scale.set(1, 1.8, 1); scene.add(c); clips.push(c);
+    }
+    const tray = add(group(st.tip.x, 0, st.tip.z), box(0.1, 0.006, 0.08, C.ink700), 0.01, 0.003, 0);
+    const pile = (c, i) => { c.position.set(st.tip.x - 0.035 + (i % 8) * 0.013, 0.008, st.tip.z - 0.025 + Math.floor(i / 8) * 0.025); c.rotation.set(Math.PI / 2, 0, (i * 0.7) % 3); };
+    const lifted = (c, i) => { c.position.set(st.tip.x + ((i % 5) - 2) * 0.008, st.tip.y - 0.105 - Math.floor(i / 5) * 0.016, st.tip.z + (((i * 7) % 3) - 1) * 0.006); c.rotation.set(0, (i * 1.3) % 3, 0); };
+    return { group: g, wind, set(n, p = 1) { clips.forEach((c, i) => (i < n && p >= 1 ? lifted(c, i) : pile(c, i))); }, setTurns(f) { wind.scale.set(1, f, 1); } };
+  }
+
+  /* ---------- DC motor model: stator magnets, rotor coil, commutator, brushes ---------- */
+  function motor(x, z) {
+    const g = group(x, BY, z);
+    add(g, box(0.2, 0.012, 0.12, C.ink700), 0, 0.006, 0);
+    const pN = add(g, box(0.03, 0.09, 0.07, C.red, { roughness: 0.5 }), -0.07, 0.057, 0);
+    const pS = add(g, box(0.03, 0.09, 0.07, C.blue, { roughness: 0.5 }), 0.07, 0.057, 0);
+    const lN = label('N', V(-0.07, 0.12, 0), { parent: g }), lS = label('S', V(0.07, 0.12, 0), { parent: g });
+    const rot = add(g, new THREE.Group(), 0, 0.06, 0);
+    const fm = mat(C.copper, { metalness: 0.6, roughness: 0.3 });
+    [0.035, -0.035].forEach((yy) => add(rot, new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.006, 0.08), fm), 0, yy, 0));
+    [0.04, -0.04].forEach((zz) => add(rot, new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.076, 0.006), fm), 0, 0, zz));
+    add(rot, cyl(0.0025, 0.15, C.steel, { metalness: 0.6 }, 8), 0, 0, 0).rotation.x = Math.PI / 2;
+    const comm = add(rot, cyl(0.008, 0.016, 0xB87333, { metalness: 0.7 }, 16), 0, 0, 0.062); comm.rotation.x = Math.PI / 2;
+    [-1, 1].forEach((s) => add(g, box(0.006, 0.02, 0.006, C.ink), s * 0.011, 0.06, 0.062));
+    post(g, -0.03, 0.012, 0.05); post(g, 0.03, 0.012, 0.05);
+    label('Rotor', V(0, 0.15, -0.03), { parent: g, minor: true });
+    return {
+      group: g, get a() { return world(g, V(-0.03, 0.024, 0.05)); }, get b() { return world(g, V(0.03, 0.024, 0.05)); },
+      spin(d) { rot.rotation.z += d; }
+    };
+  }
+
   return {
     C, V, THREE, mat, box, cyl, sphere, add, group, label, sizeLabels, table, board, BY,
     wire, clearWires, powerSupply, cells, switchK, lamp, resistor, rheostat, meter, stopwatch,
     coil, compass, barMagnet, stand, dynamometer, electrophore, candle,
-    neonLamp, voltaCell, wireBoard, capacitor, calorimeter, socketTester, glassMat, world, post
+    neonLamp, voltaCell, wireBoard, capacitor, calorimeter, socketTester, glassMat, world, post,
+    needle, flatMagnet, fieldLines, horseshoe, swing, frameMeter, liftMagnet, motor
   };
 };
