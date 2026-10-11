@@ -22,14 +22,14 @@
     {
       n: 1, title: 'Elektr zaryad. Elektr maydon',
       topics: [
-        { n: 1, p: 4, w: 1, t: 'Jismlarning zaryadlanishi' },
-        { n: 2, p: 9, w: 1, t: 'Elektr zaryad' },
-        { n: 3, p: 12, w: 2, t: 'Zaryadlarning o‘zaro ta’siri. Kulon qonuni' },
+        { n: 1, p: 4, w: 1, t: 'Jismlarning zaryadlanishi', lab: true },
+        { n: 2, p: 9, w: 1, t: 'Elektr zaryad', lab: true },
+        { n: 3, p: 12, w: 2, t: 'Zaryadlarning o‘zaro ta’siri. Kulon qonuni', lab: true },
         { n: 4, p: 15, w: 2, t: 'Masalalar yechish (Kulon qonuni)' },
-        { n: 5, p: 18, w: 3, t: 'Elektr maydon' },
+        { n: 5, p: 18, w: 3, t: 'Elektr maydon', lab: true },
         { n: 6, p: 22, w: 3, t: 'O‘tkazgichlarda elektr zaryadlarning taqsimlanishi', lab: true },
         { n: 7, p: 25, w: 4, t: 'Masalalar yechish (elektr maydon)' },
-        { n: 8, p: 27, w: 4, t: 'Tabiatdagi elektr hodisalar' }
+        { n: 8, p: 27, w: 4, t: 'Tabiatdagi elektr hodisalar', lab: true }
       ]
     },
     {

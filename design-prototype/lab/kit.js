@@ -589,11 +589,130 @@ window.EMPIRA_KIT = function (THREE, scene) {
     };
   }
 
+  /* ================= Chapter I tools (electrostatics) ================= */
+
+  /* ---------- Rubbing rod: glass (+) or ebonite (−), with a charge-sign pill ---------- */
+  const rodMats = {
+    shisha: () => new THREE.MeshStandardMaterial({ color: 0xDCE6F5, roughness: 0.1, metalness: 0.05, transparent: true, opacity: 0.7 }),
+    ebonit: () => mat(0x23262F, { roughness: 0.4 })
+  };
+  function chargeRod(len = 0.2) {
+    const g = new THREE.Group(); scene.add(g);
+    const body = add(g, shade(new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, len, 20), rodMats.shisha())), 0, 0, 0);
+    body.rotation.z = Math.PI / 2;
+    const plus = label('+ + +', V(len / 2 - 0.03, 0.025, 0), { parent: g, color: '#E5484D' });
+    const minus = label('− − −', V(len / 2 - 0.03, 0.025, 0), { parent: g, color: '#3B4CFF' });
+    let k = 'shisha', shown = true;
+    const sync = () => { plus.userData.hidden = !shown || k !== 'shisha'; minus.userData.hidden = !shown || k === 'shisha'; };
+    sync();
+    return {
+      group: g, len,
+      setKind(kind) { k = kind; body.material = rodMats[kind](); sync(); },
+      showSign(v) { shown = v; sync(); }
+    };
+  }
+
+  /* ---------- Rod hung by its middle on a thread from a stand; turns about the thread ---------- */
+  function hangingRod(x, z, h = 0.34) {
+    const st = stand(x, z, h, 0.16);
+    const drop = 0.1;
+    add(group(st.tip.x, st.tip.y - drop / 2, st.tip.z), cyl(0.0008, drop, C.ink700, {}, 6));
+    const r = chargeRod(0.2);
+    r.group.position.set(st.tip.x, st.tip.y - drop, st.tip.z);
+    return { group: r.group, tip: V(st.tip.x, st.tip.y - drop, st.tip.z), setKind: r.setKind, set(rad) { r.group.rotation.y = rad; } };
+  }
+
+  /* ---------- Electroscope: glass jar, metal rod with ball, two foil leaves ---------- */
+  function electroscope(x, z) {
+    const g = group(x, 0, z);
+    add(g, box(0.12, 0.012, 0.12, C.navy, { roughness: 0.5 }), 0, 0.006, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.13, 40, 1, true), new THREE.MeshStandardMaterial({ color: 0xE8EEF8, roughness: 0.1, transparent: true, opacity: 0.35, side: THREE.DoubleSide })), 0, 0.077, 0);
+    add(g, cyl(0.022, 0.016, C.ink700), 0, 0.15, 0);
+    add(g, cyl(0.0025, 0.12, 0x9AA1BC, { metalness: 0.7, roughness: 0.3 }, 10), 0, 0.15, 0);
+    add(g, sphere(0.014, 0xC9CED9, { metalness: 0.8, roughness: 0.25 }), 0, 0.215, 0);
+    const foil = new THREE.MeshStandardMaterial({ color: 0xE8C76A, metalness: 0.7, roughness: 0.35, side: THREE.DoubleSide });
+    const leaves = [-1, 1].map((s) => { const p = add(g, new THREE.Group(), 0, 0.09, 0); add(p, new THREE.Mesh(new THREE.PlaneGeometry(0.012, 0.05), foil), 0, -0.025, 0.002 * s); return { p, s }; });
+    label('Elektroskop', V(0, 0.27, 0), { parent: g, minor: true });
+    return { group: g, get ball() { return world(g, V(0, 0.215, 0)); }, set(deg) { leaves.forEach(({ p, s }) => { p.rotation.z = s * THREE.MathUtils.degToRad(deg / 2); }); } };
+  }
+
+  /* ---------- Coulomb torsion balance: glass case, thread, beam with ball, fixed ball ---------- */
+  function torsionBalance(x, z) {
+    const g = group(x, 0, z), R = 0.075, Y = 0.1;
+    add(g, cyl(0.12, 0.012, C.navy, { roughness: 0.5 }), 0, 0.006, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.17, 48, 1, true), new THREE.MeshStandardMaterial({ color: 0xE8EEF8, roughness: 0.1, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false })), 0, 0.097, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.112, 0.112, 0.006, 48), new THREE.MeshStandardMaterial({ color: 0xE8EEF8, roughness: 0.1, transparent: true, opacity: 0.3, depthWrite: false })), 0, 0.186, 0);
+    const rim = add(g, new THREE.Mesh(new THREE.TorusGeometry(0.112, 0.003, 6, 64), mat(C.ink700)), 0, 0.186, 0); rim.rotation.x = Math.PI / 2;
+    add(g, cyl(0.016, 0.01, C.ink700), 0, 0.19, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0xE8EEF8, roughness: 0.1, transparent: true, opacity: 0.35, side: THREE.DoubleSide })), 0, 0.27, 0);
+    const head = add(g, new THREE.Group(), 0, 0.355, 0);
+    add(head, cyl(0.024, 0.014, C.ink700), 0, 0, 0); add(head, box(0.006, 0.006, 0.03, C.red), 0, 0.009, 0.012);
+    add(g, cyl(0.0006, 0.26, C.ink700, {}, 6), 0, Y + 0.13, 0);
+    const beam = add(g, new THREE.Group(), 0, Y, 0);
+    add(beam, box(R + 0.04, 0.003, 0.003, 0xF2F4F8), 0, 0, 0).position.x = 0.0;
+    add(beam, sphere(0.009, 0xC9CED9, { metalness: 0.8, roughness: 0.25 }), R, 0, 0);
+    add(beam, cyl(0.016, 0.004, C.ink700), -0.055, 0, 0).rotation.z = Math.PI / 2;
+    add(g, cyl(0.002, 0.09, 0xF2F4F8, {}, 8), R, Y + 0.045, 0);
+    add(g, sphere(0.009, 0xC9CED9, { metalness: 0.8, roughness: 0.25 }), R, Y, 0);
+    // degree scale ring on the glass
+    const ring = add(g, new THREE.Mesh(new THREE.TorusGeometry(0.111, 0.0012, 6, 72), mat(C.ink700)), 0, Y, 0); ring.rotation.x = Math.PI / 2;
+    for (let i = 0; i < 36; i++) { const a = i / 36 * Math.PI * 2; add(g, box(0.001, i % 3 ? 0.006 : 0.012, 0.001, C.ink700), Math.cos(a) * 0.111, Y, Math.sin(a) * 0.111); }
+    return {
+      group: g,
+      set(rM, headDeg = 0) { const phi = 2 * Math.asin(Math.min(0.95, rM / (2 * R))); beam.rotation.y = phi; head.rotation.y = THREE.MathUtils.degToRad(headDeg); }
+    };
+  }
+
+  /* ---------- Field-line fibres in an oil dish around electrodes ---------- */
+  function fieldFibres(x, z) {
+    const g = group(x, 0, z), Rd = 0.13;
+    add(g, cyl(Rd + 0.01, 0.01, C.light, { roughness: 0.4 }), 0, 0.005, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(Rd, Rd, 0.002, 64), new THREE.MeshStandardMaterial({ color: 0xF5E9C8, roughness: 0.15, transparent: true, opacity: 0.85 })), 0, 0.011, 0);
+    const cfgs = {
+      bir: { q: [[0, 0, 1]] },
+      qarama: { q: [[-0.05, 0, 1], [0.05, 0, -1]] },
+      birxil: { q: [[-0.05, 0, 1], [0.05, 0, 1]] },
+      plast: { q: [...Array(13)].flatMap((_, i) => [[-0.05, -0.06 + i * 0.01, 1], [0.05, -0.06 + i * 0.01, -1]]), plates: true }
+    };
+    const els = {};
+    Object.entries(cfgs).forEach(([k, c]) => {
+      const eg = add(g, new THREE.Group(), 0, 0, 0); els[k] = eg;
+      if (c.plates) { add(eg, box(0.006, 0.03, 0.13, C.red, { metalness: 0.4 }), -0.05, 0.026, 0); add(eg, box(0.006, 0.03, 0.13, C.blue, { metalness: 0.4 }), 0.05, 0.026, 0); }
+      else c.q.forEach(([qx, qz, s]) => add(eg, sphere(0.009, s > 0 ? C.red : C.blue, { metalness: 0.3, roughness: 0.4 }), qx, 0.02, qz));
+    });
+    const fm = mat(0x3A2E1C, { roughness: 0.8 });
+    const fibres = [];
+    for (let ix = -12; ix <= 12; ix++) for (let iz = -12; iz <= 12; iz++) {
+      const px = ix * 0.0098 + (iz % 2) * 0.004, pz = iz * 0.0098;
+      if (Math.hypot(px, pz) > Rd - 0.008) continue;
+      const m = add(g, new THREE.Mesh(new THREE.BoxGeometry(0.009, 0.0012, 0.0012), fm), px, 0.013, pz);
+      fibres.push({ m, px, pz, a0: ((ix * 7 + iz * 13) % 10) / 10 * Math.PI, a1: 0, show: true });
+    }
+    let cur = 'bir';
+    return {
+      group: g,
+      set(cfg) {
+        cur = cfg; Object.entries(els).forEach(([k, eg]) => { eg.visible = k === cfg; });
+        const c = cfgs[cfg];
+        fibres.forEach((f) => {
+          let ex = 0, ez = 0, near = false;
+          c.q.forEach(([qx, qz, s]) => { const dx = f.px - qx, dz = f.pz - qz, r2 = dx * dx + dz * dz; if (r2 < 0.012 * 0.012) near = true; ex += s * dx / r2; ez += s * dz / r2; });
+          if (c.plates && Math.abs(Math.abs(f.px) - 0.05) < 0.007 && Math.abs(f.pz) < 0.07) near = true;
+          f.m.visible = !near; f.a1 = Math.atan2(-ez, ex);
+          let d = f.a1 - f.a0; d = ((d + Math.PI / 2) % Math.PI + Math.PI) % Math.PI - Math.PI / 2; f.a1 = f.a0 + d;
+          f.m.rotation.y = f.a0;
+        });
+      },
+      align(p) { fibres.forEach((f) => { f.m.rotation.y = f.a0 + (f.a1 - f.a0) * p; }); }
+    };
+  }
+
   return {
     C, V, THREE, mat, box, cyl, sphere, add, group, label, sizeLabels, table, board, BY,
     wire, clearWires, powerSupply, cells, switchK, lamp, resistor, rheostat, meter, stopwatch,
     coil, compass, barMagnet, stand, dynamometer, electrophore, candle,
     neonLamp, voltaCell, wireBoard, capacitor, calorimeter, socketTester, glassMat, world, post,
-    needle, flatMagnet, fieldLines, horseshoe, swing, frameMeter, liftMagnet, motor
+    needle, flatMagnet, fieldLines, horseshoe, swing, frameMeter, liftMagnet, motor,
+    chargeRod, hangingRod, electroscope, torsionBalance, fieldFibres, faceTexture
   };
 };

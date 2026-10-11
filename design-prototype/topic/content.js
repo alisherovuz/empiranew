@@ -345,3 +345,52 @@ Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPIC
     labs: [{ slug: 'elektr-dvigatel', title: 'O‘zgarmas tok elektr dvigateli', goal: 'Kuchlanishni o‘zgartirib, dvigatel tezligini kuzating. Manba qutblarini almashtirib ko‘ring.', task: 'Dvigatelni teskari aylantirish uchun nima qilish kerak?', minutes: 5 }]
   }
 });
+
+// Batch 4 — Chapter I (electrostatics) topics with a demonstration lab.
+Object.assign((typeof window !== 'undefined' ? window : globalThis).EMPIRA_TOPICS, {
+  'jismlarning-zaryadlanishi': {
+    explain: [
+      'Ishqalanganda jismlar elektrlanadi (zaryadlanadi): shoyiga ishqalangan shisha musbat, junga ishqalangan ebonit manfiy zaryadlanadi.',
+      'Zaryadlarning ikki turi bor. Bir xil ishorali zaryadlar itarishadi, har xil ishoralilar esa tortishadi.'
+    ],
+    formulas: ['+ va + → itarishadi', '+ va − → tortishadi'],
+    terms: [['+', 'musbat zaryad (shisha)', '—'], ['−', 'manfiy zaryad (ebonit)', '—']],
+    labs: [{ slug: 'elektrlanish-turlari', title: 'Elektrlanishning ikki turi', goal: 'Ipga osilgan zaryadli tayoqchaga boshqa tayoqchani yaqinlashtirib, ular itarishishini yoki tortishishini kuzating.', task: 'Qanday tayoqchalar itarishadi, qanday tayoqchalar tortishadi?', minutes: 5 }]
+  },
+  'elektr-zaryad': {
+    explain: [
+      'Elektr zaryad — jismning elektr ta’sirlashuvga kirishish xususiyatini ifodalovchi kattalik. U q harfi bilan belgilanadi va kulonlarda (Kl) o‘lchanadi.',
+      'Elektroskop jismning zaryadlanganligini ko‘rsatadi: zaryad qancha ko‘p bo‘lsa, barglar shuncha ko‘p ochiladi. Barglar zaryad ishorasidan qat’i nazar ochiladi.'
+    ],
+    formulas: ['q = N · e', 'e = 1,6 · 10⁻¹⁹ Kl'],
+    terms: [['q', 'elektr zaryad', 'Kl'], ['e', 'elementar zaryad', 'Kl'], ['N', 'elektronlar soni', '—']],
+    labs: [{ slug: 'elektroskop', title: 'Elektroskopni zaryadlash', goal: 'Zaryadli tayoqchani elektroskop sharchasiga bir necha marta tegizib, barglar ochilishini kuzating.', task: 'Zaryad ortsa, barglar orasidagi burchak qanday o‘zgaradi?', minutes: 5 }]
+  },
+  'zaryadlarning-ozaro-tasiri-kulon-qonuni': {
+    explain: [
+      'Ikki nuqtaviy zaryadning o‘zaro ta’sir kuchi zaryadlar ko‘paytmasiga to‘g‘ri, ular orasidagi masofaning kvadratiga teskari proporsional (Kulon qonuni).',
+      'Kulon bu qonunni buralma tarozi yordamida aniqlagan: sharchalar itarishganda ip buraladi, burish burchagi kuchni ko‘rsatadi.'
+    ],
+    formulas: ['F = k · q₁ · q₂ / r²', 'k = 9 · 10⁹ N·m²/Kl²'],
+    terms: [['F', 'o‘zaro ta’sir kuchi', 'N'], ['q₁, q₂', 'zaryadlar', 'Kl'], ['r', 'zaryadlar orasidagi masofa', 'm']],
+    labs: [{ slug: 'kulon-qonuni', title: 'Kulon tajribasi (buralma tarozi)', goal: 'Sharchalar orasidagi masofa va zaryadni o‘zgartirib, ularning o‘zaro ta’sir kuchini o‘lchang.', task: 'Masofa 2 marta ortsa, kuch necha marta kamayadi?', minutes: 7 }]
+  },
+  'elektr-maydon': {
+    explain: [
+      'Har bir zaryad atrofida elektr maydon mavjud. Maydon boshqa zaryadlarga kuch bilan ta’sir qiladi.',
+      'Maydonni kuch chiziqlari bilan tasvirlash mumkin: ular musbat zaryaddan chiqib, manfiy zaryadga kiradi. Moydagi mayda tolalar shu chiziqlar bo‘ylab tiziladi.'
+    ],
+    formulas: ['E = F / q', 'E = k · q / r²'],
+    terms: [['E', 'maydon kuchlanganligi', 'N/Kl'], ['F', 'zaryadga ta’sir etuvchi kuch', 'N'], ['q', 'sinov zaryadi', 'Kl']],
+    labs: [{ slug: 'elektr-maydon-chiziqlari', title: 'Elektr maydon kuch chiziqlari', goal: 'Turli elektrodlar atrofida moydagi tolalar qanday tizilishini kuzating.', task: 'Ikki plastinka orasida kuch chiziqlari qanday joylashadi?', minutes: 5 }]
+  },
+  'tabiatdagi-elektr-hodisalar': {
+    explain: [
+      'Chaqmoq — bulutlar orasida yoki bulut bilan Yer orasidagi ulkan uchqun razryadi. Momaqaldiroq — razryad qizdirgan havoning keskin kengayishidan chiqadigan tovush.',
+      'Yorug‘lik deyarli bir zumda yetib keladi, tovush esa havoda 340 m/s tezlik bilan tarqaladi. Chaqmoq va momaqaldiroq orasidagi vaqtdan chaqmoqgacha masofani topish mumkin.'
+    ],
+    formulas: ['d = v · t', 'v = 340 m/s'],
+    terms: [['d', 'chaqmoqgacha masofa', 'm'], ['v', 'tovush tezligi', 'm/s'], ['t', 'chaqmoq va momaqaldiroq orasidagi vaqt', 's']],
+    labs: [{ slug: 'chaqmoq-masofasi', title: 'Chaqmoqgacha masofani aniqlash', goal: 'Chaqmoq chaqnagandan momaqaldiroq eshitilguncha vaqtni o‘lchab, chaqmoqgacha masofani hisoblang.', task: 'Momaqaldiroq 5 s dan keyin eshitilsa, chaqmoq qancha uzoqda?', minutes: 5 }]
+  }
+});
