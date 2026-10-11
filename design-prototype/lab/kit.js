@@ -129,20 +129,23 @@ window.EMPIRA_KIT = function (THREE, scene) {
   }
 
   /* ---------- Lamp on a holder (patron), glow ∝ brightness ---------- */
-  function lamp(x, z, name) {
+  function lamp(x, z, name, { color = C.amber } = {}) {
     const g = group(x, BY, z);
     add(g, box(0.07, 0.012, 0.045, C.ink700), 0, 0.006, 0);
     post(g, -0.026, 0.012, 0); post(g, 0.026, 0.012, 0);
     add(g, cyl(0.012, 0.02, C.steel, { metalness: 0.5, roughness: 0.3 }), 0, 0.022, 0);
-    const glass = add(g, new THREE.Mesh(new THREE.SphereGeometry(0.022, 28, 20),
+    const bulb = add(g, new THREE.Group(), 0, 0, 0);            // glass + filament: can be unscrewed (setRemoved)
+    const glass = add(bulb, new THREE.Mesh(new THREE.SphereGeometry(0.022, 28, 20),
       new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, roughness: 0.1 })), 0, 0.05, 0);
-    const filMat = mat(C.amber, { emissive: C.amber, emissiveIntensity: 0 });
-    add(g, new THREE.Mesh(new THREE.SphereGeometry(0.006, 12, 10), filMat), 0, 0.05, 0);
-    const light = add(g, new THREE.PointLight(C.amber, 0, 0.5, 2), 0, 0.05, 0);
-    if (name) label(name, V(0, 0.1, 0), { parent: g, minor: true });
+    const filMat = mat(color, { emissive: color, emissiveIntensity: 0 });
+    add(bulb, new THREE.Mesh(new THREE.SphereGeometry(0.006, 12, 10), filMat), 0, 0.05, 0);
+    add(bulb, cyl(0.011, 0.012, C.steel, { metalness: 0.6, roughness: 0.3 }), 0, 0.034, 0);
+    const light = add(bulb, new THREE.PointLight(color, 0, 0.5, 2), 0, 0.05, 0);
+    const lab = name ? label(name, V(0, 0.1, 0), { parent: g, minor: true }) : null;
     return {
-      group: g, get a() { return world(g, V(-0.026, 0.024, 0)); }, get b() { return world(g, V(0.026, 0.024, 0)); },
-      set(b) { filMat.emissiveIntensity = b <= 0 ? 0 : 0.3 + 3 * b; light.intensity = 0.3 * b; glass.material.opacity = 0.35 + 0.25 * b; }
+      group: g, lab, get a() { return world(g, V(-0.026, 0.024, 0)); }, get b() { return world(g, V(0.026, 0.024, 0)); },
+      set(b) { filMat.emissiveIntensity = b <= 0 ? 0 : 0.3 + 3 * b; light.intensity = 0.3 * b; glass.material.opacity = 0.35 + 0.25 * b; },
+      setRemoved(r) { bulb.position.set(r ? 0.05 : 0, r ? 0.02 : 0, r ? 0.035 : 0); bulb.rotation.z = r ? -0.9 : 0; }
     };
   }
 
@@ -154,8 +157,8 @@ window.EMPIRA_KIT = function (THREE, scene) {
     const body = add(g, cyl(0.009, len, C.beige, { roughness: 0.6 }, 20), 0, 0.026, 0); body.rotation.z = Math.PI / 2;
     [-0.3, -0.1, 0.1, 0.3].forEach((f, i) => { const b = add(g, cyl(0.0095, 0.004, i === 3 ? C.amber : C.ink, {}, 20), f * len, 0.026, 0); b.rotation.z = Math.PI / 2; });
     [-1, 1].forEach((s) => { const lead = add(g, cyl(0.0012, 0.04 - len / 2, C.steel, { metalness: 0.6 }, 8), s * (len / 2 + (0.04 - len / 2) / 2), 0.026, 0); lead.rotation.z = Math.PI / 2; });
-    if (name) label(name, V(0, 0.075, 0), { parent: g });
-    return { group: g, get a() { return world(g, V(-0.04, 0.024, 0)); }, get b() { return world(g, V(0.04, 0.024, 0)); } };
+    const lab = name ? label(name, V(0, 0.075, 0), { parent: g }) : null;
+    return { group: g, lab, get a() { return world(g, V(-0.04, 0.024, 0)); }, get b() { return world(g, V(0.04, 0.024, 0)); } };
   }
 
   /* ---------- Rheostat: ceramic tube with winding, rod and slider ---------- */
@@ -168,10 +171,12 @@ window.EMPIRA_KIT = function (THREE, scene) {
     const slider = add(g, new THREE.Group(), 0, 0, 0);
     add(slider, box(0.016, 0.014, 0.022, C.navy, { roughness: 0.45 }), 0, 0.068, 0);
     add(slider, box(0.004, 0.016, 0.004, C.steel, { metalness: 0.5 }), 0, 0.054, 0);
-    post(g, -0.12, 0.06, 0.012); post(g, 0.12, 0.072, 0.0);
+    post(g, -0.12, 0.06, 0.012); post(g, 0.12, 0.072, 0.0); post(g, 0.12, 0.06, 0.016);
     label('Reostat', V(0, 0.12, 0), { parent: g, minor: true });
     return {
+      // a = left coil end, b = slider (via the rod), c = right coil end (for potentiometer wiring)
       group: g, get a() { return world(g, V(-0.12, 0.072, 0.012)); }, get b() { return world(g, V(0.12, 0.084, 0)); },
+      get c() { return world(g, V(0.12, 0.072, 0.016)); },
       set(pos) { slider.position.x = -0.1 + 0.2 * pos; }   // pos 0 = most wire in circuit
     };
   }
@@ -337,9 +342,132 @@ window.EMPIRA_KIT = function (THREE, scene) {
     };
   }
 
+  /* ================= Chapter II–III tools ================= */
+  const glassMat = () => new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.28, roughness: 0.08, depthWrite: false });
+
+  /* ---------- Neon lamp: small glass tube, orange glow ---------- */
+  function neonLamp(x, z, h = 0) {
+    const g = group(x, BY + h, z);
+    add(g, box(0.05, 0.01, 0.03, C.ink700), 0, 0.005, 0);
+    const tube = add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.05, 20), glassMat()), 0, 0.012, 0); tube.rotation.z = Math.PI / 2;
+    const glowMat = new THREE.MeshStandardMaterial({ color: 0xFF7A3D, emissive: 0xFF7A3D, emissiveIntensity: 0, transparent: true, opacity: 0.5 });
+    const glow = add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.032, 16), glowMat), 0, 0.012, 0); glow.rotation.z = Math.PI / 2;
+    [-0.022, 0.022].forEach((s) => add(g, cyl(0.002, 0.012, C.steel, { metalness: 0.6 }, 8), s, 0.012, 0).rotation.z = Math.PI / 2);
+    const light = add(g, new THREE.PointLight(0xFF7A3D, 0, 0.3, 2), 0, 0.02, 0);
+    label('Neon lampa', V(0, 0.06, 0), { parent: g, minor: true });
+    return {
+      group: g, get a() { return world(g, V(-0.028, 0.012, 0)); }, get b() { return world(g, V(0.028, 0.012, 0)); },
+      set(b) { glowMat.emissiveIntensity = 2.5 * b; glowMat.opacity = 0.5 + 0.4 * b; light.intensity = 0.25 * b; }
+    };
+  }
+
+  /* ---------- Volta cell: beaker, electrolyte, two metal plates ---------- */
+  const METAL = { zn: 0xB9BEC8, cu: C.copper };
+  function voltaCell(x, z) {
+    const g = group(x, BY, z);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.046, 0.11, 32, 1, true), glassMat()), 0, 0.055, 0);
+    add(g, cyl(0.046, 0.003, 0xE8ECF5, { transparent: true, opacity: 0.6 }), 0, 0.0015, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.047, 0.045, 0.075, 32), new THREE.MeshStandardMaterial({ color: 0xBFD4F2, transparent: true, opacity: 0.45, roughness: 0.1, depthWrite: false })), 0, 0.04, 0);
+    const pm = [mat(METAL.zn, { metalness: 0.7, roughness: 0.35 }), mat(METAL.cu, { metalness: 0.7, roughness: 0.35 })];
+    const plates = [-0.022, 0.022].map((s, i) => add(g, new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.12, 0.05), pm[i]), s, 0.075, 0));
+    plates.forEach((p) => { p.castShadow = true; });
+    const labs = [label('Zn', V(-0.022, 0.16, 0), { parent: g, minor: true }), label('Cu', V(0.022, 0.16, 0), { parent: g, minor: true })];
+    label('Sulfat kislota eritmasi', V(0, 0.02, 0.075), { parent: g, minor: true });
+    return {
+      group: g, get a() { return world(g, V(-0.022, 0.136, 0)); }, get b() { return world(g, V(0.022, 0.136, 0)); },
+      setMetals(left, right) { [left, right].forEach((m, i) => { pm[i].color.setHex(METAL[m]); labs[i].setText(m === 'zn' ? 'Zn' : 'Cu'); }); }
+    };
+  }
+
+  /* ---------- Wire board (qisqichli taxta): one wire, clip sets the length ---------- */
+  const WIRE_COLOR = { mis: C.copper, nikelin: 0xA9AFBF, nixrom: 0x6B7186 };
+  function wireBoard(x, z, span = 0.42) {
+    const g = group(x, BY, z);
+    add(g, box(span + 0.06, 0.016, 0.07, 0xD8CBB0, { roughness: 0.85 }), 0, 0.008, 0);
+    for (let i = 0; i <= 3; i++) { add(g, box(0.003, 0.002, 0.03, C.ink700), -span / 2 + i * span / 3, 0.017, 0.022); }
+    post(g, -span / 2, 0.016, 0); post(g, span / 2, 0.016, 0);
+    const wMat = mat(WIRE_COLOR.nixrom, { metalness: 0.7, roughness: 0.35 });
+    const wireMesh = add(g, new THREE.Mesh(new THREE.CylinderGeometry(1, 1, span, 12), wMat), 0, 0.03, 0); wireMesh.rotation.z = Math.PI / 2;
+    const clip = add(g, new THREE.Group(), 0, 0, 0);
+    add(clip, box(0.012, 0.016, 0.014, C.red, { roughness: 0.5 }), 0, 0.03, 0);
+    let clipX = span / 2;
+    ['0', '0,5 m', '1 m', '1,5 m'].forEach((t, i) => label(t, V(-span / 2 + i * span / 3, 0.05, 0.04), { parent: g, minor: true }));
+    return {
+      group: g, get a() { return world(g, V(-span / 2, 0.028, 0)); }, get b() { return world(g, V(clipX, 0.04, 0)); },
+      setWire(material, S) { wMat.color.setHex(WIRE_COLOR[material]); const r = S >= 1 ? 0.0028 : 0.0018; wireMesh.scale.set(r, 1, r); },
+      setLength(frac) { clipX = -span / 2 + span * frac; clip.position.x = clipX; }
+    };
+  }
+
+  /* ---------- Flat capacitor: two plates on insulating stands ---------- */
+  function capacitor(x, z) {
+    const g = group(x, BY, z);
+    const plateMat = mat(0xC9CED9, { metalness: 0.8, roughness: 0.25 });
+    const mk = () => { const p = add(g, new THREE.Group(), 0, 0, 0); add(p, cyl(0.004, 0.06, 0xF2F4F8, { transparent: true, opacity: 0.7 }, 12), 0, 0.03, 0); add(p, box(0.03, 0.006, 0.03, C.ink700), 0, 0.003, 0); const pl = add(p, new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.1, 0.1), plateMat), 0, 0.11, 0); pl.castShadow = true; return p; };
+    const left = mk(), right = mk();
+    const diel = add(g, box(0.003, 0.11, 0.11, 0xBFD4F2, { transparent: true, opacity: 0.55, roughness: 0.1 }), 0, 0.11, 0);
+    const dielLabel = label('Shisha', V(0, 0.185, 0.03), { parent: g, minor: true });
+    label('Kondensator', V(0.06, 0.05, 0.07), { parent: g, minor: true });
+    return {
+      group: g, get a() { return world(left, V(0, 0.07, 0)); }, get b() { return world(right, V(0, 0.07, 0)); },
+      set(dmm, areaFrac, glass) {
+        const half = 0.002 + dmm * 0.004;                       // visual gap ∝ d
+        left.position.x = -half; right.position.x = half;
+        right.position.y = (1 - areaFrac) * 0.07;                // less overlap = smaller area
+        diel.visible = glass; dielLabel.userData.hidden = !glass; diel.scale.x = Math.max(1, (2 * half - 0.004) / 0.003);
+      }
+    };
+  }
+
+  /* ---------- Calorimeter: beaker of water, heating spiral, thermometer ---------- */
+  function calorimeter(x, z) {
+    const g = group(x, BY, z);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.12, 32, 1, true), glassMat()), 0, 0.06, 0);
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.049, 0.09, 32), new THREE.MeshStandardMaterial({ color: 0xBFD4F2, transparent: true, opacity: 0.4, depthWrite: false })), 0, 0.045, 0);
+    add(g, cyl(0.058, 0.008, C.ink700), 0, 0.124, 0);
+    const pts = []; for (let i = 0; i <= 200; i++) { const t = i / 200, a = t * Math.PI * 14; pts.push(V(Math.cos(a) * 0.014 - 0.015, 0.03 + t * 0.05, Math.sin(a) * 0.014)); }
+    const spiralMat = mat(0x6B7186, { emissive: 0xFF6A3D, emissiveIntensity: 0, metalness: 0.5 });
+    add(g, new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 300, 0.0018, 6, false), spiralMat));
+    [-0.03, 0.0].forEach((s) => add(g, cyl(0.0015, 0.06, C.steel, { metalness: 0.6 }, 8), s, 0.1, 0));
+    post(g, -0.03, 0.128, 0); post(g, 0.0, 0.128, 0);
+    // thermometer
+    add(g, new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.2, 12), glassMat()), 0.028, 0.13, 0);
+    add(g, sphere(0.006, 0xE5484D), 0.028, 0.035, 0);
+    const col = add(g, cyl(0.0018, 1, 0xE5484D, {}, 8), 0.028, 0.04, 0);
+    const tLab = label('20,0 °C', V(0.07, 0.2, 0), { parent: g });
+    return {
+      group: g, get a() { return world(g, V(-0.03, 0.14, 0)); }, get b() { return world(g, V(0, 0.14, 0)); },
+      setTemp(T) { const h = 0.04 + (T - 15) * 0.0035; col.scale.y = h; col.position.y = 0.035 + h / 2; tLab.setText(`${T.toFixed(1).replace('.', ',')} °C`); },
+      setHeat(b) { spiralMat.emissiveIntensity = 0.6 * b; }
+    };
+  }
+
+  /* ---------- Wall socket + screwdriver-type voltage tester ---------- */
+  function socketTester(x, z) {
+    const g = group(x, 0, z);
+    add(g, box(0.3, 0.26, 0.02, 0xF2F4F8, { roughness: 0.9 }), 0, 0.13, -0.05);
+    add(g, box(0.09, 0.09, 0.012, C.white, { roughness: 0.6 }), 0, 0.14, -0.034);
+    const holes = [-0.02, 0.02].map((s) => add(g, cyl(0.005, 0.004, C.ink, {}, 16), s, 0.14, -0.027));
+    holes.forEach((h) => { h.rotation.x = Math.PI / 2; });
+    label('Rozetka (220 V)', V(0, 0.22, -0.03), { parent: g, minor: true });
+    const tool = add(g, new THREE.Group(), 0, 0, 0);
+    const tip = add(tool, cyl(0.0018, 0.035, C.steel, { metalness: 0.7 }, 8), 0, 0, 0.018); tip.rotation.x = Math.PI / 2;
+    const handle = add(tool, new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.09, 16), new THREE.MeshStandardMaterial({ color: 0xFFD27A, transparent: true, opacity: 0.55, roughness: 0.2 })), 0, 0, 0.08); handle.rotation.x = Math.PI / 2;
+    const neonMat = new THREE.MeshStandardMaterial({ color: 0xFF7A3D, emissive: 0xFF7A3D, emissiveIntensity: 0 });
+    add(tool, new THREE.Mesh(new THREE.SphereGeometry(0.004, 12, 8), neonMat), 0, 0, 0.065);
+    const light = add(tool, new THREE.PointLight(0xFF7A3D, 0, 0.06, 2), 0, 0, 0.065);
+    const tLab = label('Indikator', V(0, 0.035, 0.1), { parent: tool, minor: true });
+    return {
+      group: g,
+      setTool(holeX, inFrac) { tool.position.set(holeX, 0.14, -0.027 + 0.03 + (1 - inFrac) * 0.06); },
+      setGlow(b) { neonMat.emissiveIntensity = 3 * b; light.intensity = 0.03 * b; }
+    };
+  }
+
   return {
     C, V, THREE, mat, box, cyl, sphere, add, group, label, sizeLabels, table, board, BY,
     wire, clearWires, powerSupply, cells, switchK, lamp, resistor, rheostat, meter, stopwatch,
-    coil, compass, barMagnet, stand, dynamometer, electrophore, candle
+    coil, compass, barMagnet, stand, dynamometer, electrophore, candle,
+    neonLamp, voltaCell, wireBoard, capacitor, calorimeter, socketTester, glassMat, world, post
   };
 };
