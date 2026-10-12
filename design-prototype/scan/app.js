@@ -76,7 +76,12 @@
     $('[data-r-subject]').textContent = plan.subjects[0].name;
     $('[data-r-topic]').textContent = m.topic;
     $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Bu mavzu uchun laboratoriya yo‘q';
-    if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = '3D laboratoriyani ochish'; }
+    // One lab with a Build Mode: offer both ways right here (ready lab, or build it yourself)
+    const buildCfg = m.labs.length === 1 && (window.EMPIRA_BUILD || {})[m.labs[0].slug];
+    const buildBtn = $('[data-r-build]');
+    buildBtn.hidden = !buildCfg;
+    if (buildCfg) { buildBtn.href = `../lab/build/index.html?lab=${m.labs[0].slug}`; buildBtn.textContent = buildCfg.label; }
+    if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = buildCfg ? 'Tayyor laboratoriya' : '3D laboratoriyani ochish'; }
     else if (m.labs.length > 1) { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = '3D laboratoriyalarni ko‘rish'; }
     else {
       // No lab for this topic: say so plainly and open the annual plan (lab topics only) at the same chapter

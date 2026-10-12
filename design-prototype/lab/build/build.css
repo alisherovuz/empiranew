@@ -1,0 +1,141 @@
+/* Empira — Build Mode ("Zanjirni o‘zingiz yig‘ing"). Loaded after ../styles.css: same tokens, top bar, stage and panel.
+   Feedback colours follow the brand: Spark Amber = it worked, Signal Coral = alerts only, no green.
+   Motion: short (≤ 450 ms), only on a committed action, none under prefers-reduced-motion. */
+
+:root { --coral-500: #FF6A4D; --coral-50: #FFF1EE; --amber-50: #FFF7E6; --blue-300: #8B96FF; }
+
+/* Phones and tablets: the workspace stays pinned under the top bar while the student picks tools and terminals below,
+   so every placed tool and every wire (and its amber / coral flash) is seen as it happens. */
+@media (max-width: 1023px) {
+  .lab--build { --stage-h: clamp(240px, 40vh, 420px); }
+  .lab--build .stage { position: sticky; top: var(--bar-h); z-index: 5; height: var(--stage-h); box-shadow: 0 1px 0 var(--line); }
+}
+
+/* The build panel is one simple column at every width */
+.lab--build .panel { display: flex; flex-direction: column; }
+.lab--build .panel .block--controls { order: 0; border-top: 1px solid var(--mist); }
+.lab--build .panel .block--task { border-top: 0; }
+.block__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.block__count { font-size: 14px; font-weight: 600; color: var(--ink-500); font-variant-numeric: tabular-nums; }
+.hint { font-size: 14px; line-height: 1.45; font-weight: 500; color: var(--ink-500); margin-bottom: var(--s3); }
+.text-btn { min-height: 44px; font-size: 15px; font-weight: 600; color: var(--blue-500); }
+.text-btn:disabled { color: var(--ink-500); opacity: .5; cursor: default; }
+
+/* ---------- Feedback: one place, one message ---------- */
+.feedback {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  padding: 14px var(--s4);
+  border-radius: var(--r-m);
+  background: var(--mist);
+  border: 1px solid transparent;
+}
+.feedback__icon {
+  flex: none; display: grid; place-items: center;
+  width: 32px; height: 32px; border-radius: var(--r-full);
+  background: var(--white); color: var(--ink-500);
+}
+.feedback__icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.feedback__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 4px; }
+.feedback__title { font-size: 16px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; color: var(--ink-900); }
+.feedback__body { font-size: 15px; line-height: 1.45; font-weight: 500; color: var(--ink-700); }
+.feedback__body:empty { display: none; }
+
+.feedback--ok, .feedback--done { background: var(--amber-50); border-color: var(--amber-500); }
+.feedback--ok .feedback__icon, .feedback--done .feedback__icon { background: var(--amber-500); color: var(--ink-900); }
+.feedback--error { background: var(--coral-50); border-color: var(--coral-500); }
+.feedback--error .feedback__icon { background: var(--coral-500); color: var(--white); }
+.feedback--done { padding: var(--s4); }
+.feedback--done .feedback__title { font-size: 18px; }
+
+.feedback.is-anim .feedback__icon { animation: fb-pop 380ms var(--ease); }
+.feedback--error.is-anim { animation: fb-shake 360ms var(--ease); }
+.feedback--done.is-anim { animation: fb-glow 900ms var(--ease); }
+@keyframes fb-pop { 0% { transform: scale(.55); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes fb-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+@keyframes fb-glow { 0% { box-shadow: 0 0 0 0 rgba(255, 178, 30, .55); } 100% { box-shadow: 0 0 0 14px rgba(255, 178, 30, 0); } }
+
+.build-start { margin-top: var(--s3); width: 100%; }
+
+/* ---------- Tool library: 10 tiles, two per row ---------- */
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.tool {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  min-height: 60px; padding: var(--s2) 10px;
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--r-m);
+  text-align: left;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.tool__icon { flex: none; width: 26px; height: 26px; fill: none; stroke: var(--ink-700); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tool__text { display: flex; flex-direction: column; min-width: 0; }
+.tool__name { font-size: 14px; line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-900); overflow-wrap: break-word; }
+.tool__note { font-size: 13px; line-height: 1.3; font-weight: 500; color: var(--ink-500); }
+.tool__state { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: var(--r-full); display: none; place-items: center; box-shadow: 0 0 0 2px var(--white); }
+.tool__state svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.tool.is-placed { background: var(--blue-50); border-color: var(--blue-500); box-shadow: inset 0 0 0 1px var(--blue-500); cursor: default; }
+.tool.is-placed .tool__icon { stroke: var(--blue-500); }
+.tool.is-placed .tool__state { display: grid; background: var(--blue-500); color: var(--white); }
+.tool.is-wrong { border-color: var(--coral-500); background: var(--coral-50); animation: fb-shake 360ms var(--ease); }
+.tool.is-wrong .tool__state { display: grid; background: var(--coral-500); color: var(--white); }
+.tool.is-ok .tool__state { animation: fb-pop 380ms var(--ease); }
+.tool:disabled:not(.is-placed) { opacity: .5; cursor: default; }
+@media (hover: hover) {
+  .tool:not(.is-placed):not(:disabled):hover { background: var(--blue-50); border-color: var(--blue-500); }
+  .text-btn:not(:disabled):hover { color: var(--blue-600); }
+}
+.tool:not(.is-placed):not(:disabled):active { background: var(--blue-50); border-color: var(--blue-600); }
+
+/* ---------- Terminal chips ---------- */
+.terms { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+.term-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 44px; }
+.term-row__name { font-size: 15px; font-weight: 600; color: var(--ink-700); }
+.term-row__chips { display: flex; gap: var(--s2); }
+.chip {
+  min-width: 48px; height: 44px; padding: 0 var(--s3);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--r-m);
+  font-size: 17px; font-weight: 700; color: var(--ink-900); font-variant-numeric: tabular-nums;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.chip--plus { color: #D93B3F; }
+.chip__wires { font-size: 13px; font-weight: 600; color: var(--blue-500); }
+.chip[aria-pressed="true"] { background: var(--blue-500); border-color: var(--blue-500); color: var(--white); }
+.chip[aria-pressed="true"] .chip__wires { color: var(--white); }
+.chip.is-ok { animation: fb-pop 380ms var(--ease); border-color: var(--amber-500); }
+.chip.is-wrong { animation: fb-shake 360ms var(--ease); border-color: var(--coral-500); }
+@media (hover: hover) { .chip:not([aria-pressed="true"]):hover { background: var(--blue-50); border-color: var(--blue-500); } }
+.build-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s2) var(--s4); margin-top: var(--s3); }
+
+.pill--done { color: var(--ink-900); box-shadow: var(--shadow-float), inset 0 0 0 1.5px var(--amber-500); }
+
+/* ---------- Missing (unknown lab) ---------- */
+.build-missing { max-width: 560px; margin: var(--s7) auto; padding: 0 var(--s4); display: flex; flex-direction: column; gap: var(--s4); }
+.build-missing__title { font-size: 24px; line-height: 1.25; font-weight: 700; letter-spacing: -0.015em; }
+
+/* Desktop: the panel stays narrow; tool tiles keep two columns */
+@media (min-width: 1024px) {
+  .lab--build { grid-template-columns: minmax(0, 1fr) 400px; }
+  .lab--build .panel .block--controls { order: 0; }
+}
+@media (min-width: 1024px) and (max-height: 900px) {
+  .tool { min-height: 52px; }
+  .lab--build .block { padding: 14px 0; }
+}
+
+/* The feedback (and the "O‘lchashni boshlash" button) never scrolls away: whatever the student taps, the answer is in view.
+   Desktop: top of the panel. Phones/tablets: right under the pinned workspace. (Kept last so nothing overrides it.) */
+.lab--build .panel .block--feedback {
+  position: sticky; top: 0; z-index: 4;
+  margin: 0 calc(-1 * var(--pad)); padding: var(--s3) var(--pad);
+  background: var(--white); border-top: 0;
+}
+@media (max-width: 1023px) {
+  .lab--build .panel .block--feedback { top: calc(var(--bar-h) + var(--stage-h)); box-shadow: 0 1px 0 var(--mist); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback.is-anim .feedback__icon, .feedback--error.is-anim, .feedback--done.is-anim,
+  .tool.is-wrong, .tool.is-ok .tool__state, .chip.is-ok, .chip.is-wrong { animation: none !important; }
+}

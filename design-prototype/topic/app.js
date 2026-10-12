@@ -36,7 +36,9 @@
 
   document.title = `${topic.t} — ${plan.grade}-sinf ${subject} — Empira`;
 
-  /* ---------- Lab cards (first lab gets the page's one primary button) ---------- */
+  /* ---------- Lab cards (first lab gets the page's one primary button) ----------
+     Labs with a Build Mode (../lab/build/experiments.js) get two choices: the ready lab, or build it yourself. */
+  const build = window.EMPIRA_BUILD || {};
   const labCards = !data ? '' : data.labs.map((lab, n) => `
     <article class="lab-card">
       <h3 class="lab-card__title">${lab.title}</h3>
@@ -47,8 +49,9 @@
         <p class="question__text">${lab.task}</p>
       </div>
       <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${lab.slug}"${n === 0 ? ' data-main-cta' : ''}>
-        ${n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
+        ${build[lab.slug] ? 'Tayyor laboratoriya' : n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
       </a>
+      ${build[lab.slug] ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${build[lab.slug].label}</a>` : ''}
     </article>`).join('');
 
   /* ---------- Formula panel ---------- */
