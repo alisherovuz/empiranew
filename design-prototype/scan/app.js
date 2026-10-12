@@ -75,10 +75,15 @@
     $('[data-r-class]').textContent = `${plan.grade}-sinf`;
     $('[data-r-subject]').textContent = plan.subjects[0].name;
     $('[data-r-topic]').textContent = m.topic;
-    $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Tez orada';
+    $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Bu mavzu uchun laboratoriya yo‘q';
     if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = '3D laboratoriyani ochish'; }
     else if (m.labs.length > 1) { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = '3D laboratoriyalarni ko‘rish'; }
-    else { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = 'Mavzuni ochish'; }
+    else {
+      // No lab for this topic: say so plainly and open the annual plan (lab topics only) at the same chapter
+      const t = window.EMPIRA_AVAIL && window.EMPIRA_AVAIL.findTopic(m.slug);
+      cta.href = `../class-plan/index.html?sinf=${plan.grade}${t ? `#bob-${t.chapter.n}` : ''}`;
+      cta.textContent = 'Yillik rejani ochish';
+    }
     $('[data-r-other]').href = `../class-plan/index.html?sinf=${plan.grade}`;
   }
 

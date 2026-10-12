@@ -1,32 +1,36 @@
 // Empira — Topic page prototype (S3). Prototype only.
-// ?mavzu=<slug> selects the topic (default: Nyutonning ikkinchi qonuni).
+// ?mavzu=<slug> selects the topic. An unknown slug shows "Mavzu topilmadi" (never a different topic).
+// Previous/next step through topics that have a 3D lab only (../shared/availability.js).
 (function () {
   const plan = window.EMPIRA_PLAN;
   const content = window.EMPIRA_TOPICS;
-
-  const slug = (s) => s.toLowerCase()
-    .replace(/[‘’']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  const avail = window.EMPIRA_AVAIL;
 
   const icon = {
     left: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>',
     right: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
   };
 
-  // Every curriculum topic has a page, in annual-plan order. Previous/next follow this order (no skipping).
-  const pages = plan.chapters.flatMap((c) =>
-    c.topics.map((t) => ({ ...t, slug: slug(t.t), chapter: c })));
-
-  const requested = new URLSearchParams(location.search).get('mavzu') || 'nyutonning-ikkinchi-qonuni';
-  const i = Math.max(0, pages.findIndex((p) => p.slug === requested));
-  const topic = pages[i];
-  const data = topic.lab ? content[topic.slug] : null;
-  const prev = pages[i - 1];
-  const next = pages[i + 1];
-
   const subject = plan.subjects[0].name;
   const planHref = `../class-plan/index.html?sinf=${plan.grade}`;
+
+  // Any curriculum topic can still be opened directly (scanner, old links), so resolve against the full plan
+  const requested = new URLSearchParams(location.search).get('mavzu') || '';
+  const topic = avail.findTopic(requested);
+
+  if (!topic) {
+    document.title = `Mavzu topilmadi — Empira`;
+    document.querySelector('[data-page]').innerHTML = `
+      <h1 class="title">Mavzu topilmadi</h1>
+      <section class="nolab" aria-live="polite">
+        <p class="nolab__text">Bu havola bo‘yicha mavzu topilmadi.</p>
+        <a class="btn btn--secondary btn--large" href="${planHref}">Yillik rejaga qaytish</a>
+      </section>`;
+    return;
+  }
+
+  const data = avail.hasLab(topic) ? content[topic.slug] : null;
+  const { prev, next } = avail.neighbours(topic.slug);
   const chapterHref = `${planHref}#bob-${topic.chapter.n}`;
   const topicHref = (p) => `?mavzu=${p.slug}`;
 
@@ -70,7 +74,7 @@
       <a class="pager__tile pager__tile--${dir}" href="${topicHref(p)}" rel="${dir}">
         <span class="pager__label">${dir === 'prev' ? icon.left + 'Oldingi mavzu' : 'Keyingi mavzu' + icon.right}</span>
         <span class="pager__title">${p.t}</span>
-        <span class="pager__meta">${p.w}-hafta · ${p.lab ? '3D laboratoriya mavjud' : 'Tez orada'}</span>
+        <span class="pager__meta">${p.w}-hafta · 3D laboratoriya mavjud</span>
       </a>`;
   };
 
@@ -87,7 +91,7 @@
 
     ${data ? '' : `
     <section class="nolab" aria-live="polite">
-      <p class="nolab__text">Bu mavzu uchun 3D laboratoriya hali mavjud emas.</p>
+      <p class="nolab__text">Bu mavzu uchun laboratoriya yo‘q.</p>
       <a class="btn btn--secondary btn--large" href="${chapterHref}">Yillik rejaga qaytish</a>
     </section>`}
 

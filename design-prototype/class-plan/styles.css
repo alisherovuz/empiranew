@@ -226,8 +226,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .topic__go { grid-area: go; display: grid; place-items: center; color: var(--ink-500); transition: color var(--t-fast) var(--ease); }
 
-/* Every row is a link. Lab rows keep the stronger title; "Tez orada" rows stay quieter. */
-.tag--soon { background: var(--mist); color: var(--ink-500); }
+/* Every row is a link to a topic that has a 3D lab. */
 /* Phone: this week's row carries both the "Shu hafta" chip and a tag, so the tag gets its own line */
 .topic--now { grid-template-areas: "title title go" "week week go" "tag tag go"; }
 .topic--lab .topic__title { font-weight: 600; color: var(--ink-900); }

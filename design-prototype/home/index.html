@@ -34,11 +34,11 @@
     <!-- B. What Empira is -->
     <section class="intro">
       <h1 class="intro__title">Darslikdagi har bir mavzu — 3D laboratoriya</h1>
-      <p class="intro__meta"><span class="dot" aria-hidden="true"></span>Hozircha: Fizika, 6–11-sinflar</p>
+      <p class="intro__meta"><span class="dot" aria-hidden="true"></span><span data-availability>Hozircha: 8-sinf Fizika</span></p>
     </section>
 
     <!-- E. Continue (returning teachers only; hidden on first visit) -->
-    <a class="continue" href="../topic/index.html?mavzu=om-qonuni" hidden data-continue>
+    <a class="continue" href="../topic/index.html?mavzu=laboratoriya-ishi-om-qonunini-organish" hidden data-continue>
       <span class="continue__text">
         <span class="continue__label">Davom ettirish</span>
         <span class="continue__topic">8-sinf · Fizika › Om qonuni</span>
@@ -87,7 +87,24 @@
     </div>
   </main>
 
+  <script src="../class-plan/data.js"></script>
+  <script src="../topic/content.js"></script>
+  <script src="../shared/availability.js"></script>
   <script>
+    // Only grades that have 3D labs are shown (a grade without labs is not listed at all)
+    (function () {
+      const avail = window.EMPIRA_AVAIL;
+      if (!avail) return;
+      const ready = avail.grades();
+      document.querySelectorAll('.grades .grade').forEach((a) => {
+        const g = Number(new URL(a.href, location.href).searchParams.get('sinf'));
+        if (!ready.includes(g)) a.closest('li').remove();
+      });
+      const subject = window.EMPIRA_PLAN.subjects[0].name;
+      document.querySelector('[data-availability]').textContent =
+        `Hozircha: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subject}`;
+    })();
+
     // Prototype-only: ?davom=1 shows the returning-teacher state
     const q = new URLSearchParams(location.search);
     if (q.get('davom') === '1') {

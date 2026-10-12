@@ -34,15 +34,16 @@ $('[data-back]').href = `../topic/index.html?mavzu=${topic.slug}`;
 $('[data-question]').textContent = info.task;
 $('[data-stage]').setAttribute('aria-label', `3D laboratoriya: ${info.title}`);
 
-/* Next curriculum topic (same order and labels as the Topic page pager) */
+/* Next topic that has a 3D lab (same rule and labels as the Topic page pager) */
 {
-  const next = allTopics[allTopics.findIndex((t) => t.slug === topic.slug) + 1];
+  const next = window.EMPIRA_AVAIL ? window.EMPIRA_AVAIL.neighbours(topic.slug).next
+    : allTopics[allTopics.findIndex((t) => t.slug === topic.slug) + 1];
   if (next) {
     $('[data-next]').innerHTML = `
       <a class="next-link" href="../topic/index.html?mavzu=${next.slug}">
         <span class="next-link__label">Keyingi mavzu<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
         <span class="next-link__title">${next.t}</span>
-        <span class="next-link__meta">${next.w}-hafta · ${next.lab ? '3D laboratoriya mavjud' : 'Tez orada'}</span>
+        <span class="next-link__meta">${next.w}-hafta · 3D laboratoriya mavjud</span>
       </a>`;
     $('[data-next]').hidden = false;
   }
