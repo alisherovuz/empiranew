@@ -38,7 +38,7 @@
 
   /* ---------- Lab cards (first lab gets the page's one primary button) ----------
      Labs with a Build Mode (../lab/build/experiments.js) get two choices: the ready lab, or build it yourself. */
-  const build = window.EMPIRA_BUILD || {};
+  const buildFor = window.EMPIRA_BUILD_FOR || (() => null);
   // Best result in Build Mode on this device (1–3 stars), so students see what they earned and can try for 3
   const starsFor = (labSlug) => {
     let n = 0;
@@ -55,9 +55,9 @@
         <p class="question__text">${lab.task}</p>
       </div>
       <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${lab.slug}"${n === 0 ? ' data-main-cta' : ''}>
-        ${build[lab.slug] ? 'Tayyor laboratoriya' : n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
+        ${buildFor(lab.slug) ? 'Tayyor laboratoriya' : n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
       </a>
-      ${build[lab.slug] ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${build[lab.slug].label}${starsFor(lab.slug)}</a>` : ''}
+      ${buildFor(lab.slug) ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${buildFor(lab.slug).label}${starsFor(lab.slug)}</a>` : ''}
     </article>`).join('');
 
   /* ---------- Formula panel ---------- */

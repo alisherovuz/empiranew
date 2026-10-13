@@ -1,4 +1,4 @@
-// node --test tests/  — Build Mode circuit checker (Om qonuni)
+// node --test tests/*.cjs  — Build Mode circuit checker (Om qonuni)
 const test = require('node:test');
 const assert = require('node:assert');
 require('../design-prototype/lab/build/circuit.js');

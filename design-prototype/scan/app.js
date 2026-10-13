@@ -77,7 +77,7 @@
     $('[data-r-topic]').textContent = m.topic;
     $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Bu mavzu uchun laboratoriya yo‘q';
     // One lab with a Build Mode: offer both ways right here (ready lab, or build it yourself)
-    const buildCfg = m.labs.length === 1 && (window.EMPIRA_BUILD || {})[m.labs[0].slug];
+    const buildCfg = m.labs.length === 1 && window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(m.labs[0].slug);
     const buildBtn = $('[data-r-build]');
     buildBtn.hidden = !buildCfg;
     if (buildCfg) { buildBtn.href = `../lab/build/index.html?lab=${m.labs[0].slug}`; buildBtn.textContent = buildCfg.label; }

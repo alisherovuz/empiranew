@@ -145,7 +145,17 @@
       return { status: 'error', code: 'generic', message: M.generic };
     }
 
-    return { check, progress, required, terminals, validCount: valid.length };
+    // Next connection to make (for the "Maslahat" button), from a correct circuit that fits the wires so far
+    function hint(wires) {
+      const nets = valid.find((n) => fits(n, wires)) || valid[0];
+      const f = groups(wires);
+      for (const net of nets) {
+        for (const a of net) { const b = net.find((t) => t !== a && f(t) !== f(a)); if (b) return [a, b]; }
+      }
+      return null;
+    }
+
+    return { check, progress, required, terminals, hint, validCount: valid.length };
   }
 
   root.EMPIRA_CIRCUIT = { create };

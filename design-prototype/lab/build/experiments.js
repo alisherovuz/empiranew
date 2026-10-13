@@ -21,6 +21,22 @@
     magnet: '<path d="M6 4v8a6 6 0 0 0 12 0V4"/><path d="M6 4h3v8a3 3 0 0 0 6 0V4h3"/><path d="M6 8h3"/><path d="M15 8h3"/>'
   };
 
+  // Every other 8-sinf lab gets Build Mode automatically from its ready lab (auto.js + netcheck.js).
+  // wired: the student also connects the wires; tools: the student picks the right equipment, then experiments.
+  const WIRED = ['elektr-zanjir', 'reostat', 'tok-manbalari', 'ketma-ket-ulash', 'parallel-ulash', 'lampochka-quvvati',
+    'elektromagnit', 'elektr-toki-neon', 'volta-elementi', 'kuchlanish-olchash', 'tok-kuchi-olchash', 'qarshilik-sim',
+    'potensiometr', 'tok-va-qarshilik', 'ketma-ket-lampalar', 'parallel-lampalar', 'kondensator', 'joul-lens', 'ersted',
+    'amper', 'tokli-ramka', 'elektromagnit-kuchi', 'elektr-dvigatel', 'metall-elektronlar', 'suyuqlik-otkazuvchanligi',
+    'elektroliz', 'faradey-ikkinchi', 'galvanostegiya', 'vakuum-diod', 'gaz-ionlash', 'razryad-turlari'];
+  const TOOLS_ONLY = ['elektr-shamoli', 'magnitlar-tasiri', 'lampochka-energiyasi', 'faza-indikator', 'magnit-kuch-chiziqlari',
+    'yer-magnit-maydoni', 'elektrlanish-turlari', 'elektroskop', 'kulon-qonuni', 'chaqmoq-masofasi', 'elektr-maydon-chiziqlari'];
+  root.EMPIRA_BUILD_AUTO_LABS = Object.fromEntries([
+    ...WIRED.map((id) => [id, { label: 'Zanjirni o‘zingiz yig‘ing', wired: true }]),
+    ...TOOLS_ONLY.map((id) => [id, { label: 'Laboratoriyani o‘zingiz yig‘ing', wired: false }])
+  ]);
+  // Which Build Mode a lab has (hand-made config wins), or null
+  root.EMPIRA_BUILD_FOR = (labId) => (root.EMPIRA_BUILD || {})[labId] || root.EMPIRA_BUILD_AUTO_LABS[labId] || null;
+
   root.EMPIRA_BUILD = {
     'om-qonuni': {
       label: 'Zanjirni o‘zingiz yig‘ing',

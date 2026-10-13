@@ -106,7 +106,8 @@
 .chip.is-ok { animation: fb-pop 380ms var(--ease); border-color: var(--amber-500); }
 .chip.is-wrong { animation: fb-shake 360ms var(--ease); border-color: var(--coral-500); }
 @media (hover: hover) { .chip:not([aria-pressed="true"]):hover { background: var(--blue-50); border-color: var(--blue-500); } }
-.build-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s2) var(--s4); margin-top: var(--s3); }
+.build-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s1) var(--s4); margin-top: var(--s3); }
+.build-actions [data-hint-btn] { flex-basis: 100%; text-align: left; }
 
 .pill--done { color: var(--ink-900); box-shadow: var(--shadow-float), inset 0 0 0 1.5px var(--amber-500); }
 
