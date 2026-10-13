@@ -83,6 +83,65 @@ const ui = {
 
 let scene3d = null; // filled in when three.js loads
 
+/* =====================================================================
+   Live feedback: every action shows what happened (same look, sounds and cards as Build Mode, from fx.js)
+   ===================================================================== */
+const FX = window.EMPIRA_FX;
+const FB_ICON = {
+  ok: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  done: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><path d="M12 11v6"/><path d="M12 7v.5"/></svg>'
+};
+function feedback(kind, title, text) {
+  const el = $('[data-feedback]'); if (!el) return;
+  el.className = `feedback feedback--${kind}`;
+  $('[data-fb-icon]').innerHTML = FB_ICON[kind];
+  $('[data-fb-title]').textContent = title;
+  $('[data-fb-text]').textContent = text || '';
+  if (kind !== 'info') { void el.offsetWidth; el.classList.add('is-anim'); }
+}
+const PRAISE = ['O‘lchandi!', 'Zo‘r!', 'Ajoyib!', 'Barakalla!', 'Kuzating!'];
+let praiseI = 0;
+const praise = () => PRAISE[praiseI++ % PRAISE.length];
+const num = (t) => { const m = String(t).replace(',', '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+const pillsOf = (v, c, runs) => L.readouts(v, c, true, runs).map(([k, val, key]) => ({ k, v: String(val), key: !!key }));
+// "I: 20 mA → 30 mA ↑" for every reading that changed since the previous measurement
+function changes(prevRun, nowRun, runs) {
+  const before = pillsOf(prevRun, prevRun, runs.slice(0, -1)), after = pillsOf(nowRun, nowRun, runs);
+  return after.map((p) => {
+    const b = before.find((x) => x.k === p.k);
+    if (!b || b.v === p.v || p.v === '—' || b.v === '—') return null;
+    const x = num(b.v), y = num(p.v);
+    const arrow = x !== null && y !== null && x !== y ? (y > x ? ' ↑' : ' ↓') : '';
+    return { text: `${p.k}: ${b.v} → ${p.v}${arrow}`, key: p.key };
+  }).filter(Boolean).sort((a, b) => b.key - a.key);
+}
+const stepsDone = () => L.steps.map((st) => !!st.done(state));
+let lastPills = {};
+let changeTimer = null;
+function announceControl(ctl) {
+  // a slider sends many events: speak once it settles
+  clearTimeout(changeTimer);
+  changeTimer = setTimeout(() => {
+    const v = values[ctl.key];
+    const text = ctl.type === 'choice' ? (ctl.options.find((o) => String(o.v) === String(v)) || {}).label : ctl.text ? ctl.text(v) : `${fmt(v, ctl.d)} ${ctl.unit}`;
+    feedback('info', `${ctl.label}: ${text}`, `«${L.run[0]}» tugmasini bosing va natija qanday o‘zgarishini kuzating.`);
+  }, 250);
+}
+let finaleShown = false;
+function finale() {
+  const build = window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(labId);
+  const next = window.EMPIRA_AVAIL ? window.EMPIRA_AVAIL.neighbours(topic.slug).next : null;
+  FX.Sound.play('win'); FX.confetti(110);
+  FX.coach({
+    kind: 'done', step: 'Barcha bosqichlar bajarildi', title: 'Tajriba bajarildi!',
+    text: `Tajriba savoli: «${info.task}» O‘lchovlaringizga qarab javob bering.`,
+    go: build ? build.label : next ? 'Keyingi mavzu' : 'Yillik rejaga qaytish',
+    onGo: () => { location.href = build ? `build/index.html?lab=${labId}` : next ? `../topic/index.html?mavzu=${next.slug}` : `../class-plan/index.html?sinf=${plan.grade}`; },
+    close: 'Shu yerda qolish'
+  });
+}
+
 function paintRange(input) {
   const pct = ((input.value - input.min) / (input.max - input.min)) * 100;
   input.style.setProperty('--fill', `${pct}%`);
@@ -97,8 +156,12 @@ function render() {
     $(`[data-val="${ctl.key}"]`).textContent = ctl.text ? ctl.text(values[ctl.key]) : `${fmt(values[ctl.key], ctl.d)} ${ctl.unit}`;
   });
   ui.choices.forEach((b) => b.setAttribute('aria-checked', String(String(values[b.dataset.choice]) === b.dataset.v)));
-  ui.readouts.innerHTML = L.readouts(values, c, done, state.runs).map(([k, v, key]) =>
-    `<span class="pill${key ? ' pill--key' : ''}"><span class="pill__k">${k}</span><span>${v}</span></span>`).join('');
+  const pills = L.readouts(values, c, done, state.runs);
+  ui.readouts.innerHTML = pills.map(([k, v, key]) => {
+    const changed = k in lastPills && lastPills[k] !== String(v) && String(v) !== '—';
+    return `<span class="pill${key ? ' pill--key' : ''}${changed ? ' is-changed' : ''}"><span class="pill__k">${k}</span><span>${v}</span></span>`;
+  }).join('');
+  lastPills = Object.fromEntries(pills.map(([k, v]) => [k, String(v)]));
 
   const doneSteps = L.steps.map((s) => !!s.done(state));
   const current = doneSteps.indexOf(false);
@@ -113,8 +176,10 @@ function render() {
   ui.runsEmpty.hidden = ran;
   ui.runs.hidden = !ran;
   $('[data-runs-block]').hidden = !ran;          // measurements appear with the first measurement
-  ui.runsBody.innerHTML = state.runs.slice(-5).map((r) =>
-    `<tr>${L.row(r, r).map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('');
+  const shown = state.runs.slice(-5);
+  ui.runsBody.innerHTML = shown.map((r, i) =>
+    `<tr${i === shown.length - 1 && state.justMeasured ? ' class="is-new"' : ''}>${L.row(r, r).map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('');
+  state.justMeasured = false;
 
   const running = state.phase === 'running';
   ui.run.disabled = running;
@@ -133,12 +198,14 @@ ui.inputs.forEach((input) => input.addEventListener('input', () => {
   values[input.dataset.ctl] = +input.value;
   state.touched.add(input.dataset.ctl);
   reset();
+  announceControl(L.controls.find((x) => x.key === input.dataset.ctl));
 }));
 ui.choices.forEach((b) => b.addEventListener('click', () => {
   const ctl = L.controls.find((x) => x.key === b.dataset.choice);
   values[ctl.key] = typeof ctl.value === 'number' ? +b.dataset.v : b.dataset.v;
   state.touched.add(ctl.key);
   reset();
+  announceControl(ctl);
 }));
 
 ui.run.addEventListener('click', () => {
@@ -146,14 +213,37 @@ ui.run.addEventListener('click', () => {
   state.t = 0;
   state.dur = L.duration ? L.duration(values, calc()) : 1;
   state.phase = 'running';
+  flowRefresh();
   render();
 });
 
 function finish() {
+  const before = stepsDone();
   state.phase = 'done';
   state.runs.push({ ...values, ...calc() });
+  state.justMeasured = true;
   scene3d?.progress(1, values, calc());
+  const after = stepsDone();
+  const fresh = after.map((d, i) => d && !before[i] ? i : -1).filter((i) => i >= 0);
+  const runs = state.runs, now = runs[runs.length - 1];
+  const diff = runs.length > 1 ? changes(runs[runs.length - 2], now, runs) : [];
+  const keys = pillsOf(now, now, runs).filter((p) => p.key && p.v !== '—').map((p) => `${p.k} = ${p.v}`);
+  const what = diff.length ? diff.slice(0, 3).map((d) => d.text).join(' · ') : keys.join(' · ');
   render();
+  if (after.every(Boolean) && !finaleShown) {
+    finaleShown = true;
+    feedback('done', 'Tajriba bajarildi!', what);
+    setTimeout(finale, FX.reduceMotion ? 0 : 700);
+  } else if (fresh.length) {
+    FX.Sound.play('step');
+    feedback('ok', `${fresh[fresh.length - 1] + 1}-bosqich bajarildi!`, what);
+    fresh.forEach((i) => { const li = ui.steps[i]; li.classList.remove('is-just-done'); void li.offsetWidth; li.classList.add('is-just-done'); });
+  } else if (runs.length > 1 && !diff.length) {
+    feedback('info', 'Natija o‘zgarmadi', 'Boshqaruvni o‘zgartirib, yana o‘lchab ko‘ring.');
+  } else {
+    FX.Sound.play('ok');
+    feedback('ok', praise(), what);
+  }
 }
 
 function tick(dt) {
@@ -172,6 +262,19 @@ $('[data-fullscreen]').addEventListener('click', () => {
 /* =====================================================================
    3D: shared stage (table, light, camera, labels) + the lab's own scene from kit.js
    ===================================================================== */
+/* ---------- Current flow: amber dots run along the wires while current flows (faster with more current) ---------- */
+let rec = null, flow = null, Iref = 0;
+function flowRefresh() { if (flow && rec) flow.set(FX.labRoutes(rec, window.EMPIRA_BUILD_AUTO.TYPES)); }
+function flowTick(dt) {
+  if (!flow || !flow.size) return;
+  const c = calc();
+  const I = typeof c.I === 'number' ? c.I : null;
+  const flowing = (state.phase === 'done' || (state.phase === 'running' && state.t / state.dur > 0.45)) && I !== 0;
+  if (I > 0 && !Iref) Iref = I;
+  const speed = I && Iref ? 0.35 + 0.45 * Math.min(2, I / Iref) : 0.55;
+  flow.update(dt, flowing, speed);
+}
+
 async function build3D() {
   if (!window.EMPIRA_THREE) throw new Error('three.js bundle missing');
   const { THREE, OrbitControls } = window.EMPIRA_THREE;   // local bundle: no internet needed
@@ -201,7 +304,11 @@ async function build3D() {
 
   const kit = window.EMPIRA_KIT(THREE, scene);
   kit.table();
-  const api = L.build(kit, THREE);
+  // Recording the lab (build/auto.js) changes nothing in it; it only tells where its wires run, for the current-flow dots
+  const A = window.EMPIRA_BUILD_AUTO;
+  rec = A ? A.analyze(L, kit, THREE, scene, values, calc()) : null;
+  const api = rec ? rec.api : L.build(kit, THREE);
+  flow = FX.makeFlow(THREE, scene);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
@@ -241,6 +348,7 @@ async function build3D() {
     const dt = Math.min(clock.getDelta(), 0.05);
     tick(dt);
     api.animate?.(dt, state.phase);
+    flowTick(dt);
     controls.update();
     kit.sizeLabels(camera, viewH);
     renderer.render(scene, camera);
@@ -254,6 +362,11 @@ async function build3D() {
    Boot
    ===================================================================== */
 render();
+feedback('info', 'Tajribani boshlang', `Boshqaruvni tanlab, «${L.run[0]}» tugmasini bosing. Har bir o‘lchovdan keyin nima o‘zgarganini shu yerda ko‘rasiz.`);
+{
+  const btn = $('[data-sound]');
+  if (btn) { btn.setAttribute('aria-pressed', String(FX.Sound.on)); btn.addEventListener('click', () => btn.setAttribute('aria-pressed', String(FX.Sound.toggle()))); }
+}
 
 build3D().then((api) => {
   scene3d = api;
