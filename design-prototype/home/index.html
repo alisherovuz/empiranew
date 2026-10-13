@@ -91,18 +91,22 @@
   <script src="../topic/content.js"></script>
   <script src="../shared/availability.js"></script>
   <script>
-    // Only grades that have 3D labs are shown (a grade without labs is not listed at all)
+    // Every grade is listed. Grades whose labs are not ready yet carry a quiet "Tayyorlanmoqda" note
+    // and open an honest page that points to the grades that are ready.
     (function () {
       const avail = window.EMPIRA_AVAIL;
       if (!avail) return;
       const ready = avail.grades();
       document.querySelectorAll('.grades .grade').forEach((a) => {
         const g = Number(new URL(a.href, location.href).searchParams.get('sinf'));
-        if (!ready.includes(g)) a.closest('li').remove();
+        if (ready.includes(g)) return;
+        a.classList.add('grade--soon');
+        a.insertAdjacentHTML('beforeend', '<span class="grade__note">Tayyorlanmoqda</span>');
+        a.setAttribute('aria-label', `${g}-sinf, laboratoriyalar tayyorlanmoqda`);
       });
       const subject = window.EMPIRA_PLAN.subjects[0].name;
       document.querySelector('[data-availability]').textContent =
-        `Hozircha: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subject}`;
+        `Laboratoriyalar tayyor: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subject}`;
     })();
 
     // Prototype-only: ?davom=1 shows the returning-teacher state

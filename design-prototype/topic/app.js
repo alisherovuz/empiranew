@@ -39,6 +39,12 @@
   /* ---------- Lab cards (first lab gets the page's one primary button) ----------
      Labs with a Build Mode (../lab/build/experiments.js) get two choices: the ready lab, or build it yourself. */
   const build = window.EMPIRA_BUILD || {};
+  // Best result in Build Mode on this device (1–3 stars), so students see what they earned and can try for 3
+  const starsFor = (labSlug) => {
+    let n = 0;
+    try { n = Number(localStorage.getItem(`empira-build-best:${labSlug}`)) || 0; } catch (e) { /* storage blocked */ }
+    return n ? `<span class="lab-card__stars" aria-label="Eng yaxshi natija: ${n} ta yulduz">${'★'.repeat(n)}${'☆'.repeat(3 - n)}</span>` : '';
+  };
   const labCards = !data ? '' : data.labs.map((lab, n) => `
     <article class="lab-card">
       <h3 class="lab-card__title">${lab.title}</h3>
@@ -51,7 +57,7 @@
       <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${lab.slug}"${n === 0 ? ' data-main-cta' : ''}>
         ${build[lab.slug] ? 'Tayyor laboratoriya' : n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
       </a>
-      ${build[lab.slug] ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${build[lab.slug].label}</a>` : ''}
+      ${build[lab.slug] ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${build[lab.slug].label}${starsFor(lab.slug)}</a>` : ''}
     </article>`).join('');
 
   /* ---------- Formula panel ---------- */

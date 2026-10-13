@@ -45,6 +45,11 @@
         series: [{ id: 'K' }, { id: 'mA', polar: true }, { id: 'R' }],
         across: [{ id: 'V', polar: true, over: 'R' }]
       },
+      // Shown when all measurements are done (what the student just proved)
+      finale: (runs) => {
+        const avg = runs.reduce((a, r) => a + r.R, 0) / runs.length;
+        return `Rₒ‘ᵣₜ = ${fmt(avg, 0)} Ω. Kuchlanish necha marta oshsa, tok kuchi ham shuncha marta oshdi, qarshilik esa o‘zgarmadi. Bu Om qonuni!`;
+      },
       // Measurement on the student's own circuit: values come from EMPIRA_LABS['om-qonuni'].compute
       instruments: {
         update(o, v) { o.ps.set(v.U); o.K.set(false); o.mA.set(0, 'mA'); o.V.set(0, 'V'); },

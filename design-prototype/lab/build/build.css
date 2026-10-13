@@ -139,3 +139,115 @@
   .feedback.is-anim .feedback__icon, .feedback--error.is-anim, .feedback--done.is-anim,
   .tool.is-wrong, .tool.is-ok .tool__state, .chip.is-ok, .chip.is-wrong { animation: none !important; }
 }
+
+/* =====================================================================
+   Step bar on the workspace: 1 Asboblar → 2 Ulash → 3 O‘lchash
+   ===================================================================== */
+.stepbar { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.stepbar__item {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  height: 36px; padding: 0 var(--s3) 0 6px;
+  background: var(--white); border-radius: var(--r-full); box-shadow: var(--shadow-float);
+  font-size: 14px; font-weight: 600; color: var(--ink-500); white-space: nowrap;
+}
+.stepbar__n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-full); background: var(--mist); color: var(--ink-500); font-size: 13px; font-weight: 700; }
+.stepbar__n svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.stepbar__count { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-900); }
+.stepbar__item.is-current { color: var(--ink-900); box-shadow: var(--shadow-float), inset 0 0 0 2px var(--blue-500); }
+.stepbar__item.is-current .stepbar__n { background: var(--blue-500); color: var(--white); }
+.stepbar__item.is-done .stepbar__n { background: var(--amber-500); color: var(--ink-900); }
+@media (max-width: 420px) { .stepbar__item { height: 32px; font-size: 13px; padding-right: 10px; } .stepbar__n { width: 22px; height: 22px; } }
+
+/* Guide glow: "the tools are here" (after the first card), "start here" chip */
+.block--tools.is-guide .tools { border-radius: var(--r-m); animation: guide 1.6s ease-in-out infinite; }
+.chip.is-guide { animation: guide 1.6s ease-in-out infinite; border-color: var(--blue-500); }
+@keyframes guide { 0%, 100% { box-shadow: 0 0 0 0 rgba(59, 76, 255, .0); } 50% { box-shadow: 0 0 0 6px rgba(59, 76, 255, .28); } }
+
+/* Sound toggle in the top bar */
+.labbar__sound { margin-left: auto; }
+.labbar__sound + .labbar__fs { margin-left: 0; }
+.labbar__sound .icon--off, .labbar__sound[aria-pressed="false"] .icon--on { display: none; }
+.labbar__sound[aria-pressed="false"] .icon--off { display: block; }
+
+/* =====================================================================
+   Coach cards: the big moments
+   ===================================================================== */
+.coach {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid; place-items: center; padding: var(--s4);
+  background: rgba(11, 16, 38, .38);
+  opacity: 0; transition: opacity 220ms var(--ease);
+}
+.coach.is-open { opacity: 1; }
+.coach__card {
+  width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow: auto;
+  padding: var(--s6) var(--s5) var(--s5);
+  background: var(--white); border-radius: 24px; box-shadow: 0 24px 64px rgba(11, 16, 38, .28);
+  text-align: center;
+  transform: translateY(16px) scale(.94); transition: transform 360ms cubic-bezier(.2, 1.4, .4, 1);
+}
+.coach.is-open .coach__card { transform: none; }
+.coach__step { margin-top: var(--s4); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--blue-500); }
+.coach__step:empty { display: none; }
+.coach__title { margin-top: var(--s2); font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; color: var(--ink-900); }
+.coach__text { margin-top: var(--s3); font-size: 17px; line-height: 1.5; font-weight: 500; color: var(--ink-700); }
+.coach__meta { margin-top: var(--s3); font-size: 14px; font-weight: 600; color: var(--ink-500); }
+.coach__meta:empty { display: none; }
+.coach__plan { margin: var(--s4) auto 0; padding: 0; list-style: none; display: grid; gap: var(--s2); max-width: 300px; text-align: left; }
+.coach__plan li { display: flex; align-items: center; gap: var(--s3); font-size: 16px; font-weight: 600; color: var(--ink-700); }
+.coach__plan li span { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: var(--r-full); background: var(--blue-50); color: var(--blue-500); font-weight: 700; }
+.coach__plan li:first-child { color: var(--ink-900); }
+.coach__plan li:first-child span { background: var(--blue-500); color: var(--white); }
+.coach__actions { margin-top: var(--s5); display: flex; flex-direction: column; align-items: stretch; gap: var(--s1); }
+.coach__actions .btn { width: 100%; }
+
+/* Art: a circle with a picture inside, per moment */
+.coach__art { position: relative; width: 112px; height: 112px; margin: 0 auto; }
+.coach__art svg { width: 100%; height: 100%; overflow: visible; }
+.art-ring { fill: var(--blue-50); }
+.coach[data-kind="win"] .art-ring, .coach[data-kind="done"] .art-ring { fill: var(--amber-500); }
+.art-ink { fill: none; stroke: var(--blue-500); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.coach[data-kind="win"] .art-ink, .coach[data-kind="done"] .art-ink { stroke: var(--ink-900); stroke-width: 6; }
+.art-dot { fill: var(--white); stroke: var(--blue-500); stroke-width: 3; }
+.art-plus { fill: #E5484D; }
+.art-wire { fill: none; stroke: var(--blue-500); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 80; stroke-dashoffset: 80; animation: draw-wire 2.4s ease-in-out infinite; }
+.art-finger { fill: var(--amber-500); opacity: .9; animation: tap-finger 2.4s ease-in-out infinite; }
+@keyframes draw-wire { 0%, 15% { stroke-dashoffset: 80; } 55%, 85% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes tap-finger { 0% { transform: translate(-22px, 0) scale(1); } 10% { transform: translate(-22px, 0) scale(.75); } 15% { transform: translate(-22px, 0) scale(1); } 55% { transform: translate(22px, 0) scale(1); } 62% { transform: translate(22px, 0) scale(.75); } 70%, 100% { transform: translate(22px, 0) scale(1); } }
+.art-arrow { fill: none; stroke: var(--blue-500); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; animation: nudge 1.2s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(0, 6px); } }
+.art-check { stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw-check 520ms 180ms cubic-bezier(.6, 0, .2, 1) forwards; }
+@keyframes draw-check { to { stroke-dashoffset: 0; } }
+.art-rays line { stroke: var(--amber-500); stroke-width: 4; stroke-linecap: round; transform-origin: 56px 56px; animation: rays 900ms ease-out both; }
+@keyframes rays { 0% { opacity: 0; transform: scale(.5); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.25); } }
+.coach.is-open .coach__art .art-pop { animation: art-pop 520ms cubic-bezier(.2, 1.6, .4, 1) both; transform-origin: 56px 56px; }
+@keyframes art-pop { 0% { transform: scale(.4); } 100% { transform: scale(1); } }
+
+/* Stars: earned one by one */
+.stars { margin-top: var(--s4); display: flex; justify-content: center; gap: var(--s2); }
+.star { width: 44px; height: 44px; }
+.star path { fill: var(--mist); stroke: var(--line); stroke-width: 1.5; stroke-linejoin: round; }
+.star.is-on path { fill: var(--amber-500); stroke: #E89A00; }
+.coach.is-open .star.is-on { animation: star-in 520ms cubic-bezier(.2, 1.6, .4, 1) both; }
+.coach.is-open .star:nth-child(1) { animation-delay: 300ms; }
+.coach.is-open .star:nth-child(2) { animation-delay: 480ms; }
+.coach.is-open .star:nth-child(3) { animation-delay: 660ms; }
+@keyframes star-in { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
+.coach__badge { display: inline-block; margin-top: var(--s3); padding: 4px 12px; border-radius: var(--r-full); background: var(--amber-50); color: var(--ink-900); font-size: 13px; font-weight: 700; box-shadow: inset 0 0 0 1px var(--amber-500); }
+
+.confetti { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 50; pointer-events: none; }
+
+@media (max-width: 639px) {
+  .coach { align-items: end; padding: var(--s3); }
+  .coach__card { padding: var(--s5) var(--s4) var(--s4); border-radius: 24px; }
+  .coach__title { font-size: 24px; }
+  .coach__text { font-size: 16px; }
+  .coach__art { width: 96px; height: 96px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach, .coach__card { transition: none !important; }
+  .art-wire, .art-finger, .art-arrow, .art-rays line, .art-check, .star, .coach__art .art-pop,
+  .block--tools.is-guide .tools, .chip.is-guide { animation: none !important; }
+  .art-wire, .art-check { stroke-dashoffset: 0; }
+}

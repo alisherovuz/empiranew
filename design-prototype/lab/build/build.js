@@ -58,6 +58,8 @@ const state = {
   wires: [],                 // accepted wires [[tid, tid]]
   pending: null,             // first terminal of a wire being made
   hover: null,
+  guide: null,               // terminal that pulses "start here" after the step-2 card
+  mistakes: 0, startedAt: 0, finaleShown: false,
   // measurement (same shape as the ready lab engine)
   values: Object.fromEntries(L.controls.map((c) => [c.key, c.value])),
   runs: [], touched: new Set(), mphase: 'ready', t: 0, dur: 1
@@ -92,6 +94,168 @@ function flashEl(el, cls) {
 }
 
 /* =====================================================================
+   Sound: short, soft tones made in the browser (no files). Toggle in the top bar, remembered on this device.
+   ===================================================================== */
+const Sound = (() => {
+  let ctx = null, on = true;
+  try { on = localStorage.getItem('empira-sound') !== 'off'; } catch (e) { /* storage blocked: keep default */ }
+  function tone(freq, t0, dur, type = 'sine', vol = 0.12) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0 + dur + 0.03);
+  }
+  function play(kind) {
+    if (!on) return;
+    try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) { return; }
+    const t = ctx.currentTime;
+    if (kind === 'ok') { tone(660, t, 0.12); tone(990, t + 0.07, 0.18); }
+    else if (kind === 'error') { tone(233, t, 0.16, 'triangle', 0.1); tone(196, t + 0.12, 0.24, 'triangle', 0.1); }
+    else if (kind === 'step') { [523, 659, 784].forEach((f, i) => tone(f, t + i * 0.09, 0.2)); }
+    else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * 0.11, 0.3, 'sine', 0.14)); tone(1319, t + 0.46, 0.6, 'sine', 0.09); tone(1568, t + 0.52, 0.6, 'sine', 0.06); }
+  }
+  return { play, get on() { return on; }, toggle() { on = !on; try { localStorage.setItem('empira-sound', on ? 'on' : 'off'); } catch (e) { /* ignore */ } return on; } };
+})();
+const soundBtn = $('[data-sound]');
+soundBtn.setAttribute('aria-pressed', String(Sound.on));
+soundBtn.addEventListener('click', () => { soundBtn.setAttribute('aria-pressed', String(Sound.toggle())); });
+
+/* ---------- Confetti in brand colours (skipped under reduced motion) ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function confetti(amount = 150) {
+  if (reduceMotion) return;
+  const c = $('[data-confetti]'), g = c.getContext('2d'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = c.width = innerWidth * dpr, H = c.height = innerHeight * dpr;
+  c.hidden = false;
+  const cols = ['#3B4CFF', '#FFB21E', '#8B96FF', '#FFB21E', '#0B1026', '#FFFFFF'];
+  const ps = Array.from({ length: amount }, (_, i) => ({
+    x: W * (0.5 + (Math.random() - 0.5) * 0.3), y: H * 0.45,
+    vx: (Math.random() - 0.5) * W * 0.022, vy: -H * (0.012 + Math.random() * 0.016),
+    s: (6 + Math.random() * 8) * dpr, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.35, c: cols[i % cols.length], round: i % 4 === 0
+  }));
+  const t0 = performance.now();
+  (function frame(now) {
+    const t = (now - t0) / 1000;
+    g.clearRect(0, 0, W, H);
+    ps.forEach((p) => {
+      p.vy += H * 0.00055; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.rot); g.globalAlpha = Math.max(0, Math.min(1, 2.6 - t));
+      g.fillStyle = p.c; g.strokeStyle = 'rgba(11,16,38,.15)';
+      if (p.round) { g.beginPath(); g.arc(0, 0, p.s / 3, 0, Math.PI * 2); g.fill(); } else { g.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); }
+      g.restore();
+    });
+    if (t < 2.6) requestAnimationFrame(frame); else { g.clearRect(0, 0, W, H); c.hidden = true; }
+  })(t0);
+}
+
+/* ---------- Coach cards: the big, clear moments (start, step 2, win, experiment done) ---------- */
+const ART = {
+  intro: `<svg viewBox="0 0 112 112"><g class="art-pop"><circle class="art-ring" cx="56" cy="56" r="56"/>
+    <rect class="art-ink" x="30" y="34" width="22" height="18" rx="4"/><rect class="art-ink" x="60" y="34" width="22" height="18" rx="4"/>
+    <rect class="art-ink" x="30" y="60" width="22" height="18" rx="4"/><rect class="art-ink" x="60" y="60" width="22" height="18" rx="4"/></g>
+    <path class="art-arrow" d="M56 88v14M49 96l7 7 7-7"/></svg>`,
+  connect: `<svg viewBox="0 0 112 112"><circle class="art-ring" cx="56" cy="56" r="56"/>
+    <rect class="art-ink" x="18" y="44" width="24" height="24" rx="5"/><rect class="art-ink" x="70" y="44" width="24" height="24" rx="5"/>
+    <path class="art-wire" d="M34 50 C 44 26, 68 26, 78 50"/>
+    <circle class="art-dot" cx="34" cy="50" r="5"/><circle class="art-plus" cx="34" cy="50" r="2.5"/><circle class="art-dot" cx="78" cy="50" r="5"/>
+    <g transform="translate(56 82)"><circle class="art-finger" r="9"/></g></svg>`,
+  win: `<svg viewBox="0 0 112 112"><g class="art-rays">${[0, 45, 90, 135, 180, 225, 270, 315].map((a) =>
+    `<line x1="56" y1="4" x2="56" y2="-8" transform="rotate(${a} 56 56)"/>`).join('')}</g>
+    <g class="art-pop"><circle class="art-ring" cx="56" cy="56" r="50"/><path class="art-ink art-check" d="M34 58l15 15 30-32"/></g></svg>`,
+  done: `<svg viewBox="0 0 112 112"><g class="art-rays">${[0, 45, 90, 135, 180, 225, 270, 315].map((a) =>
+    `<line x1="56" y1="4" x2="56" y2="-8" transform="rotate(${a} 56 56)"/>`).join('')}</g>
+    <g class="art-pop"><circle class="art-ring" cx="56" cy="56" r="50"/>
+    <path class="art-ink" d="M44 32h24M48 32v18L34 76a6 6 0 0 0 5 8h34a6 6 0 0 0 5-8L64 50V32"/><path class="art-ink art-check" d="M44 66l8 8 16-16"/></g></svg>`
+};
+const STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
+const coachEl = $('[data-coach]');
+let coachGo = null, coachCloseFn = null;
+function coach({ kind, step = '', title, text = '', plan = null, stars = 0, meta = '', go, onGo, close = '', onClose = null }) {
+  coachEl.dataset.kind = kind;
+  $('[data-coach-art]').innerHTML = ART[kind];
+  $('[data-coach-step]').textContent = step;
+  $('[data-coach-title]').textContent = title;
+  $('[data-coach-text]').textContent = text;
+  const planEl = $('[data-coach-plan]');
+  planEl.hidden = !plan; planEl.innerHTML = plan ? plan.map((x, i) => `<li><span>${i + 1}</span>${x}</li>`).join('') : '';
+  const st = $('[data-coach-stars]');
+  st.hidden = !stars; st.innerHTML = stars ? [1, 2, 3].map((i) => STAR.replace('class="star"', `class="star${i <= stars ? ' is-on' : ''}"`)).join('') : '';
+  st.setAttribute('aria-label', stars ? `${stars} ta yulduz (3 tadan)` : '');
+  $('[data-coach-meta]').innerHTML = meta;
+  $('[data-coach-go]').textContent = go;
+  const cl = $('[data-coach-close]'); cl.hidden = !close; cl.textContent = close;
+  coachGo = onGo || null; coachCloseFn = onClose;
+  coachEl.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => coachEl.classList.add('is-open')));
+  setTimeout(() => $('[data-coach-go]').focus({ preventScroll: true }), 60);
+}
+function closeCoach(run) {
+  if (coachEl.hidden) return;
+  coachEl.classList.remove('is-open'); coachEl.hidden = true;
+  const fn = run ? coachGo : coachCloseFn; coachGo = coachCloseFn = null;
+  if (fn) fn();
+}
+$('[data-coach-go]').addEventListener('click', () => closeCoach(true));
+$('[data-coach-close]').addEventListener('click', () => closeCoach(false));
+coachEl.addEventListener('click', (e) => { if (e.target === coachEl) closeCoach(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !coachEl.hidden) closeCoach(false); });
+
+const PRAISE = ['To‘g‘ri!', 'Zo‘r!', 'Ajoyib!', 'Barakalla!', 'Juda yaxshi!', 'Davom eting!'];
+let praiseI = 0;
+const praise = () => PRAISE[praiseI++ % PRAISE.length];
+const mark = () => { if (!state.startedAt) state.startedAt = performance.now(); };
+const bestKey = `empira-build-best:${labId}`;
+function bestStars() { try { return Number(localStorage.getItem(bestKey)) || 0; } catch (e) { return 0; } }
+function saveBest(n) { try { if (n > bestStars()) localStorage.setItem(bestKey, String(n)); } catch (e) { /* ignore */ } }
+
+function showIntro() {
+  coach({
+    kind: 'intro', step: '1-qadam · 3 tadan', title: 'Laboratoriyani o‘zingiz yig‘ing',
+    text: 'Ro‘yxatda 10 ta asbob bor. Ulardan faqat 5 tasi bu tajriba uchun kerak: ularni toping!',
+    plan: ['Kerakli asboblarni tanlang', 'Ularni sim bilan ulang', 'O‘lchang va natijani ko‘ring'],
+    go: 'Boshladik!',
+    onGo: () => { $('.block--tools').classList.add('is-guide'); $('.block--tools').scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' }); }
+  });
+}
+function showConnect() {
+  Sound.play('step');
+  coach({
+    kind: 'connect', step: '2-qadam · 3 tadan', title: 'Barakalla! Asboblar stolda',
+    text: 'Endi ularni sim bilan ulang: bitta qisqichni bosing, keyin ikkinchisini. Ular orasida sim paydo bo‘ladi. Qizil qisqich — «+».',
+    go: 'Ulashni boshlash',
+    onGo: () => { state.guide = `${cfg.circuit.source.id}.+`; render(); },
+    onClose: () => { state.guide = `${cfg.circuit.source.id}.+`; render(); }
+  });
+}
+function showWin() {
+  const stars = state.mistakes === 0 ? 3 : state.mistakes <= 2 ? 2 : 1;
+  const prev = bestStars(); saveBest(stars);
+  const secs = Math.max(1, Math.round((performance.now() - (state.startedAt || performance.now())) / 1000));
+  const time = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  const text = stars === 3 ? 'Zanjirni birinchi urinishda, xatosiz yig‘dingiz. Haqiqiy fizikdek!'
+    : stars === 2 ? 'Zanjir to‘g‘ri yig‘ildi! Xatolarni o‘zingiz topib tuzatdingiz.'
+    : 'Zanjir to‘g‘ri yig‘ildi! Keyingi safar 3 yulduzga harakat qiling.';
+  const record = prev && stars > prev ? '<span class="coach__badge">Yangi rekord!</span><br>' : '';
+  Sound.play('win'); confetti();
+  coach({
+    kind: 'win', step: 'Zanjir tayyor', title: 'Tabriklaymiz!', text, stars,
+    meta: `${record}Vaqt: ${time} · Xatolar: ${state.mistakes}`,
+    go: 'O‘lchashni boshlash', onGo: startMeasure, close: 'Zanjirga qarash'
+  });
+}
+function showDone() {
+  const next = avail.neighbours(topic.slug).next;
+  Sound.play('win'); confetti(110);
+  coach({
+    kind: 'done', step: '3-qadam bajarildi', title: 'Tajriba bajarildi!',
+    text: cfg.finale ? cfg.finale(state.runs, calc()) : 'O‘zingiz yig‘gan zanjirda barcha o‘lchovlar olindi.',
+    go: next ? 'Keyingi mavzu' : 'Yillik rejaga qaytish',
+    onGo: () => { location.href = next ? `../../topic/index.html?mavzu=${next.slug}` : '../../class-plan/index.html?sinf=8'; },
+    close: 'Shu yerda qolish'
+  });
+}
+
+/* =====================================================================
    Panel rendering
    ===================================================================== */
 const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -113,7 +277,7 @@ function renderTerms() {
       <span class="term-row__name">${tools[id].name}</span>
       <span class="term-row__chips">${Object.keys(tools[id].terminals).map((k) => {
         const tid = `${id}.${k}`, n = wiresAt(tid);
-        return `<button class="chip${k === '+' ? ' chip--plus' : ''}" type="button" data-term="${tid}" aria-pressed="${state.pending === tid}"
+        return `<button class="chip${k === '+' ? ' chip--plus' : ''}${state.guide === tid && !state.pending ? ' is-guide' : ''}" type="button" data-term="${tid}" aria-pressed="${state.pending === tid}"
           aria-label="${termName(tid)}${n ? `, ${n} ta sim` : ''}">${CHIP_LABEL[k]}${n ? `<span class="chip__wires" aria-hidden="true">·${n}</span>` : ''}</button>`;
       }).join('')}</span>
     </li>`).join('');
@@ -124,9 +288,18 @@ function renderReadouts() {
   if (state.phase === 'measure') {
     pills = L.readouts(state.values, calc(), state.mphase === 'done', state.runs);
   } else {
+    // Build phases: the three steps, always visible on the workspace
     const placedNeed = needed.filter((t) => state.placed[t.id]).length;
-    pills = [['Asboblar', `${placedNeed} / ${needed.length}`, placedNeed === needed.length ? 'done' : ''],
-      ['Ulanishlar', `${progress()} / ${circuit.required}`, state.phase === 'ready' ? 'done' : '']];
+    const steps = [
+      ['Asboblar', `${placedNeed} / ${needed.length}`, placedNeed === needed.length],
+      ['Ulash', `${progress()} / ${circuit.required}`, state.phase === 'ready'],
+      ['O‘lchash', '', false]
+    ];
+    const cur = steps.findIndex((x) => !x[2]);
+    $('[data-readouts]').innerHTML = `<ol class="stepbar" aria-label="Bosqichlar">${steps.map(([k, v, done], i) => `
+      <li class="stepbar__item${done ? ' is-done' : ''}${i === cur ? ' is-current' : ''}"${i === cur ? ' aria-current="step"' : ''}>
+        <span class="stepbar__n">${done ? CHECK : i + 1}</span>${k}${v ? ` <span class="stepbar__count">${v}</span>` : ''}</li>`).join('')}</ol>`;
+    return;
   }
   $('[data-readouts]').innerHTML = pills.map(([k, v, key]) =>
     `<span class="pill${key === 'done' ? ' pill--done' : key ? ' pill--key' : ''}"><span class="pill__k">${k}</span><span>${v}</span></span>`).join('');
@@ -152,6 +325,7 @@ function render() {
   const hint = $('[data-hint]');
   hint.textContent = state.phase === 'measure' ? 'Aylantirish uchun suring'
     : state.pending ? `${termName(state.pending)} tanlandi — endi ikkinchi qisqichni bosing`
+    : state.guide ? `Shu yerdan boshlang: ${termName(state.guide)}`
     : Object.keys(state.placed).length ? 'Qisqichni bosing, so‘ng ikkinchisini: sim ulanadi' : 'Asboblarni ro‘yxatdan tanlang';
 }
 
@@ -193,6 +367,7 @@ function updateMarkers(now) {
     if (wiresAt(tid)) { color = COLOR.active; scale = 0.85; }
     if (state.hover === tid) { color = COLOR.active; scale = 1.35; }
     if (state.pending === tid) { color = COLOR.active; scale = 1.5 + Math.sin(now / 160) * 0.12; }
+    else if (state.guide === tid) { color = COLOR.active; scale = 1.45 + 0.4 * (0.5 + 0.5 * Math.sin(now / 220)); }
     if (mk.flash && mk.flash.until > now) {
       const k = (mk.flash.until - now) / 900;
       color = COLOR[mk.flash.kind]; scale = 1.2 + 0.6 * k;
@@ -219,14 +394,66 @@ function flashWire(w, kind) {
   S.temps.push({ mesh, t: 0, dur: kind === 'error' ? 1.1 : 0.9, kind });
 }
 
+/* ---------- Current flow: glowing dots run along the student's wires, from «+» through the loop to «−» ---------- */
+function wireCurve(w) {
+  const { THREE } = S;
+  const a = termPos(w[0]), b = termPos(w[1]), lift = liftFor(w);
+  const mid = a.clone().lerp(b, 0.5); mid.y = Math.max(a.y, b.y) + lift;
+  return new THREE.CatmullRomCurve3([a, a.clone().setY(a.y + lift * 0.55), mid, b.clone().setY(b.y + lift * 0.55), b]);
+}
+function currentPath() {
+  // terminals joined by wires, plus the inside of each series element (not the voltmeter)
+  const adj = {}; const link = (a, b, w) => { (adj[a] = adj[a] || []).push([b, w]); };
+  state.wires.forEach((w) => { link(w[0], w[1], w); link(w[1], w[0], w); });
+  cfg.circuit.series.forEach((e) => { const [a, b] = e.polar ? [`${e.id}.+`, `${e.id}.-`] : [`${e.id}.a`, `${e.id}.b`]; link(a, b, null); link(b, a, null); });
+  const start = `${cfg.circuit.source.id}.+`, end = `${cfg.circuit.source.id}.-`;
+  const prev = { [start]: null }; const queue = [start];
+  while (queue.length) {
+    const n = queue.shift(); if (n === end) break;
+    (adj[n] || []).forEach(([m, w]) => { if (!(m in prev)) { prev[m] = [n, w]; queue.push(m); } });
+  }
+  if (!(end in prev)) return [];
+  const out = []; let n = end;
+  while (prev[n]) { const [from, w] = prev[n]; if (w) out.unshift({ w, forward: w[0] === from }); n = from; }
+  return out;
+}
+function buildFlow() {
+  const { THREE } = S;
+  S.flow.forEach((f) => f.dots.forEach((d) => S.flowGroup.remove(d)));
+  const geo = new THREE.SphereGeometry(0.0042, 10, 8);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xFFB21E });
+  S.flow = currentPath().map(({ w, forward }) => {
+    const curve = wireCurve(w);
+    const n = Math.max(3, Math.round(curve.getLength() / 0.06));
+    const dots = Array.from({ length: n }, () => { const d = new THREE.Mesh(geo, mat); d.visible = false; S.flowGroup.add(d); return d; });
+    return { curve, forward, dots };
+  });
+  S.flowT = 0;
+}
+function updateFlow(dt) {
+  if (!S.flow.length) return;
+  const running = state.mphase === 'running' && state.t / state.dur > 0.45;
+  const on = state.phase === 'measure' && (state.mphase === 'done' || running);
+  const speed = 0.25 + 0.6 * Math.min(1, (calc().I || 0) / 0.05);    // more current, faster flow
+  S.flowT = (S.flowT + dt * speed * (reduceMotion ? 0 : 1)) % 1;
+  S.flow.forEach(({ curve, forward, dots }) => dots.forEach((d, i) => {
+    d.visible = on;
+    if (!on) return;
+    const u = (i / dots.length + S.flowT) % 1;
+    d.position.copy(curve.getPointAt(forward ? u : 1 - u));
+  }));
+}
+
 /* =====================================================================
    Actions
    ===================================================================== */
 function chooseTool(id) {
   if (!S || state.phase === 'measure') return;
   const t = tools[id]; const btn = $(`[data-tool="${id}"]`);
+  mark();
+  $('.block--tools').classList.remove('is-guide');
   if (!t.need) {
-    flashEl(btn, 'is-wrong');
+    flashEl(btn, 'is-wrong'); Sound.play('error'); state.mistakes++;
     feedback('error', 'Bu asbob kerak emas', t.why);
     return;
   }
@@ -234,13 +461,17 @@ function chooseTool(id) {
   placeTool(t);
   flashEl(btn, 'is-ok');
   const left = needed.filter((x) => !state.placed[x.id]).length;
-  if (left) feedback('ok', 'To‘g‘ri!', `${t.name} stolga qo‘yildi.`);
-  else feedback('ok', 'Barcha asboblar stolda', 'Endi ularni sim bilan ulang: bir qisqichni, so‘ng ikkinchisini bosing.');
+  if (left) { Sound.play('ok'); feedback('ok', praise(), `${t.name} stolga qo‘yildi. Yana ${left} ta asbob qoldi.`); }
+  else {
+    feedback('ok', 'Barcha asboblar stolda', 'Endi ularni sim bilan ulang: bir qisqichni, so‘ng ikkinchisini bosing.');
+    setTimeout(showConnect, reduceMotion ? 0 : 500);   // let the last tool land first
+  }
   render();
 }
 
 function chooseTerminal(tid) {
   if (state.phase === 'measure' || !tid) return;
+  mark();
   if (!state.pending) { state.pending = tid; render(); return; }
   if (state.pending === tid) { state.pending = null; render(); return; }
   const w = [state.pending, tid];
@@ -248,20 +479,23 @@ function chooseTerminal(tid) {
   const r = circuit.check(state.wires, w);
   if (r.status === 'duplicate') feedback('info', 'Bu sim allaqachon bor', r.message);
   else if (r.status === 'error') {
-    flashWire(w, 'error'); flashTerms(w, 'error');
+    flashWire(w, 'error'); flashTerms(w, 'error'); Sound.play('error'); state.mistakes++;
     feedback('error', 'Noto‘g‘ri ulanish', r.message);
     render(); w.forEach((x) => flashEl($(`[data-term="${x}"]`), 'is-wrong'));
     return;
   } else if (r.status === 'ok') {
-    state.wires.push(w); redrawWires();
+    state.wires.push(w); redrawWires(); state.guide = null;
     flashWire(w, 'ok'); flashTerms(w, 'ok');
     if (r.complete) {
       state.phase = 'ready';
       state.wires.forEach((x) => flashWire(x, 'ok'));
       flashTerms(allTerminals(), 'ok');
       feedback('done', 'Zanjir tayyor!', 'Barcha ulanishlar to‘g‘ri. Endi o‘lchashni boshlang.');
+      setTimeout(showWin, reduceMotion ? 0 : 450);
     } else {
-      feedback('ok', 'To‘g‘ri ulandi', `${termName(w[0])} → ${termName(w[1])}`);
+      Sound.play('ok');
+      const left = r.required - r.progress;
+      feedback('ok', praise(), `${termName(w[0])} → ${termName(w[1])}. Yana ${left} ta ulanish qoldi.`);
     }
     render(); w.forEach((x) => flashEl($(`[data-term="${x}"]`), 'is-ok'));
     return;
@@ -283,7 +517,9 @@ function restart() {
   Object.values(state.placed).forEach((o) => S.scene.remove(o.group));
   Object.values(S.markers).forEach((m) => { S.scene.remove(m.mesh); m.mesh.geometry.dispose(); });
   S.markers = {}; S.drops = [];
-  Object.assign(state, { phase: 'build', placed: {}, wires: [], pending: null, hover: null, runs: [], touched: new Set(), mphase: 'ready', t: 0 });
+  Object.assign(state, { phase: 'build', placed: {}, wires: [], pending: null, hover: null, guide: null, mistakes: 0, startedAt: 0, finaleShown: false, runs: [], touched: new Set(), mphase: 'ready', t: 0 });
+  S.flow.forEach((f) => f.dots.forEach((d) => { S.flowGroup.remove(d); }));
+  S.flow = [];
   state.values = Object.fromEntries(L.controls.map((c) => [c.key, c.value]));
   S.kit.clearWires();
   feedback('info', 'Kerakli asboblarni tanlang', 'To‘g‘ri asbob stolga qo‘yiladi. Keraksiz asbob tanlansa, ogohlantirish chiqadi.');
@@ -314,7 +550,8 @@ function startMeasure() {
     state.values[c.key] = typeof c.value === 'number' ? +b.dataset.v : b.dataset.v; state.touched.add(c.key); resetRun();
   }));
   cfg.instruments.update(state.placed, state.values, calc());
-  feedback('done', 'Zanjir tayyor!', 'Kuchlanishni tanlab, kalitni ulang va o‘lchang.');
+  buildFlow();
+  feedback('done', '3-qadam: o‘lchang', 'Kuchlanishni tanlab, kalitni ulang. Simlarda tok qanday oqishini kuzating!');
   fb.classList.remove('is-anim');
   render();
 }
@@ -347,7 +584,9 @@ function tickMeasure(dt) {
     state.mphase = 'done'; state.runs.push({ ...state.values, ...calc() });
     const allDone = L.steps.every((st) => st.done({ runs: state.runs, touched: state.touched, phase: 'done' }));
     if (allDone) feedback('done', 'Tajriba bajarildi!', 'O‘zingiz yig‘gan zanjirda barcha o‘lchovlar olindi.');
+    else Sound.play('ok');
     render();
+    if (allDone && !state.finaleShown) { state.finaleShown = true; setTimeout(showDone, reduceMotion ? 0 : 600); }
   }
 }
 
@@ -418,7 +657,8 @@ function build3D() {
   new ResizeObserver(resize).observe(canvas.parentElement);
   resize();
 
-  S = { THREE, kit, scene, camera, controls, canvas, markers: {}, drops: [], temps: [], tempGroup, hoverLabel };
+  const flowGroup = new THREE.Group(); scene.add(flowGroup);
+  S = { THREE, kit, scene, camera, controls, canvas, markers: {}, drops: [], temps: [], tempGroup, hoverLabel, flowGroup, flow: [], flowT: 0 };
 
   /* ---------- Picking: the terminal nearest to the tap on screen (generous radius for fingers) ---------- */
   const coarse = window.matchMedia('(pointer: coarse)').matches;
@@ -478,9 +718,23 @@ function build3D() {
     });
     tickMeasure(dt);
     updateMarkers(now);
-    const show = state.phase !== 'measure' && (state.pending || state.hover);
+    const show = state.phase !== 'measure' && (state.pending || state.hover || state.guide);
     hoverLabel.userData.hidden = !show;
-    if (show) { hoverLabel.setText(termName(show)); hoverLabel.position.copy(termPos(show)).add(new THREE.Vector3(0, 0.055, 0)); }
+    if (show) {
+      hoverLabel.setText(show === state.guide && !state.pending && !state.hover ? 'Shu yerdan boshlang' : termName(show));
+      hoverLabel.position.copy(termPos(show)).add(new THREE.Vector3(0, 0.055, 0));
+      // keep the whole label inside the workspace (terminals near the edge, small phone screens)
+      const r = canvas.getBoundingClientRect();
+      const ndc = hoverLabel.position.clone().project(camera);
+      const hPx = Math.min(36, Math.max(24, viewH * 0.045)), half = (hPx * (hoverLabel.userData.ratio || 1)) / 2;
+      const cx = (ndc.x + 1) / 2 * r.width;
+      const dx = cx - half < 8 ? 8 - (cx - half) : cx + half > r.width - 8 ? (r.width - 8) - (cx + half) : 0;
+      if (dx) {
+        const perPx = 2 * camera.position.distanceTo(hoverLabel.position) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / viewH;
+        hoverLabel.position.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0), dx * perPx);
+      }
+    }
+    updateFlow(dt);
     controls.update();
     kit.sizeLabels(camera, viewH);
     renderer.render(scene, camera);
@@ -489,6 +743,12 @@ function build3D() {
 }
 
 render();
-try { build3D(); render(); }
-catch (err) { console.error(err); $('[data-loading]').hidden = true; $('[data-fallback]').hidden = false; }
+try {
+  build3D(); render();
+  // Step 1 card: shown on a student's first visit to this lab (remembered on this device)
+  let seen = false;
+  try { seen = localStorage.getItem(`empira-build-intro:${labId}`) === '1'; localStorage.setItem(`empira-build-intro:${labId}`, '1'); } catch (e) { /* ignore */ }
+  if (!seen) setTimeout(showIntro, 350);
+  else feedback('info', '1-qadam: kerakli asboblarni tanlang', 'Ro‘yxatdagi 10 ta asbobdan faqat 5 tasi kerak.');
+} catch (err) { console.error(err); $('[data-loading]').hidden = true; $('[data-fallback]').hidden = false; }
 })();
