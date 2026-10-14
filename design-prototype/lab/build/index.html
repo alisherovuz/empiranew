@@ -135,19 +135,35 @@
   <!-- Unknown lab or a lab without Build Mode: say so, never open a different experiment -->
   <section class="build-missing" data-missing hidden>
     <h2 class="build-missing__title">Bu laboratoriya uchun yig‘ish rejimi yo‘q</h2>
-    <a class="btn btn--primary btn--large" href="../../class-plan/index.html?sinf=8" data-missing-link>Yillik rejaga qaytish</a>
+    <a class="btn btn--primary btn--large" href="../../class-plan/index.html" data-missing-link>Yillik rejaga qaytish</a>
   </section>
 
   <script src="../../class-plan/data.js"></script>
+  <script src="../../class-plan/data-7.js"></script>
   <script src="../../topic/content.js"></script>
+  <script src="../../topic/content-7.js"></script>
   <script src="../../shared/availability.js"></script>
+  <script>
+    // The way back goes to the annual plan of this lab's grade (availability.js picks it from ?lab=)
+    if (window.EMPIRA_PLAN) document.querySelector('[data-missing-link]').href = `../../class-plan/index.html?sinf=${window.EMPIRA_PLAN.grade}`;
+  </script>
   <script src="../vendor/three-0.170.0-bundle.js" defer></script>
   <script src="../kit.js" defer></script>
+  <script src="../kit-7.js" defer></script>
+  <script src="../kit-7a.js" defer></script>
+  <script src="../kit-7c.js" defer></script>
+  <script src="../kit-7d.js" defer></script>
+  <script src="../kit-7e.js" defer></script>
   <script src="../labs-8.js" defer></script>
   <script src="../labs-8b.js" defer></script>
   <script src="../labs-8c.js" defer></script>
   <script src="../labs-8d.js" defer></script>
   <script src="../labs-8e.js" defer></script>
+  <script src="../labs-7a.js" defer></script>
+  <script src="../labs-7b.js" defer></script>
+  <script src="../labs-7c.js" defer></script>
+  <script src="../labs-7d.js" defer></script>
+  <script src="../labs-7e.js" defer></script>
   <script src="auto.js" defer></script>
   <script src="netcheck.js" defer></script>
   <script src="../fx.js" defer></script>

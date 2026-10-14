@@ -30,9 +30,19 @@
     'elektroliz', 'faradey-ikkinchi', 'galvanostegiya', 'vakuum-diod', 'gaz-ionlash', 'razryad-turlari'];
   const TOOLS_ONLY = ['elektr-shamoli', 'magnitlar-tasiri', 'lampochka-energiyasi', 'faza-indikator', 'magnit-kuch-chiziqlari',
     'yer-magnit-maydoni', 'elektrlanish-turlari', 'elektroskop', 'kulon-qonuni', 'chaqmoq-masofasi', 'elektr-maydon-chiziqlari'];
+  // 7-sinf (mechanics): the student picks the right equipment for the book's experiment, then measures
+  const SEVEN = ['harakat-nisbiyligi', 'yol-va-kochish', 'daryodan-suzib-otish', 'tomizgichli-aravacha', 'havo-pufagi', 'yol-grafigi',
+    'oniy-tezlik', 'qiya-aravacha-tezlanish', 'itarilgan-aravacha', 'galiley-novi', 'sharcha-tezlanishi', 'nyuton-nayi', 'tik-otish',
+    'aylanuvchi-disk', 'aylanish-davri', 'markazga-intilma-tezlanish', 'kuchlarni-qoshish', 'inersiya', 'aravachalar-inertligi',
+    'nyuton-ikkinchi-qonuni', 'tasir-aks-tasir', 'markazga-intilma-kuch', 'guk-qonuni', 'prujina-bikirligi', 'kavendish-tajribasi',
+    'ogirlik-kuchi', 'jism-ogirligi', 'liftdagi-tarozi', 'gorizontal-otish', 'suniy-yoldosh', 'tinchlikdagi-ishqalanish',
+    'sirpanish-dumalanish', 'ishqalanish-koeffitsiyenti', 'tormozlanish-yoli', 'kuch-impulsi', 'aravachalar-toqnashuvi',
+    'reaktiv-harakat', 'mexanik-ish', 'kotarish-va-sudrash', 'potensial-energiya', 'kinetik-energiya', 'energiya-saqlanishi',
+    'sharcha-kinetik-energiyasi', 'kotargich-quvvati', 'qiya-tekislik-fik'];
   root.EMPIRA_BUILD_AUTO_LABS = Object.fromEntries([
     ...WIRED.map((id) => [id, { label: 'Zanjirni o‘zingiz yig‘ing', wired: true }]),
-    ...TOOLS_ONLY.map((id) => [id, { label: 'Laboratoriyani o‘zingiz yig‘ing', wired: false }])
+    ...TOOLS_ONLY.map((id) => [id, { label: 'Laboratoriyani o‘zingiz yig‘ing', wired: false }]),
+    ...SEVEN.map((id) => [id, { label: 'Laboratoriyani o‘zingiz yig‘ing', wired: false }])
   ]);
   // Which Build Mode a lab has (hand-made config wins), or null
   root.EMPIRA_BUILD_FOR = (labId) => (root.EMPIRA_BUILD || {})[labId] || root.EMPIRA_BUILD_AUTO_LABS[labId] || null;

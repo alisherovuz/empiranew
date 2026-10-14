@@ -1,4 +1,5 @@
-// Empira — Class Plan prototype. Renders the annual plan from data.js. Prototype only.
+// Empira — Class Plan prototype. Renders the annual plan of the page's grade (data.js / data-7.js, picked by
+// ../shared/availability.js from ?sinf=). Prototype only.
 (function () {
   const plan = window.EMPIRA_PLAN;
   const q = new URLSearchParams(location.search);
@@ -22,10 +23,17 @@
   /* ---------- Grade ---------- */
   document.querySelector('[data-grade-title]').textContent = `${grade}-sinf`;
   document.title = `${grade}-sinf · ${subjects[0].name} — Empira`;
-  if (!avail.grades().includes(grade)) {
-    // Mock data exists only for 8-sinf: say so plainly instead of showing a fake plan
+  const ready = avail.grades();
+  if (!ready.includes(grade)) {
+    // No labs for this grade yet: say so plainly and point to every grade that is ready
     document.querySelector('[data-plan]').hidden = true;
     document.querySelector('[data-empty]').hidden = false;
+    const names = ready.map((g) => `${g}-sinf`);
+    document.querySelector('[data-empty-hint]').textContent =
+      `Hozircha ${names.length > 1 ? `${names.slice(0, -1).join(', ')} va ${names[names.length - 1]}` : names[0]} ${subjects[0].name} laboratoriyalarini sinab ko‘ring.`;
+    // The grade opened last gets the one primary button
+    document.querySelector('[data-empty-home]').insertAdjacentHTML('beforebegin', ready.map((g) => `
+      <a class="btn ${g === plan.grade ? 'btn--primary' : 'btn--secondary'}" href="../class-plan/index.html?sinf=${g}">${g}-sinf laboratoriyalari</a>`).join(''));
     return;
   }
 

@@ -34,7 +34,7 @@
     <!-- B. What Empira is -->
     <section class="intro">
       <h1 class="intro__title">Darslikdagi har bir mavzu — 3D laboratoriya</h1>
-      <p class="intro__meta"><span class="dot" aria-hidden="true"></span><span data-availability>Hozircha: 8-sinf Fizika</span></p>
+      <p class="intro__meta"><span class="dot" aria-hidden="true"></span><span data-availability>Laboratoriyalar tayyor: 7-sinf, 8-sinf Fizika</span></p>
     </section>
 
     <!-- E. Continue (returning teachers only; hidden on first visit) -->
@@ -88,7 +88,9 @@
   </main>
 
   <script src="../class-plan/data.js"></script>
+  <script src="../class-plan/data-7.js"></script>
   <script src="../topic/content.js"></script>
+  <script src="../topic/content-7.js"></script>
   <script src="../shared/availability.js"></script>
   <script>
     // Every grade is listed. Grades whose labs are not ready yet carry a quiet "Tayyorlanmoqda" note
@@ -104,19 +106,22 @@
         a.insertAdjacentHTML('beforeend', '<span class="grade__note">Tayyorlanmoqda</span>');
         a.setAttribute('aria-label', `${g}-sinf, laboratoriyalar tayyorlanmoqda`);
       });
-      const subject = window.EMPIRA_PLAN.subjects[0].name;
+      // Subject names come from each ready grade's own plan (one name when they all match)
+      const plans = window.EMPIRA_PLANS || {};
+      const subjects = [...new Set(ready.map((g) => plans[g] && plans[g].subjects[0].name).filter(Boolean))];
       document.querySelector('[data-availability]').textContent =
-        `Laboratoriyalar tayyor: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subject}`;
+        `Laboratoriyalar tayyor: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subjects.join(', ')}`;
+      // The grade the teacher opened last is shown as selected (nothing is selected on a first visit)
+      let last = null;
+      try { last = Number(localStorage.getItem('empira.grade')) || null; } catch (e) { /* private mode */ }
+      const tile = ready.includes(last) && document.querySelector(`.grades a[href$="?sinf=${last}"]`);
+      if (tile) tile.setAttribute('aria-current', 'true');
     })();
 
     // Prototype-only: ?davom=1 shows the returning-teacher state
     const q = new URLSearchParams(location.search);
     if (q.get('davom') === '1') {
       document.querySelector('[data-continue]').hidden = false;
-    }
-    // Prototype-only: ?holat=tanlangan shows the selected state on 8-sinf (documentation only)
-    if (q.get('holat') === 'tanlangan') {
-      document.querySelector('a[href$="?sinf=8"]').setAttribute('aria-current', 'true');
     }
   </script>
 </body>

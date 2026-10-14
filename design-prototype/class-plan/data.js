@@ -107,3 +107,9 @@
     }
   ]
 };
+// Every grade's plan, by grade number (data-7.js adds 7-sinf). shared/availability.js picks the current one.
+(function (root) {
+  root.EMPIRA_PLANS = root.EMPIRA_PLANS || {};
+  root.EMPIRA_PLANS[8] = root.EMPIRA_PLAN;
+  root.EMPIRA_PLAN.lastPage = 170;
+})(typeof window !== 'undefined' ? window : globalThis);

@@ -2,7 +2,7 @@
 
 > **Status: LOCKED.** This is the visual source of truth for the Empira MVP. Reusable rules: `/HOME_DESIGN_RULES.md`.
 
-Prototype: `design-prototype/home/index.html` (open it in a browser). Add `?davom=1` to see the returning-teacher state, or `?holat=tanlangan` to see the selected state on 8-sinf (documentation only).
+Prototype: `design-prototype/home/index.html` (open it in a browser). Add `?davom=1` to see the returning-teacher state. The selected state marks the grade the teacher opened last (`localStorage` `empira.grade`); nothing is selected on a first visit.
 Reference renders: `design-prototype/home/screenshots/`.
 Tokens: `EMPIRA_DESIGN_SYSTEM.md` §16. Structure: the approved `EMPIRA_HOME_UX.md`.
 

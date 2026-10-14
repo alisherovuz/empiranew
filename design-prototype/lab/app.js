@@ -103,7 +103,7 @@ function feedback(kind, title, text) {
 const PRAISE = ['O‘lchandi!', 'Zo‘r!', 'Ajoyib!', 'Barakalla!', 'Kuzating!'];
 let praiseI = 0;
 const praise = () => PRAISE[praiseI++ % PRAISE.length];
-const num = (t) => { const m = String(t).replace(',', '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+const num = (t) => { const m = String(t).replace('−', '-').replace(',', '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
 const pillsOf = (v, c, runs) => L.readouts(v, c, true, runs).map(([k, val, key]) => ({ k, v: String(val), key: !!key }));
 // "I: 20 mA → 30 mA ↑" for every reading that changed since the previous measurement
 function changes(prevRun, nowRun, runs) {

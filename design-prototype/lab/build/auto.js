@@ -79,9 +79,11 @@
     arcLamp: { name: 'Elektr yoyi', icon: IC.spark, domain: 'c' },
     fieldFibres: { name: 'Elektrodli moy idishi', icon: IC.dish, domain: 's' }
   };
+  // More equipment registered by other kit files (kit-7.js: mechanics for 7-sinf)
+  Object.assign(TYPES, root.EMPIRA_KIT_TYPES || {});
   // Pictures the lab draws to explain (not equipment to pick): always on the table
   const SCENERY = new Set(['fieldLines', 'conductorView']);
-  const FACTORIES = Object.keys(TYPES).map((t) => t.split(':')[0]).concat([...SCENERY]);
+  const factories = () => { Object.assign(TYPES, root.EMPIRA_KIT_TYPES || {}); return Object.keys(TYPES).map((t) => t.split(':')[0]).concat([...SCENERY]); };
 
   const typeOf = (fn, args) => (fn === 'meter' ? `meter:${args[2]}` : fn);
 
@@ -103,7 +105,7 @@
     const instances = [];          // { id, type, obj, groups, terms: {key: getter} }
     let depth = 0;
     const rec = Object.create(kit);
-    FACTORIES.forEach((fn) => {
+    factories().forEach((fn) => {
       if (typeof kit[fn] !== 'function') return;
       rec[fn] = (...args) => {
         if (depth > 0) return kit[fn](...args);
@@ -146,5 +148,9 @@
 
   // Kinds that do the same job: never offered as a "wrong" tool next to each other (an ammeter vs a milliammeter)
   const SAME = { 'meter:A': ['meter:mA'], 'meter:mA': ['meter:A'], compass: ['needle'], needle: ['compass'], barMagnet: ['flatMagnet'], flatMagnet: ['barMagnet'] };
+  // 7-sinf: families of equipment that do the same job (a lab with one of them never offers another as "wrong")
+  [['stopwatch', 'timer'], ['weights', 'pan', 'gramLoad', 'kettleLoads'], ['track', 'chute'], ['ruler', 'millimetreRuler', 'woodRuler'],
+    ['dynamometer', 'digitalDynamometer', 'paperDynamometer', 'forcePuller', 'forceSensor'], ['cart', 'bufferCart', 'magnetCart', 'ironCart'],
+    ['stand', 'holder', 'dropStand'], ['scaleBal', 'floorScale']].forEach((fam) => fam.forEach((t) => { SAME[t] = (SAME[t] || []).concat(fam.filter((x) => x !== t)); }));
   root.EMPIRA_BUILD_AUTO = { TYPES, SAME, analyze, terminalsOf };
 })(typeof window !== 'undefined' ? window : globalThis);

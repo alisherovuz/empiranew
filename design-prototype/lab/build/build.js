@@ -156,7 +156,7 @@ function showDone() {
     text: M.finale ? M.finale(state.runs, calc())
       : `Tajribani o‘zingiz yig‘gan laboratoriyada bajardingiz. Tajriba savoli: «${info.task}» Javobni o‘lchovlardan toping.`,
     go: next ? 'Keyingi mavzu' : 'Yillik rejaga qaytish',
-    onGo: () => { location.href = next ? `../../topic/index.html?mavzu=${next.slug}` : '../../class-plan/index.html?sinf=8'; },
+    onGo: () => { location.href = next ? `../../topic/index.html?mavzu=${next.slug}` : `../../class-plan/index.html?sinf=${window.EMPIRA_PLAN.grade}`; },
     close: 'Shu yerda qolish'
   });
 }

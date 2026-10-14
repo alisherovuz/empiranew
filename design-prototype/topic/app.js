@@ -12,7 +12,9 @@
   };
 
   const subject = plan.subjects[0].name;
+  // The page's grade is the topic's grade (availability.js picks it from ?mavzu=), so every link goes to that plan
   const planHref = `../class-plan/index.html?sinf=${plan.grade}`;
+  document.querySelector('[data-back]').href = planHref;
 
   // Any curriculum topic can still be opened directly (scanner, old links), so resolve against the full plan
   const requested = new URLSearchParams(location.search).get('mavzu') || '';
@@ -29,7 +31,10 @@
     return;
   }
 
-  const data = avail.hasLab(topic) ? content[topic.slug] : null;
+  const hasLab = avail.hasLab(topic);
+  const data = hasLab ? content[topic.slug] : null;
+  // A topic without a lab may still have a short explanation (e.g. 7-sinf §2 Fazo va vaqt): show it under the note
+  const study = data || content[topic.slug] || null;
   const { prev, next } = avail.neighbours(topic.slug);
   const chapterHref = `${planHref}#bob-${topic.chapter.n}`;
   const topicHref = (p) => `?mavzu=${p.slug}`;
@@ -61,12 +66,15 @@
     </article>`).join('');
 
   /* ---------- Formula panel ---------- */
-  const terms = !data ? '' : data.terms.map(([sym, name, unit]) => `
+  const terms = !study ? '' : (study.terms || []).map(([sym, name, unit]) => `
     <div class="term">
       <dt class="term__sym">${sym}</dt>
       <dd class="term__name">${name}</dd>
       <dd class="term__unit">${unit}</dd>
     </div>`).join('');
+
+  const nf = study ? (study.formulas || []).length : 0;
+  const formulaTitle = nf > 1 ? 'Asosiy formulalar' : nf === 1 ? 'Asosiy formula' : 'Asosiy kattaliklar';
 
   /* ---------- Previous / next ---------- */
   const pagerTile = (p, dir) => {
@@ -104,25 +112,25 @@
       <a class="btn btn--secondary btn--large" href="${chapterHref}">Yillik rejaga qaytish</a>
     </section>`}
 
-    <div class="layout"${data ? '' : ' hidden'}>
-      <section class="labs" aria-labelledby="labs-title">
+    <div class="layout"${study ? '' : ' hidden'}>
+      ${data ? `<section class="labs" aria-labelledby="labs-title">
         <h2 class="section-title" id="labs-title">3D laboratoriya</h2>
         ${labCards}
-      </section>
+      </section>` : ''}
 
       <div class="study">
         <section aria-labelledby="explain-title">
           <h2 class="section-title" id="explain-title">Qisqacha tushuntirish</h2>
-          <div class="explain">${data ? data.explain.map((p) => `<p>${p}</p>`).join('') : ''}</div>
+          <div class="explain">${study ? (study.explain || []).map((p) => `<p>${p}</p>`).join('') : ''}</div>
         </section>
 
-        <section class="formula" aria-labelledby="formula-title">
-          <h2 class="section-title" id="formula-title">${data && data.formulas.length > 1 ? 'Asosiy formulalar' : 'Asosiy formula'}</h2>
+        ${study && ((study.formulas || []).length || terms) ? `<section class="formula" aria-labelledby="formula-title">
+          <h2 class="section-title" id="formula-title">${formulaTitle}</h2>
           <div class="formula__panel">
-            ${data ? data.formulas.map((f) => `<p class="formula__expr">${f}</p>`).join('') : ''}
+            ${(study.formulas || []).map((f) => `<p class="formula__expr">${f}</p>`).join('')}
             <dl class="terms">${terms}</dl>
           </div>
-        </section>
+        </section>` : ''}
       </div>
     </div>
 
