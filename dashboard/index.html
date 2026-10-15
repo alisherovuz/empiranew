@@ -64,6 +64,19 @@ input,select{font-family:inherit}
 .oauth button.tg{background:#229ED9;border-color:#229ED9;color:#fff}.oauth button.tg:hover{background:#1c8cc2}
 .oauth svg{width:20px;height:20px;flex:none}
 .auth .fine{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink3)}
+.rolecards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.rolecard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:22px 20px;border:1.5px solid var(--line);border-radius:18px;background:#fff;transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
+.rolecard:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.rolecard .ric{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.rolecard .ric svg{width:28px;height:28px}
+.rolecard b{font-family:var(--sora);font-size:19px}
+.rolecard .rd{font-size:13.5px;color:var(--ink3);min-height:38px}
+.rolecard .rgo{margin-top:8px;font-family:var(--sora);font-weight:600;font-size:13.5px}
+.rolecard.stu{}.rolecard.stu:hover{border-color:var(--blue-300)}
+.rolecard.stu .ric{background:var(--blue-050);color:var(--blue)}.rolecard.stu .rgo{color:var(--blue)}
+.rolecard.tea:hover{border-color:var(--amber)}
+.rolecard.tea .ric{background:var(--amber-bg);color:var(--amber-tx)}.rolecard.tea .rgo{color:var(--amber-tx)}
+@media (max-width:560px){.rolecards{grid-template-columns:1fr}.rolecard .rd{min-height:0}}
 
 /* registration */
 .reg{max-width:560px;margin:14px auto;padding:30px 34px 34px}
@@ -199,7 +212,7 @@ input,select{font-family:inherit}
 .pcount{font-size:13px;color:var(--ink3)}.np{display:flex;gap:10px}
 
 /* student gate */
-.sgate{max-width:420px;margin:30px auto;padding:38px 34px;text-align:center}
+.sgate{position:relative;max-width:420px;margin:30px auto;padding:44px 34px 38px;text-align:center}
 .sgate .ill{width:72px;height:72px;border-radius:20px;background:var(--blue-050);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
 .sgate .ill svg{width:38px;height:38px;color:var(--blue)}
 .sgate .mand{display:inline-block;font-size:11.5px;font-weight:700;font-family:var(--sora);color:#C77E00;background:var(--amber-bg);padding:3px 11px;border-radius:999px;margin-bottom:16px}
@@ -217,6 +230,7 @@ input,select{font-family:inherit}
 <div class="demobar">
   <span class="lbl">Rejim:</span><span class="mode" id="modebadge">—</span>
   <span class="lbl" style="margin-left:8px">Ko‘rish:</span>
+  <button data-go="role">Rol</button>
   <button data-go="login">Kirish</button>
   <button data-go="reg-grades">Ro‘yxat</button>
   <button data-go="dashboard">Dashboard</button>
@@ -226,9 +240,33 @@ input,select{font-family:inherit}
 
 <div class="stage">
 
+  <!-- ROLE PICKER -->
+  <section class="screen active" id="sc-role">
+    <div class="card auth" style="max-width:560px">
+      <div class="brand"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.8"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(60 12 12)"/></svg></span><b>Empira</b></div>
+      <h1>Xush kelibsiz!</h1>
+      <p class="sub">Kim sifatida kirasiz?</p>
+      <div class="rolecards">
+        <button class="rolecard stu" id="role-student">
+          <span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></span>
+          <b>O‘quvchi</b>
+          <span class="rd">Laboratoriyalarni ochib, tajriba qilaman</span>
+          <span class="rgo">Telegram bilan kirish →</span>
+        </button>
+        <button class="rolecard tea" id="role-teacher">
+          <span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v11H3z"/><path d="M3 20h18M8 16v4M16 16v4"/><path d="M7 11l3-3 2.4 2.4L17 6"/></svg></span>
+          <b>O‘qituvchi</b>
+          <span class="rd">Ro‘yxatdan o‘tib, darslarimni boshqaraman</span>
+          <span class="rgo">Ro‘yxatdan o‘tish →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- LOGIN -->
-  <section class="screen active" id="sc-login">
+  <section class="screen" id="sc-login">
     <div class="card auth">
+      <button class="back" data-go="role" style="margin-bottom:6px">← Orqaga</button>
       <div class="brand"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.8"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(60 12 12)"/></svg></span><b>Empira</b></div>
       <h1>O‘qituvchi sifatida kiring</h1>
       <p class="sub">Bir marta kiring — keyin har safar osongina ochiladi.</p>
@@ -322,7 +360,7 @@ input,select{font-family:inherit}
         <div class="tiles">
           <button class="tile tl1" id="tile-reja" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h3"/></svg></span><h3>Ish reja</h3><p>Mavzular va dars tartibi</p></button>
           <button class="tile tl2" id="tile-prez" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h7M7 12h4"/></svg></span><h3>Prezentatsiya yasash</h3><p>Mavzu uchun chiroyli slayd</p></button>
-          <button class="tile tl3" id="tile-lab" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg></span><h3>Laboratoriyalar</h3><p>O‘quvchilarga 3D tajriba</p></button>
+          <button class="tile tl3" id="tile-lab" onclick="location.href='/'"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg></span><h3>Laboratoriyalar</h3><p>Hamma 3D tajribalar va skaner</p></button>
           <button class="tile tl4" id="tile-rep" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span><h3>Hisobotlar</h3><p>Kim tushundi, kim qiynaldi</p></button>
         </div>
       </div>
@@ -371,11 +409,12 @@ input,select{font-family:inherit}
   <!-- STUDENT GATE -->
   <section class="screen" id="sc-student">
     <div class="card sgate">
+      <button class="back" data-go="role" style="position:absolute;left:18px;top:16px">← Orqaga</button>
       <div class="ill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.8"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(120 12 12)"/></svg></div>
       <span class="mand">Bir bosish — bepul</span>
       <h1>Laboratoriyaga kirish</h1>
       <p>Tajribalarni ochish uchun Telegram bilan bir marta kiring. Parol ham, ro‘yxat ham yo‘q.</p>
-      <div class="oauth"><button class="tg" onclick="alert('Telegram login — server tomoni (keyin)')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram bilan kirish</button></div>
+      <div class="oauth"><button class="tg" onclick="studentEnter()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram bilan kirish</button></div>
       <p class="fine" style="margin-top:16px;color:var(--ink3);font-size:12.5px">Faqat ismingiz olinadi — foydalanuvchilarni sanash uchun.</p>
     </div>
   </section>
@@ -439,6 +478,12 @@ function show(id){
 }
 document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click',function(){show(b.getAttribute('data-go'))}); });
 
+/* ---------- ROLE PICKER ---------- */
+$('role-student').addEventListener('click',function(){ show('student'); });
+$('role-teacher').addEventListener('click',function(){ show('login'); });
+// O'quvchi kirishi → laboratoriyalar bosh sahifasi (test.empira.uz)
+function studentEnter(){ location.href='/'; }
+
 /* ---------- MODE badge ---------- */
 (function(){ var m=$('modebadge'); if(DEMO){m.textContent='DEMO';m.className='mode demo';} else {m.textContent='LIVE';m.className='mode live';} })();
 
@@ -454,12 +499,12 @@ $('g-tg').addEventListener('click', function(){
 $('logoutbtn').addEventListener('click', async function(){
   if(!DEMO && sb){ await sb.auth.signOut(); }
   localStorage.removeItem('empira_tour_seen');
-  show('login');
+  show('role');
 });
 $('resetbtn').addEventListener('click', function(){
   localStorage.removeItem('empira_profile_demo'); localStorage.removeItem('empira_tour_seen');
   state={grades:[],counts:{},inst:"",region:"",district:"",school:"",user:null};
-  location.hash=''; show('login');
+  location.hash=''; show('role');
 });
 
 async function afterLogin(){
@@ -604,9 +649,9 @@ var LAB_IMG="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJSlACEQAAAAEA
     if(sess){ await afterLogin(); return; }
   } else {
     var p=localStorage.getItem('empira_profile_demo');
-    if(p){ fillDashboard(JSON.parse(p)); /* stay on login until user acts, but offer */ }
+    if(p){ fillDashboard(JSON.parse(p)); /* profil bor — lekin rol ekranidan boshlaymiz */ }
   }
-  show('login');
+  show('role');
 })();
 </script>
 </body>
