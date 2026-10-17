@@ -414,16 +414,14 @@ input,select{font-family:inherit}
     <div class="card sgate">
       <button class="back" data-go="role" style="position:absolute;left:18px;top:16px">← Orqaga</button>
       <div class="ill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.8"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(120 12 12)"/></svg></div>
-      <span class="mand">Bir bosish — bepul</span>
       <h1>Laboratoriyaga kirish</h1>
-      <p>Tajribalarni ochish uchun Telegram bilan bir marta kiring. Parol ham, ro‘yxat ham yo‘q.</p>
+      <p>Telegram orqali kiring — parolsiz.</p>
       <div class="tgflow">
         <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
         <div class="otp" id="otp"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"></div>
         <button class="btn btn-blue" id="tg-verify">Kirish</button>
-        <div class="tg-msg" id="tg-msg">Botga <b>/start</b> yozing — kod avtomatik keladi.</div>
+        <div class="tg-msg" id="tg-msg"></div>
       </div>
-      <p class="fine" style="margin-top:16px;color:var(--ink3);font-size:12.5px">Faqat ismingiz olinadi — foydalanuvchilarni sanash uchun.</p>
     </div>
   </section>
 
@@ -588,7 +586,7 @@ function studentEnter(){ location.href='/'; }
 function otpVal(){ var s=''; document.querySelectorAll('#otp .otp-d').forEach(function(d){ s+=d.value||''; }); return s; }
 (function(){
   var open=$('tg-open');
-  if(open && CONFIG.TG_BOT){ var u=CONFIG.TG_BOT.replace(/^@/,''); open.href='https://t.me/'+u; open.target='_blank'; }
+  if(open && CONFIG.TG_BOT){ var u=CONFIG.TG_BOT.replace(/^@/,''); open.href='https://t.me/'+u+'?start=login'; open.target='_blank'; }
   else if(open){ open.addEventListener('click',function(e){ e.preventDefault(); var m=$('tg-msg'); m.style.color='#FF6A4D'; m.textContent='Bot ulanmagan (CONFIG.TG_BOT bo‘sh).'; }); }
   var ds=document.querySelectorAll('#otp .otp-d');
   ds.forEach(function(d,i){
