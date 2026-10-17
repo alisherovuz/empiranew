@@ -623,7 +623,7 @@ var REGIONS={
 var DEMO = !(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
 var sb = null;
 if(!DEMO && window.supabase){ sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); }
-var state={grades:[],counts:{},inst:"",region:"",district:"",school:"",user:null};
+var state={grades:[],counts:{},inst:"",region:"",district:"",school:"",subjects:[],_subs:[],user:null,profile:null,role:'',rolePicked:false};
 
 var $=function(id){return document.getElementById(id);};
 function show(id){
@@ -674,9 +674,13 @@ function resetLoginView(){ showTgFlow(false); document.querySelectorAll('#otp .o
   });
   var vb=$('tg-verify'); if(vb) vb.addEventListener('click', verifyTgCode);
 })();
+function clearOtp(){ document.querySelectorAll('#otp .otp-d').forEach(function(d){ d.value=''; }); var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }
+var tgVerifying=false;
 async function verifyTgCode(){
+  if(tgVerifying) return;                 // ikki marta yuborilishdan himoya
   var m=$('tg-msg'); var code=otpVal();
   if(code.length!==6){ m.style.color='#FF6A4D'; m.textContent='6 xonali kodni kiriting.'; return; }
+  tgVerifying=true;
   m.style.color='var(--ink3)'; m.textContent='Tekshirilmoqda…';
   try{
     var r=await fetch('/api/telegram/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:code})});
@@ -687,8 +691,9 @@ async function verifyTgCode(){
       if(d.access_token && sb){ await sb.auth.setSession({ access_token:d.access_token, refresh_token:d.refresh_token }); }
       await afterLogin();
     }
-    else { m.style.color='#FF6A4D'; m.textContent=d.error||'Kod xato.'; }
+    else { m.style.color='#FF6A4D'; m.textContent=d.error||'Kod xato.'; clearOtp(); }
   }catch(e){ m.style.color='#FF6A4D'; m.textContent='Ulanishda xato. Qayta urinib ko‘ring.'; }
+  finally{ tgVerifying=false; }
 }
 
 /* ---------- MODE badge ---------- */
@@ -700,15 +705,15 @@ $('g-google').addEventListener('click', function(){
   if(DEMO){ state.user={name:'Demo foydalanuvchi', initial:'D'}; afterLogin(); return; }
   sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
 });
+function resetState(){ state={grades:[],counts:{},inst:"",region:"",district:"",school:"",subjects:[],_subs:[],user:null,profile:null,role:'',rolePicked:false}; }
 $('logoutbtn').addEventListener('click', async function(){
-  if(!DEMO && sb){ await sb.auth.signOut(); }
+  if(!DEMO && sb){ try{ await sb.auth.signOut(); }catch(e){} }
   localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role'); localStorage.removeItem('empira_tg_pending');
-  state.role=''; show('role');
+  resetState(); show('role');
 });
 $('resetbtn').addEventListener('click', function(){
   localStorage.removeItem('empira_profile_demo'); localStorage.removeItem('empira_tour_seen');
-  state={grades:[],counts:{},inst:"",region:"",district:"",school:"",user:null};
-  location.hash=''; show('role');
+  resetState(); location.hash=''; show('role');
 });
 
 function storedRole(){ try{ return localStorage.getItem('empira_role')||''; }catch(e){ return ''; } }
