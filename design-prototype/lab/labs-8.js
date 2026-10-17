@@ -140,9 +140,17 @@
         k.board(0.7, 0.46, 0.03, -0.02);
         const ps = k.powerSupply(-0.22, 0.0), sw = k.switchK(-0.06, 0.15);
         const mA = k.meter(0.14, 0.15, 'mA'), R = k.resistor(0.14, -0.04, 'R'), Vm = k.meter(0.14, -0.17, 'V');
-        k.wire(ps.plus, sw.a); k.wire(sw.b, mA.a); k.wire(mA.b, R.b); k.wire(R.a, ps.minus);
-        k.wire(Vm.a, R.b, 0.05); k.wire(Vm.b, R.a, 0.05);
+        const defaultWires = [['sp','ka'],['kb','ap'],['an','rp'],['rn','sn'],['vp','rp'],['vn','rn']];
+        const terminals = { sp:ps.plus, sn:ps.minus, ka:sw.a, kb:sw.b, ap:mA.a, an:mA.b, rp:R.b, rn:R.a, vp:Vm.a, vn:Vm.b };
+        function setConnections(wires) {
+          k.clearWires();
+          (wires || defaultWires).forEach(([a,b]) => {
+            if (terminals[a] && terminals[b]) k.wire(terminals[a], terminals[b], 0.05);
+          });
+        }
+        setConnections(null);
         return {
+          setConnections,
           update(v) { ps.set(v.U); sw.set(false); mA.set(0, 'mA'); Vm.set(0, 'V'); },
           progress(p, v, c) { sw.set(p > 0.3); const f = on(p); mA.set((c.mA / 60) * f, f > 0.99 ? `${fmt(c.mA, 0)} mA` : 'mA'); Vm.set((v.U / 12) * f, f > 0.99 ? `${v.U} V` : 'V'); }
         };

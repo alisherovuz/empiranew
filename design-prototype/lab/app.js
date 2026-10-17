@@ -80,6 +80,9 @@ const ui = {
   hint: $('[data-hint]')
 };
 
+let assembly = null;
+let mode = 'watch';
+let measurementTimer = null;
 let scene3d = null; // filled in when three.js loads
 
 function paintRange(input) {
@@ -116,13 +119,15 @@ function render() {
     `<tr>${L.row(r, r).map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('');
 
   const running = state.phase === 'running';
-  ui.run.disabled = running;
+  ui.run.disabled = running || (mode === 'build' && assembly && !assembly.check().ok);
   ui.inputs.forEach((i) => { i.disabled = running; });
   ui.choices.forEach((b) => { b.disabled = running; });
   ui.run.textContent = L.run[running ? 1 : done ? 2 : 0];
+  renderBuildResult();
 }
 
 function reset() {
+  clearTimeout(measurementTimer);
   state.phase = 'ready'; state.t = 0;
   scene3d?.update(values, calc());
   render();
@@ -141,14 +146,28 @@ ui.choices.forEach((b) => b.addEventListener('click', () => {
 }));
 
 ui.run.addEventListener('click', () => {
+  if (state.phase === 'running') return;
+  if (mode === 'build') {
+    if (!assembly || !assembly.check().ok) return;
+    scene3d?.setConnections?.(assembly.connections());
+    assembly.hide();
+    document.body.classList.remove('is-building');
+  }
   if (state.phase === 'done') scene3d?.update(values, calc());
   state.t = 0;
   state.dur = L.duration ? L.duration(values, calc()) : 1;
   state.phase = 'running';
+  // Measurements remain usable if WebGL is unavailable or still loading.
+  clearTimeout(measurementTimer);
+  if (!scene3d) measurementTimer = setTimeout(() => {
+    if (state.phase === 'running') finish();
+  }, state.dur * 1000);
   render();
 });
 
 function finish() {
+  if (state.phase !== 'running') return;
+  clearTimeout(measurementTimer);
   state.phase = 'done';
   state.runs.push({ ...values, ...calc() });
   scene3d?.progress(1, values, calc());
@@ -249,6 +268,49 @@ async function build3D() {
   return api;
 }
 
+
+/* Ohm's law Build Mode: assembly has to validate before any measurement runs. */
+function renderBuildResult() {
+  const box = $('[data-build-result]');
+  if (!box) return;
+  box.hidden = mode !== 'build' || state.phase !== 'done';
+  if (box.hidden) return;
+  const c = calc();
+  box.innerHTML = '<h2 class="block__title">Zanjir ishladi!</h2><p>U = ' + fmt(values.U,0) +
+    ' V va R = 200 Ω. I = U ÷ R = ' + fmt(c.mA,0) +
+    ' mA.</p><p>Qarshilik o‘zgarmasa, kuchlanish 2 barobar oshganda tok nima bo‘ladi?</p><div class="build-quiz"><button type="button" data-answer="yes">2 barobar oshadi</button><button type="button" data-answer="no">2 barobar kamayadi</button></div><p role="status" data-build-explanation></p><p>Yana tekshiring: kuchlanishni o‘zgartiring va qayta o‘lchang.</p>';
+  box.querySelectorAll('[data-answer]').forEach(b => b.addEventListener('click',() => {
+    box.querySelectorAll('[data-answer]').forEach(x => { x.disabled = true; });
+    box.querySelector('[data-build-explanation]').textContent = b.dataset.answer === 'yes'
+      ? 'To‘g‘ri! I = U ÷ R: R o‘zgarmasa, U 2 barobar oshishi I ni ham 2 barobar oshiradi.'
+      : 'Tok 2 barobar oshadi. I = U ÷ R formulasida R o‘zgarmaydi; U oshganda I ham oshadi.';
+  }));
+}
+function selectMode(next) {
+  mode = next;
+  clearTimeout(measurementTimer);
+  state.runs = []; state.touched.clear();
+  if (mode === 'build') { assembly.show(); scene3d?.setConnections?.(assembly.connections()); }
+  else { assembly.hide(); scene3d?.setConnections?.(null); }
+  document.body.classList.toggle('is-building', mode === 'build');
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  const url = new URL(location.href);
+  if (mode === 'build') url.searchParams.set('mode','build'); else url.searchParams.delete('mode');
+  try { history.replaceState(null,'',url); } catch (_) { /* local-file preview */ }
+  reset();
+}
+if (labId === 'om-qonuni' && window.EMPIRA_BUILD) {
+  $('[data-build-modes]').hidden = false;
+  document.body.classList.add('has-build-mode');
+  assembly = window.EMPIRA_BUILD.create($('[data-build-workbench]'), () => {
+    state.runs = []; state.touched.clear();
+    scene3d?.setConnections?.(assembly.connections());
+    reset();
+  });
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => selectMode(b.dataset.mode)));
+  if (q.get('mode') === 'build') selectMode('build');
+}
+
 /* =====================================================================
    Boot
    ===================================================================== */
@@ -256,9 +318,11 @@ render();
 
 build3D().then((api) => {
   scene3d = api;
+  if (mode === 'build') api.setConnections?.(assembly.connections());
   api.update(values, calc());
+  if (state.phase === 'done') api.progress(1, values, calc());
 
-  if (q.get('holat') === 'tugadi' && L.demo) {
+  if (mode !== 'build' && q.get('holat') === 'tugadi' && L.demo) {
     // Documentation state: the lab's demo measurements already taken
     L.demo.forEach((d) => { Object.assign(values, d); state.runs.push({ ...values, ...calc() }); Object.keys(d).forEach((k) => state.touched.add(k)); });
     ui.inputs.forEach((i) => { i.value = values[i.dataset.ctl]; });
@@ -271,5 +335,6 @@ build3D().then((api) => {
   console.error(err);
   $('[data-loading]').hidden = true;
   $('[data-fallback]').hidden = false;
+  $('[data-fallback]').textContent = '3D ko‘rinish yuklanmadi. Boshqaruv orqali tajriba va o‘lchovlarni davom ettirishingiz mumkin.';
 });
 })();

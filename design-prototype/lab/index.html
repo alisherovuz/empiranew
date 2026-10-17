@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="build-mode.css">
 </head>
 <body>
 
@@ -27,10 +28,18 @@
     </button>
   </header>
 
+  <div class="lab-modes" data-build-modes hidden>
+    <div role="group" aria-label="Tajriba rejimi">
+      <button type="button" data-mode="watch" aria-pressed="true">Tayyor tajriba</button>
+      <button type="button" data-mode="build" aria-pressed="false">O‘zingiz yig‘ing</button>
+    </div>
+    <p>5 jihoz · simlarni ulang · tokni o‘lchang</p>
+  </div>
   <main class="lab">
 
     <!-- The experiment dominates -->
     <section class="stage" data-stage aria-label="3D laboratoriya">
+      <section class="build-workbench" data-build-workbench aria-label="Zanjirni yig‘ish" hidden></section>
       <canvas class="stage__canvas" data-canvas></canvas>
       <div class="stage__loading" data-loading role="status">
         <span class="spinner" aria-hidden="true"></span>
@@ -56,6 +65,8 @@
         <div data-fields></div>
         <button class="btn btn--primary btn--large" type="button" data-run></button>
       </section>
+
+      <section class="block build-result" data-build-result aria-label="Tajriba natijasi" hidden></section>
 
       <section class="block block--steps" aria-labelledby="steps-title">
         <h2 class="block__title" id="steps-title">Bosqichlar</h2>
@@ -87,6 +98,7 @@
   <script src="labs-8c.js" defer></script>
   <script src="labs-8d.js" defer></script>
   <script src="labs-8e.js" defer></script>
+  <script src="build-mode.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Empira — O‘qituvchi</title>
+<title>Empira — Darslar va laboratoriyalar</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMzQjRDRkYiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0IDIpIHNjYWxlKDAuOTUpIj48cGF0aCBkPSJNMTIgNiBIMzIgVjExIEgzMCBWMjIgTDM2IDMwIEgyNCBWMzYgSDQwLjUgTDQ1IDQyIEgyNCBWNDYgSDE0IFYxMSBIMTIgWiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xNCA0OSBINTAuMjUgTDU3IDU4IEgxNCBaIiBmaWxsPSIjRkZCMjFFIi8+PC9nPjwvc3ZnPg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,6 +56,19 @@ input,select{font-family:inherit}
 .btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue-700)}
 .btn-blue:disabled{opacity:.45;cursor:not-allowed}
 .btn-ghost{background:#fff;color:var(--ink);border-color:var(--line)}.btn-ghost:hover{border-color:var(--ink3)}
+
+
+/* Clear starting point for first-time students and teachers. */
+.first-experiment{display:flex;flex-direction:column;gap:8px;margin:22px 0 8px;padding:22px;border:1.5px solid var(--blue-300);border-radius:18px;text-decoration:none;background:var(--blue-050);color:var(--ink)}
+.first-experiment-k{font-size:12px;font-weight:600;color:var(--ink3)}
+.first-experiment strong{font-family:var(--sora);font-size:23px;line-height:1.2}
+.first-experiment>span:not([class]){font-size:14px;line-height:1.5;color:var(--ink2);max-width:520px}
+.first-experiment-go{font-weight:700;font-size:14px;color:var(--blue);margin-top:4px}
+.first-experiment:hover{border-color:var(--blue)}
+.first-experiment:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.topic:disabled{cursor:default;opacity:.65;transform:none;box-shadow:none}
+.topic:disabled .ready{color:var(--ink3);background:var(--mist)}
+@media(max-width:420px){.first-experiment{padding:18px}.first-experiment strong{font-size:20px}}
 
 /* auth */
 .auth{max-width:440px;margin:28px auto;padding:38px 34px}
@@ -367,9 +380,15 @@ input,select{font-family:inherit}
       <div class="tbody">
         <h1>Assalomu alaykum<span id="dhello"></span>!</h1>
         <p class="hi-sub">Bugun qaysi ishni boshlaymiz?</p>
+        <a class="first-experiment" href="/design-prototype/lab/index.html?lab=om-qonuni&amp;mode=build">
+          <span class="first-experiment-k">Om qonuni · Interaktiv topshiriq</span>
+          <strong>Zanjirni o‘zingiz yig‘ing</strong>
+          <span>5 ta jihozni tanlang, simlarni ulang va tokni o‘lchang. Har qadamda yordam bor.</span>
+          <span class="first-experiment-go">Tajribani boshlash →</span>
+        </a>
         <div class="tiles">
-          <button class="tile tl1" id="tile-reja" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h3"/></svg></span><h3>Ish reja</h3><p>Mavzular va dars tartibi</p></button>
-          <button class="tile tl2" id="tile-prez" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h7M7 12h4"/></svg></span><h3>Prezentatsiya yasash</h3><p>Mavzu uchun chiroyli slayd</p></button>
+          <button class="tile tl1" id="tile-reja" onclick="location.href='/design-prototype/class-plan/index.html?sinf=8'"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h3"/></svg></span><h3>Yillik reja</h3><p>8-sinf fizika · mavzular tartibi</p></button>
+          <button class="tile tl2" id="tile-prez" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h7M7 12h4"/></svg></span><h3>Tayyor dars</h3><p>Om qonuni · slayd va tajriba</p></button>
           <button class="tile tl3" id="tile-lab" onclick="location.href='/'"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg></span><h3>Laboratoriyalar</h3><p>Hamma 3D tajribalar va skaner</p></button>
           <button class="tile tl4" id="tile-rep" data-go="reports"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span><h3>Hisobotlar</h3><p>Kim tushundi, kim qiynaldi</p></button>
         </div>
@@ -427,9 +446,9 @@ input,select{font-family:inherit}
       <p class="hi-sub" style="margin-top:10px">Mavzuni tanlang — dars tayyor bo‘lib chiqadi: slaydlar, 3D tajriba va xulosa.</p>
       <div class="topics">
         <button class="topic" data-topic="om"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/></svg></span><span><span class="tt">Om qonuni</span><span class="ts">8-sinf · Fizika · Elektr</span></span><span class="ready">Tayyor</span></button>
-        <button class="topic" data-topic="om"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v7M12 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg></span><span><span class="tt">Matematik mayatnik</span><span class="ts">7-sinf · Fizika · Mexanika</span></span><span class="ready">Tayyor</span></button>
-        <button class="topic" data-topic="om"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v6c0 2 3 2 3 4s-3 2-3 4v4M18 3v18"/></svg></span><span><span class="tt">Guk qonuni</span><span class="ts">7-sinf · Fizika · Mexanika</span></span><span class="ready">Tayyor</span></button>
-        <button class="topic" data-topic="om"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16M4 12h7l5-5M11 12l5 5"/></svg></span><span><span class="tt">Yorug‘lik sinishi</span><span class="ts">8-sinf · Fizika · Optika</span></span><span class="ready">Tayyor</span></button>
+        <button class="topic" data-topic="pending" disabled aria-disabled="true"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v7M12 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg></span><span><span class="tt">Matematik mayatnik</span><span class="ts">7-sinf · Fizika · Mexanika</span></span><span class="ready">Tez orada</span></button>
+        <button class="topic" data-topic="pending" disabled aria-disabled="true"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v6c0 2 3 2 3 4s-3 2-3 4v4M18 3v18"/></svg></span><span><span class="tt">Guk qonuni</span><span class="ts">7-sinf · Fizika · Mexanika</span></span><span class="ready">Tez orada</span></button>
+        <button class="topic" data-topic="pending" disabled aria-disabled="true"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16M4 12h7l5-5M11 12l5 5"/></svg></span><span><span class="tt">Yorug‘lik sinishi</span><span class="ts">8-sinf · Fizika · Optika</span></span><span class="ready">Tez orada</span></button>
       </div>
     </div>
   </section>
@@ -816,7 +835,7 @@ function applyRoleUI(role){
   var isStu = role==='student';
   ['tile-reja','tile-prez','tile-rep'].forEach(function(id){ var e=$(id); if(e) e.style.display=isStu?'none':''; });
   var tb=$('tourbtn'); if(tb) tb.style.display=isStu?'none':'';
-  var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Sozlamalar uchun ismingizni bosing. Laboratoriyani oching.' : 'Bugun qaysi ishni boshlaymiz?';
+  var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Birinchi zanjiringizni yig‘ing yoki boshqa laboratoriyani tanlang.' : 'Bugun qaysi ishni boshlaymiz?';
 }
 
 /* ---------- ADMIN PANEL ---------- */
@@ -976,10 +995,10 @@ if($('st-finish')) $('st-finish').addEventListener('click', async function(){
 
 /* ---------- TOUR ---------- */
 var TOUR=[
- {sel:'#tile-reja', t:'Ish reja', x:'Qaysi mavzuni qachon o‘tishingiz shu yerda turadi. Dars tartibingiz tayyor.'},
- {sel:'#tile-prez', t:'Prezentatsiya yasash', x:'Mavzuni tanlang — chiroyli taqdimot o‘zi tayyorlanadi. Qo‘lda bezash shart emas.'},
+ {sel:'#tile-reja', t:'Yillik reja', x:'8-sinf fizika mavzularini yillik reja bo‘yicha toping.'},
+ {sel:'#tile-prez', t:'Tayyor dars', x:'Om qonuni uchun slaydlar, tajriba va savolni oching.'},
  {sel:'#tile-lab',  t:'Laboratoriyalar', x:'O‘quvchilaringizga 3D tajriba bering. Ular o‘zi yig‘adi, o‘lchaydi va natijani ko‘radi.'},
- {sel:'#tile-rep',  t:'Hisobotlar', x:'Kim mavzuni tushundi, kim qiynaldi — hammasini shu yerda ko‘rasiz.'}
+ {sel:'#tile-rep',  t:'Hisobotlar', x:'Hozircha hisobot namunasi mavjud. Haqiqiy natijalarni yig‘ish keyingi yangilanishda qo‘shiladi.'}
 ];
 var tstep=0;
 function startTour(){ tstep=0; $('tour').hidden=false; showTourStep(); }
