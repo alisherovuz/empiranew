@@ -663,7 +663,7 @@ function storedRole(){ try{ return localStorage.getItem('empira_role')||''; }cat
 async function afterLogin(){
   // Kim kirgani (Google yoki Telegram)
   if(!DEMO && sb){
-    var u=(await sb.auth.getUser()).data.user;
+    var sess0=(await sb.auth.getSession()).data.session; var u=sess0&&sess0.user;
     if(u){ var md=u.user_metadata||{}; state.user={
       name: md.full_name||md.name||u.email||'Foydalanuvchi',
       email: u.email||'',
@@ -692,7 +692,7 @@ async function afterLogin(){
 }
 async function loadProfile(){
   if(DEMO){ var p=localStorage.getItem('empira_profile_demo'); return p?JSON.parse(p):null; }
-  var u=(await sb.auth.getUser()).data.user; if(!u) return null;
+  var sess=(await sb.auth.getSession()).data.session; var u=sess&&sess.user; if(!u) return null;
   var r=await sb.from('profiles').select('*').eq('id',u.id).single();
   return r.data||null;
 }
@@ -700,7 +700,7 @@ async function saveProfile(){
   var name = state.user ? state.user.name : '';
   var data = { full_name:name||null, role:'teacher', onboarded:true, institution_type:state.inst||null, region:state.region||null, district:state.district||null, school:state.school||null, subjects:state.subjects||[], grades:(state.grades||[]).map(Number), student_counts:state.counts||{} };
   if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); return data; }
-  var u=(await sb.auth.getUser()).data.user;
+  var u=((await sb.auth.getSession()).data.session||{}).user;
   var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error;
   try{ var rows=(state.grades||[]).map(function(g){ return { teacher_id:u.id, grade:parseInt(g,10), name:g+'-sinf', student_count:state.counts[g]||0 }; }); if(rows.length) await sb.from('classes').insert(rows); }catch(e){}
   return data;
@@ -766,7 +766,7 @@ $('acc-save').addEventListener('click', async function(){
   var data={ full_name:$('acc-fullname').value.trim()||null, subjects:state._subs||[], institution_type:$('acc-inst').value||null, region:$('acc-region').value||null, district:$('acc-district').value||null, school:$('acc-school').value.trim()||null };
   try{
     if(DEMO){ var p=Object.assign({}, state.profile||{}, data); localStorage.setItem('empira_profile_demo', JSON.stringify(p)); state.profile=p; }
-    else { var u=(await sb.auth.getUser()).data.user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; state.profile=Object.assign({}, state.profile||{}, data); }
+    else { var u=((await sb.auth.getSession()).data.session||{}).user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; state.profile=Object.assign({}, state.profile||{}, data); }
     if(state.user && data.full_name) state.user.name=data.full_name;
     fillDashboard(state.profile);
     $('acc-saved').hidden=false;
@@ -826,7 +826,7 @@ if($('st-finish')) $('st-finish').addEventListener('click', async function(){
   var data={ full_name:($('st-name').value||'').trim()||null, role:'student', onboarded:true, region:$('st-region').value||null, district:$('st-district').value||null, school:($('st-school').value||'').trim()||null };
   try{
     if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); }
-    else { var u=(await sb.auth.getUser()).data.user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; }
+    else { var u=((await sb.auth.getSession()).data.session||{}).user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; }
     state.role='student'; state.profile=Object.assign({}, state.profile||{}, data);
     fillDashboard(state.profile); applyRoleUI('student'); show('dashboard');
   }catch(e){ alert('Saqlashda xato: '+(e.message||e)); btn.disabled=false; btn.textContent='Saqlash va kirish'; }

@@ -38,12 +38,21 @@ module.exports = async (req, res) => {
     const password  = tgPass(row.telegram_id);
     const full_name = row.first_name || ('Telegram ' + row.telegram_id);
 
-    // 2) Auth user yaratamiz (agar bo'lmasa). Bor bo'lsa — xatoni e'tiborsiz qoldiramiz.
-    const cr = await admin.auth.admin.createUser({
-      email, password, email_confirm: true,
-      user_metadata: { provider: 'telegram', telegram_id: row.telegram_id, username: row.username || null, full_name }
-    });
-    // cr.error (masalan "already registered") bo'lsa ham davom etamiz — parol deterministik.
+    // 2) Sessiya: avval to'g'ridan-to'g'ri kirishga urinamiz (qaytgan foydalanuvchi uchun TEZ yo'l — createUser'siz).
+    const pub = createClient(URL, ANON, { auth: { autoRefreshToken: false, persistSession: false } });
+    let si = await pub.auth.signInWithPassword({ email, password });
+    if (si.error || !si.data || !si.data.session) {
+      // Birinchi marta: auth user yaratamiz, keyin kiramiz.
+      await admin.auth.admin.createUser({
+        email, password, email_confirm: true,
+        user_metadata: { provider: 'telegram', telegram_id: row.telegram_id, username: row.username || null, full_name }
+      });
+      si = await pub.auth.signInWithPassword({ email, password });
+    }
+    if (si.error || !si.data || !si.data.session) {
+      return res.status(500).json({ error: 'Sessiya yaratilmadi. Email provider yoqilganini tekshiring.' });
+    }
+    const s = si.data.session;
 
     // 3) Sanash uchun telegram_users, so'ng kodni o'chiramiz
     await admin.from('telegram_users').upsert(
@@ -51,14 +60,6 @@ module.exports = async (req, res) => {
       { onConflict: 'telegram_id' }
     );
     await admin.from('telegram_codes').delete().eq('code', row.code);
-
-    // 4) Sessiya olamiz (anon klient bilan parol orqali kiramiz)
-    const pub = createClient(URL, ANON, { auth: { autoRefreshToken: false, persistSession: false } });
-    const si = await pub.auth.signInWithPassword({ email, password });
-    if (si.error || !si.data || !si.data.session) {
-      return res.status(500).json({ error: 'Sessiya yaratilmadi. Email provider yoqilganini tekshiring.' });
-    }
-    const s = si.data.session;
     return res.status(200).json({
       ok: true,
       access_token: s.access_token,
