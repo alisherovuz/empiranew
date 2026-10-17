@@ -665,16 +665,12 @@ async function afterLogin(){
       verified:true }; }
   }
   var profile = await loadProfile();
-  // Rol tanlashda: foydalanuvchi hozir tanlagan rol ustun. Sahifa qayta ochilganda — profildagi rol.
-  var picked = state.rolePicked ? state.role : '';
-  var role = picked || (profile&&profile.role) || storedRole() || 'teacher';
-  state.role = role;
-  // Agar yangi rol tanlangan bo‘lsa — profildagi rolni yangilaymiz
-  if(picked && profile && profile.role && profile.role!==picked && !DEMO && sb){
-    try{ var uu=(await sb.auth.getUser()).data.user; var ur=await sb.from('profiles').update({ role:picked }).eq('id',uu.id); if(!ur.error) profile.role=picked; }catch(e){}
-  }
-  state.rolePicked=false;
   var onboarded = profile && profile.onboarded===true;
+  // Rol QAT'IY: ro‘yxatdan o‘tgach rol o‘zgarmaydi (hech qanday qo‘shimcha operatsiya yo‘q).
+  // Tanlangan rol faqat hali onboarding qilmagan YANGI hisobga ta’sir qiladi.
+  var role = onboarded ? profile.role : ((state.rolePicked?state.role:'') || storedRole() || (profile&&profile.role) || 'teacher');
+  state.role = role;
+  state.rolePicked=false;
   if(onboarded){
     state.profile=profile;
     if(role==='student'){ location.href='/'; return; }
