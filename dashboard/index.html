@@ -390,7 +390,17 @@ input,select{font-family:inherit}
         <h1>Boshqaruv paneli</h1>
         <p class="hi-sub">Empira — umumiy ko‘rsatkichlar</p>
         <div class="stats" id="ad-stats"></div>
-        <h2 class="ad-h2">So‘nggi ro‘yxatdan o‘tganlar</h2>
+        <h2 class="ad-h2">Hududlar bo‘yicha</h2>
+        <div class="ad-regions" id="ad-regions"></div>
+        <h2 class="ad-h2">Foydalanuvchilar</h2>
+        <div class="ad-tools">
+          <input id="ad-search" placeholder="Ism, maktab yoki email bo‘yicha qidirish…">
+          <div class="ad-tabs">
+            <button class="ad-tab active" data-r="">Hammasi</button>
+            <button class="ad-tab" data-r="teacher">O‘qituvchilar</button>
+            <button class="ad-tab" data-r="student">O‘quvchilar</button>
+          </div>
+        </div>
         <div class="ad-recent" id="ad-recent"></div>
       </div>
     </div>
@@ -571,6 +581,17 @@ input,select{font-family:inherit}
 .ad-row .rl{font-size:12px;color:#fff;background:var(--blue);padding:2px 9px;border-radius:999px;font-weight:600}
 .ad-row .rl.stu{background:var(--amber);color:var(--ink)}
 .ad-row .sc{font-size:12.5px;color:var(--ink3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-regions{display:flex;flex-direction:column;gap:7px;margin-bottom:6px}
+.ad-reg{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.ad-reg .nm{width:150px;color:var(--ink2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-reg .bar{flex:1;height:8px;background:var(--mist);border-radius:999px;overflow:hidden}
+.ad-reg .bar i{display:block;height:100%;background:var(--blue);border-radius:999px}
+.ad-reg .n{width:40px;text-align:right;font-weight:700}
+.ad-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.ad-tools input{flex:1;min-width:200px;height:42px;padding:0 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;color:var(--ink)}
+.ad-tabs{display:flex;gap:6px}
+.ad-tab{border:1.5px solid var(--line);background:#fff;color:var(--ink2);font-weight:600;font-size:13px;padding:8px 13px;border-radius:9px;cursor:pointer}
+.ad-tab.active{border-color:var(--blue);background:var(--blue);color:#fff}
 </style>
 <script>
 /* ===== SOZLAMALAR — faqat shu ikkitasini to‘ldiring ===== */
@@ -769,13 +790,28 @@ async function openAdmin(){
 function renderAdmin(d){
   var cards=[['O‘qituvchilar',d.teachers||0],['O‘quvchilar',d.students||0],['Maktablar',d.schools||0],['Telegram',d.telegram_users||0],['Lab. ochilishi',d.lab_opens||0]];
   $('ad-stats').innerHTML=cards.map(function(c){return '<div class="statc"><div class="v">'+c[1]+'</div><div class="k">'+c[0]+'</div></div>';}).join('');
-  var rec=d.recent||[];
-  $('ad-recent').innerHTML = rec.length ? rec.map(function(x){
+  var regs=d.by_region||[]; var maxN=regs.reduce(function(m,x){return Math.max(m,x.n||0);},1);
+  $('ad-regions').innerHTML = regs.length ? regs.map(function(x){ var pct=Math.round((x.n/maxN)*100); return '<div class="ad-reg"><span class="nm">'+esc(x.region)+'</span><span class="bar"><i style="width:'+pct+'%"></i></span><span class="n">'+x.n+'</span></div>'; }).join('') : '<div class="empty-note">Hali hudud ma’lumoti yo‘q.</div>';
+  adLoadUsers();
+}
+var adRole='', adQ='';
+async function adLoadUsers(){
+  var box=$('ad-recent'); box.innerHTML='<div class="empty-note">Yuklanmoqda…</div>';
+  if(DEMO){ renderUsers([{full_name:'Ali Valiyev',role:'student',school:'48-maktab'},{full_name:'Dilnoza O.',role:'teacher',school:'Litsey 2'}]); return; }
+  try{ var r=await sb.rpc('admin_users',{ q:adQ, role_filter:adRole, lim:100 }); if(r.error) throw r.error; renderUsers(r.data||[]); }
+  catch(e){ box.innerHTML='<div class="empty-note">Yuklanmadi: '+esc(e.message||e)+'</div>'; }
+}
+function renderUsers(list){
+  $('ad-recent').innerHTML = (list&&list.length) ? list.map(function(x){
     var isStu=x.role==='student'; var rl=isStu?'O‘quvchi':(x.role==='teacher'?'O‘qituvchi':esc(x.role));
-    return '<div class="ad-row"><span class="nm">'+esc(x.full_name||'—')+'</span><span class="rl'+(isStu?' stu':'')+'">'+rl+'</span><span class="sc">'+esc(x.school||'')+'</span></div>';
-  }).join('') : '<div class="empty-note">Hali hech kim yo‘q.</div>';
+    return '<div class="ad-row"><span class="nm">'+esc(x.full_name||'—')+'</span><span class="rl'+(isStu?' stu':'')+'">'+rl+'</span><span class="sc">'+esc(x.school||x.region||'')+'</span></div>';
+  }).join('') : '<div class="empty-note">Hech kim topilmadi.</div>';
 }
 if($('adlogout')) $('adlogout').addEventListener('click', function(){ $('logoutbtn').click(); });
+(function(){
+  var s=$('ad-search'); if(s){ var t; s.addEventListener('input',function(){ clearTimeout(t); adQ=s.value.trim(); t=setTimeout(adLoadUsers,300); }); }
+  document.querySelectorAll('.ad-tab').forEach(function(b){ b.addEventListener('click',function(){ document.querySelectorAll('.ad-tab').forEach(function(x){x.classList.remove('active')}); b.classList.add('active'); adRole=b.dataset.r||''; adLoadUsers(); }); });
+})();
 
 /* ---------- ACCOUNT / SOZLAMALAR ---------- */
 function fillRegionSel(sel, chosen){
