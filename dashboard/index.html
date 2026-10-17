@@ -376,6 +376,17 @@ input,select{font-family:inherit}
     </div>
   </section>
 
+  <!-- ROLE CONFLICT -->
+  <section class="screen" id="sc-conflict">
+    <div class="card auth" style="text-align:center">
+      <div class="cf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
+      <h1>Hisob allaqachon mavjud</h1>
+      <p class="sub" id="cf-text"></p>
+      <button class="btn btn-blue" id="cf-go" style="width:100%">Hisobimga kirish</button>
+      <button class="back" id="cf-logout" style="margin-top:12px">Boshqa email bilan kirish</button>
+    </div>
+  </section>
+
   <!-- ADMIN -->
   <section class="screen" id="sc-admin">
     <div class="card tboard">
@@ -536,6 +547,8 @@ input,select{font-family:inherit}
 <style>
 .demobar[hidden]{display:none!important}
 .tgflow[hidden],.oauth[hidden]{display:none!important}
+.cf-ic{width:56px;height:56px;border-radius:50%;background:#fff1ee;color:#FF6A4D;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.cf-ic svg{width:28px;height:28px}
 .ordiv{display:flex;align-items:center;gap:12px;color:var(--ink3);font-size:13px;margin:16px 0 6px}
 .ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:var(--line)}
 .tgflow{display:flex;flex-direction:column;gap:12px;margin-top:6px}
@@ -648,7 +661,7 @@ function showTgFlow(on){ var c=$('auth-choose'), f=$('tgflow'), m=$('tg-msg'); i
 function resetLoginView(){ showTgFlow(false); document.querySelectorAll('#otp .otp-d').forEach(function(d){ d.value=''; }); }
 (function(){
   var choose=$('tg-choose'), back=$('tg-back');
-  if(choose) choose.addEventListener('click', function(){ try{localStorage.setItem('empira_tg_pending','1');}catch(e){} showTgFlow(true); setTimeout(function(){ var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }, 60); });
+  if(choose) choose.addEventListener('click', function(){ try{localStorage.setItem('empira_tg_pending','1'); localStorage.setItem('empira_login_intent', state.role||'student');}catch(e){} showTgFlow(true); setTimeout(function(){ var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }, 60); });
   if(back) back.addEventListener('click', function(){ try{localStorage.removeItem('empira_tg_pending');}catch(e){} showTgFlow(false); });
   var open=$('tg-open');
   if(open && CONFIG.TG_BOT){ var u=CONFIG.TG_BOT.replace(/^@/,''); open.href='https://t.me/'+u+'?start=login'; open.target='_blank'; }
@@ -701,14 +714,14 @@ async function verifyTgCode(){
 
 /* ---------- AUTH ---------- */
 $('g-google').addEventListener('click', function(){
-  try{ localStorage.setItem('empira_role', state.role||'teacher'); }catch(e){}
+  try{ localStorage.setItem('empira_role', state.role||'teacher'); localStorage.setItem('empira_login_intent', state.role||'teacher'); }catch(e){}
   if(DEMO){ state.user={name:'Demo foydalanuvchi', initial:'D'}; afterLogin(); return; }
   sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
 });
 function resetState(){ state={grades:[],counts:{},inst:"",region:"",district:"",school:"",subjects:[],_subs:[],user:null,profile:null,role:'',rolePicked:false}; }
 $('logoutbtn').addEventListener('click', async function(){
   if(!DEMO && sb){ try{ await sb.auth.signOut(); }catch(e){} }
-  localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role'); localStorage.removeItem('empira_tg_pending');
+  localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role'); localStorage.removeItem('empira_tg_pending'); localStorage.removeItem('empira_login_intent');
   resetState(); show('role');
 });
 $('resetbtn').addEventListener('click', function(){
@@ -730,25 +743,40 @@ async function afterLogin(){
       verified:true }; }
   }
   var profile = await loadProfile();
-  // ADMIN: har doim admin paneliga (rol tanlash/onboarding e'tiborga olinmaydi)
+  // ADMIN: har doim admin paneliga
   if(profile && profile.role==='admin'){ state.profile=profile; openAdmin(); return; }
-  var onboarded = profile && profile.onboarded===true;
-  // Rol QAT'IY: ro‘yxatdan o‘tgach rol o‘zgarmaydi (hech qanday qo‘shimcha operatsiya yo‘q).
-  // Tanlangan rol faqat hali onboarding qilmagan YANGI hisobga ta’sir qiladi.
-  var role = onboarded ? profile.role : ((state.rolePicked?state.role:'') || storedRole() || (profile&&profile.role) || 'teacher');
-  state.role = role;
+  // "Ro‘yxatdan o‘tgan"mi? onboarded=true YOKI maktabi bor (ustun yo'q bo'lsa ham takrorlanmasin).
+  var done = profile && (profile.onboarded===true || !!profile.school);
+  // Aktiv login niyati (qaysi rolni tanlab kirdi) — bir marta o'qiymiz
+  var intent=''; try{ intent=localStorage.getItem('empira_login_intent')||''; localStorage.removeItem('empira_login_intent'); }catch(e){}
   state.rolePicked=false;
-  if(onboarded){
+  if(done){
     state.profile=profile;
+    // BIR EMAIL = BITTA ROL. Boshqa rol tanlab kirgan bo'lsa — ochiq xato ko'rsatamiz.
+    if(intent && profile.role && intent!==profile.role){ showRoleConflict(profile.role); return; }
+    var role=profile.role||'teacher'; state.role=role;
     fillDashboard(profile); applyRoleUI(role); show('dashboard');
   } else {
-    state.profile = profile||{};
-    if(role==='student'){
+    var role2 = (state.role && state.role) || intent || storedRole() || (profile&&profile.role) || 'teacher';
+    state.role=role2; state.profile=profile||{};
+    if(role2==='student'){
       var nm=$('st-name'); if(nm && state.user && state.user.name) nm.value=state.user.name;
       show('reg-student');
     } else { show('reg-grades'); }
   }
 }
+function roleName(r){ return r==='student'?'o‘quvchi':(r==='teacher'?'o‘qituvchi':(r==='admin'?'admin':r)); }
+function showRoleConflict(existingRole){
+  state._cfRole=existingRole;
+  var t=$('cf-text'); if(t) t.textContent='Bu email allaqachon '+roleName(existingRole)+' hisobi sifatida ro‘yxatdan o‘tgan. Bitta email bilan faqat bitta rol ochiladi.';
+  show('conflict');
+}
+if($('cf-go')) $('cf-go').addEventListener('click', function(){
+  var role=state._cfRole||'teacher'; state.role=role;
+  if(role==='admin'){ openAdmin(); return; }
+  fillDashboard(state.profile||{}); applyRoleUI(role); show('dashboard');
+});
+if($('cf-logout')) $('cf-logout').addEventListener('click', function(){ $('logoutbtn').click(); });
 async function loadProfile(){
   if(DEMO){ var p=localStorage.getItem('empira_profile_demo'); return p?JSON.parse(p):null; }
   var sess=(await sb.auth.getSession()).data.session; var u=sess&&sess.user; if(!u) return null;
@@ -760,7 +788,11 @@ async function saveProfile(){
   var data = { full_name:name||null, role:'teacher', onboarded:true, institution_type:state.inst||null, region:state.region||null, district:state.district||null, school:state.school||null, subjects:state.subjects||[], grades:(state.grades||[]).map(Number), student_counts:state.counts||{} };
   if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); return data; }
   var u=((await sb.auth.getSession()).data.session||{}).user;
-  var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error;
+  var r=await sb.from('profiles').update(data).eq('id',u.id);
+  if(r.error){ // yangi ustunlar yo'q bo'lishi mumkin — asosiylari bilan qayta urinamiz
+    var safe={ full_name:data.full_name, role:'teacher', institution_type:data.institution_type, region:data.region, district:data.district, school:data.school, subjects:data.subjects };
+    var r2=await sb.from('profiles').update(safe).eq('id',u.id); if(r2.error) throw r2.error;
+  }
   try{ var rows=(state.grades||[]).map(function(g){ return { teacher_id:u.id, grade:parseInt(g,10), name:g+'-sinf', student_count:state.counts[g]||0 }; }); if(rows.length) await sb.from('classes').insert(rows); }catch(e){}
   return data;
 }
@@ -924,7 +956,10 @@ if($('st-finish')) $('st-finish').addEventListener('click', async function(){
   var data={ full_name:($('st-name').value||'').trim()||null, role:'student', onboarded:true, region:$('st-region').value||null, district:$('st-district').value||null, school:($('st-school').value||'').trim()||null };
   try{
     if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); }
-    else { var u=((await sb.auth.getSession()).data.session||{}).user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; }
+    else { var u=((await sb.auth.getSession()).data.session||{}).user;
+      var r=await sb.from('profiles').update(data).eq('id',u.id);
+      if(r.error){ var safe={ full_name:data.full_name, role:'student', region:data.region, district:data.district, school:data.school }; var r2=await sb.from('profiles').update(safe).eq('id',u.id); if(r2.error) throw r2.error; }
+    }
     state.role='student'; state.profile=Object.assign({}, state.profile||{}, data);
     fillDashboard(state.profile); applyRoleUI('student'); show('dashboard');
   }catch(e){ alert('Saqlashda xato: '+(e.message||e)); btn.disabled=false; btn.textContent='Saqlash va kirish'; }
