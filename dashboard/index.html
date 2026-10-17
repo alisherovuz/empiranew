@@ -273,11 +273,12 @@ input,select{font-family:inherit}
       <div class="brand"><svg class="brand-img" viewBox="0 0 440 112" role="img" aria-label="Empira"><g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)"><path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/><path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/></g></g><text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text></svg></div>
       <h1 id="login-title">Tizimga kirish</h1>
       <p class="sub" id="login-sub">Google yoki Telegram bilan kiring.</p>
-      <div class="oauth">
+      <div class="oauth" id="auth-choose">
         <button id="g-google"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.2c-.3 1.5-1.1 2.7-2.4 3.5v2.9h3.8C21.8 18.8 23 15.9 23 12.3z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3C3.3 21.3 7.3 24 12 24z"/><path fill="#FBBC05" d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3v-3H1.3C.5 8.3 0 10.1 0 12s.5 3.7 1.3 5.3l4-3z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.3 0 3.3 2.7 1.3 6.7l4 3c.9-2.9 3.6-4.9 6.7-4.9z"/></svg>Google bilan davom etish</button>
+        <button class="tg" id="tg-choose"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram bilan davom etish</button>
       </div>
-      <div class="ordiv"><span>yoki</span></div>
-      <div class="tgflow">
+      <div class="tgflow" id="tgflow" hidden>
+        <button class="back" id="tg-back" style="align-self:flex-start;margin-bottom:2px">← Boshqa usul</button>
         <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
         <div class="otp" id="otp"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"></div>
         <button class="btn btn-ghost" id="tg-verify">Kod bilan kirish</button>
@@ -504,6 +505,7 @@ input,select{font-family:inherit}
 
 <style>
 .demobar[hidden]{display:none!important}
+.tgflow[hidden],.oauth[hidden]{display:none!important}
 .ordiv{display:flex;align-items:center;gap:12px;color:var(--ink3);font-size:13px;margin:16px 0 6px}
 .ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:var(--line)}
 .tgflow{display:flex;flex-direction:column;gap:12px;margin-top:6px}
@@ -583,14 +585,19 @@ function show(id){
 document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click',function(){show(b.getAttribute('data-go'))}); });
 
 /* ---------- ROLE PICKER ---------- */
-function setLoginRole(){ var t=$('login-title'); if(t) t.textContent = state.role==='student' ? 'O‘quvchi sifatida kirish' : 'O‘qituvchi sifatida kirish'; }
+function setLoginRole(){ var t=$('login-title'); if(t) t.textContent = state.role==='student' ? 'O‘quvchi sifatida kirish' : 'O‘qituvchi sifatida kirish'; if(typeof resetLoginView==='function') resetLoginView(); }
 $('role-student').addEventListener('click',function(){ state.role='student'; state.rolePicked=true; try{localStorage.setItem('empira_role','student');}catch(e){} setLoginRole(); show('login'); });
 $('role-teacher').addEventListener('click',function(){ state.role='teacher'; state.rolePicked=true; try{localStorage.setItem('empira_role','teacher');}catch(e){} setLoginRole(); show('login'); });
 // O'quvchi kirishi → laboratoriyalar bosh sahifasi (test.empira.uz)
 function studentEnter(){ location.href='/'; }
 /* ---------- STUDENT: TELEGRAM KOD ---------- */
 function otpVal(){ var s=''; document.querySelectorAll('#otp .otp-d').forEach(function(d){ s+=d.value||''; }); return s; }
+function showTgFlow(on){ var c=$('auth-choose'), f=$('tgflow'), m=$('tg-msg'); if(c) c.hidden=on; if(f) f.hidden=!on; if(m) m.textContent=''; }
+function resetLoginView(){ showTgFlow(false); document.querySelectorAll('#otp .otp-d').forEach(function(d){ d.value=''; }); }
 (function(){
+  var choose=$('tg-choose'), back=$('tg-back');
+  if(choose) choose.addEventListener('click', function(){ showTgFlow(true); setTimeout(function(){ var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }, 60); });
+  if(back) back.addEventListener('click', function(){ showTgFlow(false); });
   var open=$('tg-open');
   if(open && CONFIG.TG_BOT){ var u=CONFIG.TG_BOT.replace(/^@/,''); open.href='https://t.me/'+u+'?start=login'; open.target='_blank'; }
   else if(open){ open.addEventListener('click',function(e){ e.preventDefault(); var m=$('tg-msg'); m.style.color='#FF6A4D'; m.textContent='Bot ulanmagan (CONFIG.TG_BOT bo‘sh).'; }); }
