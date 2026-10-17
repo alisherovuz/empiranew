@@ -280,6 +280,7 @@ input,select{font-family:inherit}
       <div class="tgflow" id="tgflow" hidden>
         <button class="back" id="tg-back" style="align-self:flex-start;margin-bottom:2px">← Boshqa usul</button>
         <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
+        <div class="tg-hint">Bot kod yuboradi — u <b>5 daqiqa</b> amal qiladi. Kodni bosib nusxalang.</div>
         <div class="otp" id="otp"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"></div>
         <button class="btn btn-ghost" id="tg-verify">Kod bilan kirish</button>
         <div class="tg-msg" id="tg-msg"></div>
@@ -359,7 +360,7 @@ input,select{font-family:inherit}
         <div class="brand-sm"><svg class="brand-img" viewBox="0 0 440 112" role="img" aria-label="Empira"><g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)"><path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/><path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/></g></g><text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text></svg></div>
         <div class="right">
           <div class="who"><span class="av" id="dav">O</span><span class="nm" id="dnm">O‘qituvchi</span></div>
-          <button class="iconbtn" onclick="startTour()" title="Qo‘llanma">?</button>
+          <button class="iconbtn" id="tourbtn" onclick="startTour()" title="Qo‘llanma">?</button>
           <button class="iconbtn" id="logoutbtn" title="Chiqish" style="font-size:15px">⎋</button>
         </div>
       </div>
@@ -556,6 +557,7 @@ input,select{font-family:inherit}
 .otp-d{flex:1;min-width:0;height:56px;text-align:center;font-size:24px;font-weight:700;border:1.5px solid var(--line);border-radius:12px;color:var(--ink);background:#fff}
 .otp-d:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(59,76,255,.12)}
 .tg-msg{min-height:18px;font-size:13px;text-align:center;color:var(--ink3)}
+.tg-hint{font-size:12.5px;text-align:center;color:var(--ink3);line-height:1.5;margin:-2px 0 2px}
 .who{cursor:pointer}
 .who:hover .nm{color:var(--ink)}
 .av.ph,.acc-av.ph{background-size:cover;background-position:center;color:transparent}
@@ -808,7 +810,8 @@ function fillDashboard(p){
 function applyRoleUI(role){
   var isStu = role==='student';
   ['tile-reja','tile-prez','tile-rep'].forEach(function(id){ var e=$(id); if(e) e.style.display=isStu?'none':''; });
-  var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Laboratoriyani oching va tajriba qiling.' : 'Bugun qaysi ishni boshlaymiz?';
+  var tb=$('tourbtn'); if(tb) tb.style.display=isStu?'none':'';
+  var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Sozlamalar uchun ismingizni bosing. Laboratoriyani oching.' : 'Bugun qaysi ishni boshlaymiz?';
 }
 
 /* ---------- ADMIN PANEL ---------- */
