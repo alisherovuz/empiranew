@@ -271,13 +271,18 @@ input,select{font-family:inherit}
     <div class="card auth">
       <button class="back" data-go="role" style="margin-bottom:6px">← Orqaga</button>
       <div class="brand"><svg class="brand-img" viewBox="0 0 440 112" role="img" aria-label="Empira"><g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)"><path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/><path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/></g></g><text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text></svg></div>
-      <h1>O‘qituvchi sifatida kiring</h1>
-      <p class="sub">Bir marta kiring — keyin har safar osongina ochiladi.</p>
+      <h1 id="login-title">Tizimga kirish</h1>
+      <p class="sub" id="login-sub">Google yoki Telegram bilan kiring.</p>
       <div class="oauth">
         <button id="g-google"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.2c-.3 1.5-1.1 2.7-2.4 3.5v2.9h3.8C21.8 18.8 23 15.9 23 12.3z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3C3.3 21.3 7.3 24 12 24z"/><path fill="#FBBC05" d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3v-3H1.3C.5 8.3 0 10.1 0 12s.5 3.7 1.3 5.3l4-3z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.3 0 3.3 2.7 1.3 6.7l4 3c.9-2.9 3.6-4.9 6.7-4.9z"/></svg>Google bilan davom etish</button>
-        <button class="tg" id="g-tg" disabled style="opacity:.5;cursor:not-allowed"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram — tez orada</button>
       </div>
-      <p class="fine" id="loginfine">Google bilan bir marta kiring — ism va emailingiz olinadi, boshqa hech narsa.</p>
+      <div class="ordiv"><span>yoki</span></div>
+      <div class="tgflow">
+        <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
+        <div class="otp" id="otp"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"></div>
+        <button class="btn btn-ghost" id="tg-verify">Kod bilan kirish</button>
+        <div class="tg-msg" id="tg-msg"></div>
+      </div>
     </div>
   </section>
 
@@ -409,19 +414,17 @@ input,select{font-family:inherit}
     </div>
   </section>
 
-  <!-- STUDENT GATE -->
-  <section class="screen" id="sc-student">
-    <div class="card sgate">
-      <button class="back" data-go="role" style="position:absolute;left:18px;top:16px">← Orqaga</button>
-      <div class="ill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.8"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(120 12 12)"/></svg></div>
-      <h1>Laboratoriyaga kirish</h1>
-      <p>Telegram orqali kiring — parolsiz.</p>
-      <div class="tgflow">
-        <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
-        <div class="otp" id="otp"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"><input class="otp-d" inputmode="numeric" maxlength="1"></div>
-        <button class="btn btn-blue" id="tg-verify">Kirish</button>
-        <div class="tg-msg" id="tg-msg"></div>
-      </div>
+  <!-- REG: STUDENT (onboarding) -->
+  <section class="screen" id="sc-reg-student">
+    <div class="card reg">
+      <div class="step-k">Ma’lumotlaringiz</div>
+      <h2>O‘zingiz haqingizda</h2>
+      <p class="q-sub">Bir marta to‘ldiring — keyin so‘ralmaydi.</p>
+      <div class="field"><label>To‘liq ism</label><input type="text" id="st-name" placeholder="Ism Familiya"></div>
+      <div class="field"><label>Viloyat</label><select id="st-region"></select></div>
+      <div class="field"><label>Tuman / shahar</label><select id="st-district"><option value="">Avval viloyatni tanlang</option></select></div>
+      <div class="field"><label>Maktab</label><input type="text" id="st-school" placeholder="masalan, 48-maktab"></div>
+      <div class="nav"><button class="btn btn-blue" id="st-finish">Saqlash va kirish</button></div>
     </div>
   </section>
 
@@ -501,6 +504,8 @@ input,select{font-family:inherit}
 
 <style>
 .demobar[hidden]{display:none!important}
+.ordiv{display:flex;align-items:center;gap:12px;color:var(--ink3);font-size:13px;margin:16px 0 6px}
+.ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:var(--line)}
 .tgflow{display:flex;flex-direction:column;gap:12px;margin-top:6px}
 .otp{display:flex;gap:8px}
 .otp-d{flex:1;min-width:0;height:56px;text-align:center;font-size:24px;font-weight:700;border:1.5px solid var(--line);border-radius:12px;color:var(--ink);background:#fff}
@@ -578,8 +583,9 @@ function show(id){
 document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click',function(){show(b.getAttribute('data-go'))}); });
 
 /* ---------- ROLE PICKER ---------- */
-$('role-student').addEventListener('click',function(){ show('student'); });
-$('role-teacher').addEventListener('click',function(){ show('login'); });
+function setLoginRole(){ var t=$('login-title'); if(t) t.textContent = state.role==='student' ? 'O‘quvchi sifatida kirish' : 'O‘qituvchi sifatida kirish'; }
+$('role-student').addEventListener('click',function(){ state.role='student'; try{localStorage.setItem('empira_role','student');}catch(e){} setLoginRole(); show('login'); });
+$('role-teacher').addEventListener('click',function(){ state.role='teacher'; try{localStorage.setItem('empira_role','teacher');}catch(e){} setLoginRole(); show('login'); });
 // O'quvchi kirishi → laboratoriyalar bosh sahifasi (test.empira.uz)
 function studentEnter(){ location.href='/'; }
 /* ---------- STUDENT: TELEGRAM KOD ---------- */
@@ -616,7 +622,12 @@ async function verifyTgCode(){
   try{
     var r=await fetch('/api/telegram/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:code})});
     var d=await r.json();
-    if(d.ok){ localStorage.setItem('empira_tg', d.telegram_id); m.style.color='#0a7d33'; m.textContent='✓ Ulandingiz — '+(d.first_name||'')+'. Laboratoriyaga o‘tilmoqda…'; setTimeout(function(){ location.href='/'; }, 700); }
+    if(d.ok){
+      m.style.color='#0a7d33'; m.textContent='✓ Tasdiqlandi — '+(d.first_name||'')+'…';
+      try{ localStorage.setItem('empira_role', state.role||'student'); }catch(e){}
+      if(d.access_token && sb){ await sb.auth.setSession({ access_token:d.access_token, refresh_token:d.refresh_token }); }
+      await afterLogin();
+    }
     else { m.style.color='#FF6A4D'; m.textContent=d.error||'Kod xato.'; }
   }catch(e){ m.style.color='#FF6A4D'; m.textContent='Ulanishda xato. Qayta urinib ko‘ring.'; }
 }
@@ -626,17 +637,14 @@ async function verifyTgCode(){
 
 /* ---------- AUTH ---------- */
 $('g-google').addEventListener('click', function(){
-  if(DEMO){ state.user={name:'Demo o‘qituvchi', initial:'D'}; afterLogin(); return; }
+  try{ localStorage.setItem('empira_role', state.role||'teacher'); }catch(e){}
+  if(DEMO){ state.user={name:'Demo foydalanuvchi', initial:'D'}; afterLogin(); return; }
   sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
-});
-$('g-tg').addEventListener('click', function(){
-  if(DEMO){ state.user={name:'Demo o‘qituvchi', initial:'D'}; afterLogin(); return; }
-  alert('O‘qituvchi uchun Telegram login — server tomoni keyin ulanadi. Hozircha Google bilan kiring.');
 });
 $('logoutbtn').addEventListener('click', async function(){
   if(!DEMO && sb){ await sb.auth.signOut(); }
-  localStorage.removeItem('empira_tour_seen');
-  show('role');
+  localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role');
+  state.role=''; show('role');
 });
 $('resetbtn').addEventListener('click', function(){
   localStorage.removeItem('empira_profile_demo'); localStorage.removeItem('empira_tour_seen');
@@ -644,37 +652,49 @@ $('resetbtn').addEventListener('click', function(){
   location.hash=''; show('role');
 });
 
+function storedRole(){ try{ return localStorage.getItem('empira_role')||''; }catch(e){ return ''; } }
 async function afterLogin(){
-  // Google identit'ini olamiz (kim kirgani ko‘rinib tursin)
+  // Kim kirgani (Google yoki Telegram)
   if(!DEMO && sb){
     var u=(await sb.auth.getUser()).data.user;
-    if(u){ state.user={
-      name:(u.user_metadata&&(u.user_metadata.full_name||u.user_metadata.name))||u.email,
-      email:u.email,
-      avatar:(u.user_metadata&&(u.user_metadata.avatar_url||u.user_metadata.picture))||'',
+    if(u){ var md=u.user_metadata||{}; state.user={
+      name: md.full_name||md.name||u.email||'Foydalanuvchi',
+      email: u.email||'',
+      avatar: md.avatar_url||md.picture||'',
+      provider: (u.app_metadata&&u.app_metadata.provider)|| (md.provider) ||'',
       verified:true }; }
   }
-  // profil bormi? bor bo‘lsa dashboard, yo‘q bo‘lsa ro‘yxat
   var profile = await loadProfile();
-  if(profile){ state.profile=profile; fillDashboard(profile); show('dashboard'); }
-  else { show('reg-grades'); }
+  var role = (profile&&profile.role) || storedRole() || state.role || 'teacher';
+  state.role = role;
+  // Onboarding tugaganmi?
+  var done = profile && (profile.onboarded===true || (role==='teacher' && profile.school));
+  if(done){
+    state.profile=profile;
+    if(role==='student'){ location.href='/'; return; }
+    fillDashboard(profile); show('dashboard');
+  } else {
+    state.profile = profile||{};
+    if(role==='student'){
+      var nm=$('st-name'); if(nm && state.user && state.user.name) nm.value=state.user.name;
+      show('reg-student');
+    } else { show('reg-grades'); }
+  }
 }
 async function loadProfile(){
   if(DEMO){ var p=localStorage.getItem('empira_profile_demo'); return p?JSON.parse(p):null; }
   var u=(await sb.auth.getUser()).data.user; if(!u) return null;
   var r=await sb.from('profiles').select('*').eq('id',u.id).single();
-  if(r.data && r.data.school) return r.data; // ro‘yxat tugagan bo‘lsa school bo‘ladi
-  return null;
+  return r.data||null;
 }
 async function saveProfile(){
-  var name = state.user ? state.user.name : 'O‘qituvchi';
-  var profile = { full_name:name, institution_type:state.inst, region:state.region, district:state.district, school:state.school, grades:state.grades, counts:state.counts };
-  if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(profile)); return profile; }
+  var name = state.user ? state.user.name : '';
+  var data = { full_name:name||null, role:'teacher', onboarded:true, institution_type:state.inst||null, region:state.region||null, district:state.district||null, school:state.school||null, subjects:state.subjects||[], grades:(state.grades||[]).map(Number), student_counts:state.counts||{} };
+  if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); return data; }
   var u=(await sb.auth.getUser()).data.user;
-  await sb.from('profiles').update({ full_name:name, institution_type:state.inst, region:state.region, district:state.district, school:state.school }).eq('id',u.id);
-  var rows = state.grades.map(function(g){ return { teacher_id:u.id, grade:parseInt(g,10), name:g+'-sinf', student_count:state.counts[g]||0 }; });
-  if(rows.length) await sb.from('classes').insert(rows);
-  return profile;
+  var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error;
+  try{ var rows=(state.grades||[]).map(function(g){ return { teacher_id:u.id, grade:parseInt(g,10), name:g+'-sinf', student_count:state.counts[g]||0 }; }); if(rows.length) await sb.from('classes').insert(rows); }catch(e){}
+  return data;
 }
 function setAv(el, user, nm){
   if(user && user.avatar){ el.style.backgroundImage='url('+user.avatar+')'; el.classList.add('ph'); el.textContent=''; }
@@ -774,9 +794,24 @@ $('district').addEventListener('change',function(){ state.district=this.value; }
 $('school').addEventListener('input',function(){ state.school=this.value; });
 $('reg-finish').addEventListener('click', async function(){
   this.disabled=true; this.textContent='Saqlanmoqda…';
-  try{ var p=await saveProfile(); fillDashboard(p); } catch(e){ alert('Saqlashda xato: '+(e.message||e)); }
+  try{ var p=await saveProfile(); fillDashboard(p); show('dashboard'); } catch(e){ alert('Saqlashda xato: '+(e.message||e)); }
   this.disabled=false; this.textContent='Tugatish va kirish';
-  show('dashboard');
+});
+
+/* ---------- STUDENT ONBOARDING ---------- */
+(function(){
+  var r=$('st-region'); if(!r) return;
+  fillRegionSel(r,'');
+  r.addEventListener('change',function(){ fillDistrictSel($('st-district'), this.value, ''); });
+})();
+if($('st-finish')) $('st-finish').addEventListener('click', async function(){
+  var btn=this; btn.disabled=true; btn.textContent='Saqlanmoqda…';
+  var data={ full_name:($('st-name').value||'').trim()||null, role:'student', onboarded:true, region:$('st-region').value||null, district:$('st-district').value||null, school:($('st-school').value||'').trim()||null };
+  try{
+    if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); }
+    else { var u=(await sb.auth.getUser()).data.user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; }
+    location.href='/';
+  }catch(e){ alert('Saqlashda xato: '+(e.message||e)); btn.disabled=false; btn.textContent='Saqlash va kirish'; }
 });
 
 /* ---------- TOUR ---------- */
