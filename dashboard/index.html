@@ -443,14 +443,14 @@ input,select{font-family:inherit}
       </div>
       <div class="acc-form">
         <div class="field"><label>To‘liq ism</label><input type="text" id="acc-fullname" placeholder="Ism Familiya"></div>
-        <div class="field"><label>Fan(lar)</label><div class="subjects" id="acc-subjects">
+        <div class="field" id="acc-f-subjects"><label>Fan(lar)</label><div class="subjects" id="acc-subjects">
           <button type="button" class="subj" data-s="Fizika">Fizika</button>
           <button type="button" class="subj" data-s="Kimyo">Kimyo</button>
           <button type="button" class="subj" data-s="Biologiya">Biologiya</button>
           <button type="button" class="subj" data-s="Matematika">Matematika</button>
           <button type="button" class="subj" data-s="Informatika">Informatika</button>
         </div></div>
-        <div class="field"><label>Muassasa turi</label>
+        <div class="field" id="acc-f-inst"><label>Muassasa turi</label>
           <select id="acc-inst"><option value="">Tanlang…</option><option>Maktab</option><option>Litsey</option><option>Kollej</option><option>Xususiy</option></select></div>
         <div class="field"><label>Viloyat</label><select id="acc-region"></select></div>
         <div class="field"><label>Tuman / shahar</label><select id="acc-district"><option value="">Avval viloyatni tanlang</option></select></div>
@@ -580,7 +580,7 @@ function show(id){
   var el=$('sc-'+id); if(el) el.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
   if(id==='reg-students') buildCounts();
-  if(id==='dashboard' && !localStorage.getItem('empira_tour_seen')){ localStorage.setItem('empira_tour_seen','1'); setTimeout(startTour,420); }
+  if(id==='dashboard' && state.role!=='student' && !localStorage.getItem('empira_tour_seen')){ localStorage.setItem('empira_tour_seen','1'); setTimeout(startTour,420); }
 }
 document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click',function(){show(b.getAttribute('data-go'))}); });
 
@@ -596,8 +596,8 @@ function showTgFlow(on){ var c=$('auth-choose'), f=$('tgflow'), m=$('tg-msg'); i
 function resetLoginView(){ showTgFlow(false); document.querySelectorAll('#otp .otp-d').forEach(function(d){ d.value=''; }); }
 (function(){
   var choose=$('tg-choose'), back=$('tg-back');
-  if(choose) choose.addEventListener('click', function(){ showTgFlow(true); setTimeout(function(){ var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }, 60); });
-  if(back) back.addEventListener('click', function(){ showTgFlow(false); });
+  if(choose) choose.addEventListener('click', function(){ try{localStorage.setItem('empira_tg_pending','1');}catch(e){} showTgFlow(true); setTimeout(function(){ var f=document.querySelector('#otp .otp-d'); if(f) f.focus(); }, 60); });
+  if(back) back.addEventListener('click', function(){ try{localStorage.removeItem('empira_tg_pending');}catch(e){} showTgFlow(false); });
   var open=$('tg-open');
   if(open && CONFIG.TG_BOT){ var u=CONFIG.TG_BOT.replace(/^@/,''); open.href='https://t.me/'+u+'?start=login'; open.target='_blank'; }
   else if(open){ open.addEventListener('click',function(e){ e.preventDefault(); var m=$('tg-msg'); m.style.color='#FF6A4D'; m.textContent='Bot ulanmagan (CONFIG.TG_BOT bo‘sh).'; }); }
@@ -631,7 +631,7 @@ async function verifyTgCode(){
     var d=await r.json();
     if(d.ok){
       m.style.color='#0a7d33'; m.textContent='✓ Tasdiqlandi — '+(d.first_name||'')+'…';
-      try{ localStorage.setItem('empira_role', state.role||'student'); }catch(e){}
+      try{ localStorage.setItem('empira_role', state.role||'student'); localStorage.removeItem('empira_tg_pending'); }catch(e){}
       if(d.access_token && sb){ await sb.auth.setSession({ access_token:d.access_token, refresh_token:d.refresh_token }); }
       await afterLogin();
     }
@@ -650,7 +650,7 @@ $('g-google').addEventListener('click', function(){
 });
 $('logoutbtn').addEventListener('click', async function(){
   if(!DEMO && sb){ await sb.auth.signOut(); }
-  localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role');
+  localStorage.removeItem('empira_tour_seen'); localStorage.removeItem('empira_role'); localStorage.removeItem('empira_tg_pending');
   state.role=''; show('role');
 });
 $('resetbtn').addEventListener('click', function(){
@@ -668,7 +668,8 @@ async function afterLogin(){
       name: md.full_name||md.name||u.email||'Foydalanuvchi',
       email: u.email||'',
       avatar: md.avatar_url||md.picture||'',
-      provider: (u.app_metadata&&u.app_metadata.provider)|| (md.provider) ||'',
+      username: md.username||'',
+      provider: (md.provider) || (u.app_metadata&&u.app_metadata.provider) ||'',
       verified:true }; }
   }
   var profile = await loadProfile();
@@ -680,8 +681,7 @@ async function afterLogin(){
   state.rolePicked=false;
   if(onboarded){
     state.profile=profile;
-    if(role==='student'){ location.href='/'; return; }
-    fillDashboard(profile); show('dashboard');
+    fillDashboard(profile); applyRoleUI(role); show('dashboard');
   } else {
     state.profile = profile||{};
     if(role==='student'){
@@ -714,6 +714,11 @@ function fillDashboard(p){
   $('dnm').textContent=nm; setAv($('dav'), state.user, nm);
   $('dhello').textContent = nm && nm!=='O‘qituvchi' ? ', '+nm.split(' ')[0] : '';
 }
+function applyRoleUI(role){
+  var isStu = role==='student';
+  ['tile-reja','tile-prez','tile-rep'].forEach(function(id){ var e=$(id); if(e) e.style.display=isStu?'none':''; });
+  var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Laboratoriyani oching va tajriba qiling.' : 'Bugun qaysi ishni boshlaymiz?';
+}
 
 /* ---------- ACCOUNT / SOZLAMALAR ---------- */
 function fillRegionSel(sel, chosen){
@@ -730,8 +735,11 @@ function openAccount(){
   var u=state.user||{}, p=state.profile||{};
   var nm=p.full_name||u.name||'O‘qituvchi';
   $('acc-nm').textContent=nm; setAv($('acc-av'), u, nm);
-  $('acc-em').textContent=u.email||(DEMO?'demo@empira.uz (DEMO)':'—');
-  $('acc-verif').hidden = DEMO || !u.email;
+  var isTg=(u.provider==='telegram');
+  $('acc-em').textContent = isTg ? ('Telegram'+(u.username?(' @'+u.username):'')) : (u.email||(DEMO?'demo@empira.uz (DEMO)':'—'));
+  var vf=$('acc-verif'); var vtxt = isTg ? 'Telegram orqali tasdiqlangan' : (u.email?'Google orqali tasdiqlangan':'');
+  if(DEMO || !vtxt){ vf.hidden=true; } else { vf.hidden=false; vf.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+vtxt; }
+  var isStu=((p.role||state.role)==='student'); var fs=$('acc-f-subjects'), fi=$('acc-f-inst'); if(fs) fs.style.display=isStu?'none':''; if(fi) fi.style.display=isStu?'none':'';
   $('acc-fullname').value = nm==='O‘qituvchi'?'':nm;
   var subs = p.subjects || [];
   state._subs = Array.isArray(subs)?subs.slice():[];
@@ -819,7 +827,8 @@ if($('st-finish')) $('st-finish').addEventListener('click', async function(){
   try{
     if(DEMO){ localStorage.setItem('empira_profile_demo', JSON.stringify(data)); }
     else { var u=(await sb.auth.getUser()).data.user; var r=await sb.from('profiles').update(data).eq('id',u.id); if(r.error) throw r.error; }
-    location.href='/';
+    state.role='student'; state.profile=Object.assign({}, state.profile||{}, data);
+    fillDashboard(state.profile); applyRoleUI('student'); show('dashboard');
   }catch(e){ alert('Saqlashda xato: '+(e.message||e)); btn.disabled=false; btn.textContent='Saqlash va kirish'; }
 });
 
@@ -896,6 +905,8 @@ var LAB_IMG="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJSlACEQAAAAEA
     var p=localStorage.getItem('empira_profile_demo');
     if(p){ fillDashboard(JSON.parse(p)); /* profil bor — lekin rol ekranidan boshlaymiz */ }
   }
+  // Telegram kod kutilayotgan bo'lsa (botga o'tib qaytganda) — to'g'ri kod oynasiga qaytaramiz
+  try{ if(localStorage.getItem('empira_tg_pending')){ state.role=storedRole()||'teacher'; setLoginRole(); show('login'); showTgFlow(true); return; } }catch(e){}
   show('role');
 })();
 </script>
