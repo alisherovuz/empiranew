@@ -417,7 +417,11 @@ input,select{font-family:inherit}
       <span class="mand">Bir bosish — bepul</span>
       <h1>Laboratoriyaga kirish</h1>
       <p>Tajribalarni ochish uchun Telegram bilan bir marta kiring. Parol ham, ro‘yxat ham yo‘q.</p>
-      <div class="oauth"><button class="tg" onclick="studentEnter()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram bilan kirish</button></div>
+      <div class="tgflow">
+        <a class="btn btn-blue" id="tg-open" href="#" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;vertical-align:-3px;margin-right:7px"><path d="M21.9 4.3 18.6 20c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1l-4.9-1.5c-1-.3-1-1 .2-1.5l19.1-7.4c.9-.3 1.6.2 1.3 1.6z"/></svg>Telegram'da kod olish</a>
+        <div class="codebox"><input id="tg-code" inputmode="numeric" maxlength="6" placeholder="6 xonali kod"><button class="btn btn-ghost" id="tg-verify">Tasdiqlash</button></div>
+        <div class="tg-msg" id="tg-msg">Botga <b>/start</b> yozing — kod keladi. Shu kodni kiriting.</div>
+      </div>
       <p class="fine" style="margin-top:16px;color:var(--ink3);font-size:12.5px">Faqat ismingiz olinadi — foydalanuvchilarni sanash uchun.</p>
     </div>
   </section>
@@ -498,6 +502,10 @@ input,select{font-family:inherit}
 
 <style>
 .demobar[hidden]{display:none!important}
+.tgflow{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.codebox{display:flex;gap:8px}
+.codebox input{flex:1;min-width:0;height:50px;text-align:center;letter-spacing:4px;font-size:20px;font-weight:700;border:1.5px solid var(--line);border-radius:12px;color:var(--ink)}
+.tg-msg{min-height:18px;font-size:13px;text-align:center;color:var(--ink3)}
 .who{cursor:pointer}
 .who:hover .nm{color:var(--ink)}
 .av.ph,.acc-av.ph{background-size:cover;background-position:center;color:transparent}
@@ -530,7 +538,8 @@ input,select{font-family:inherit}
 /* ===== SOZLAMALAR — faqat shu ikkitasini to‘ldiring ===== */
 const CONFIG = {
   SUPABASE_URL:  "https://bxxpukjszidkcbuewbcf.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_OxQzGLAdRWcCX06JnzEN7A_cRrRyMBM"  // publishable (public) key
+  SUPABASE_ANON_KEY: "sb_publishable_OxQzGLAdRWcCX06JnzEN7A_cRrRyMBM",  // publishable (public) key
+  TG_BOT: ""   // bot username, masalan "EmpiraLabBot" (@ belgisisiz)
 };
 /* Bo‘sh bo‘lsa — DEMO rejim (internetsiz ishlaydi). To‘ldirilsa — real Google auth + baza. */
 /* ======================================================= */
@@ -573,6 +582,25 @@ $('role-student').addEventListener('click',function(){ show('student'); });
 $('role-teacher').addEventListener('click',function(){ show('login'); });
 // O'quvchi kirishi → laboratoriyalar bosh sahifasi (test.empira.uz)
 function studentEnter(){ location.href='/'; }
+/* ---------- STUDENT: TELEGRAM KOD ---------- */
+(function(){
+  var open=$('tg-open'); if(!open) return;
+  if(CONFIG.TG_BOT){ open.href='https://t.me/'+CONFIG.TG_BOT.replace(/^@/,''); open.target='_blank'; }
+  else { open.addEventListener('click',function(e){ e.preventDefault(); var m=$('tg-msg'); m.style.color='#FF6A4D'; m.textContent='Bot ulanmagan (CONFIG.TG_BOT bo‘sh).'; }); }
+  var vb=$('tg-verify'); if(vb) vb.addEventListener('click', verifyTgCode);
+  var ci=$('tg-code'); if(ci) ci.addEventListener('keydown',function(e){ if(e.key==='Enter') verifyTgCode(); });
+})();
+async function verifyTgCode(){
+  var ci=$('tg-code'), m=$('tg-msg'); var code=(ci.value||'').trim();
+  if(!/^\d{6}$/.test(code)){ m.style.color='#FF6A4D'; m.textContent='6 xonali kodni kiriting.'; return; }
+  m.style.color='var(--ink3)'; m.textContent='Tekshirilmoqda…';
+  try{
+    var r=await fetch('/api/telegram/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:code})});
+    var d=await r.json();
+    if(d.ok){ localStorage.setItem('empira_tg', d.telegram_id); m.style.color='#0a7d33'; m.textContent='✓ Ulandingiz — '+(d.first_name||'')+'. Laboratoriyaga o‘tilmoqda…'; setTimeout(function(){ location.href='/'; }, 700); }
+    else { m.style.color='#FF6A4D'; m.textContent=d.error||'Kod xato.'; }
+  }catch(e){ m.style.color='#FF6A4D'; m.textContent='Ulanishda xato. Qayta urinib ko‘ring.'; }
+}
 
 /* ---------- MODE badge ---------- */
 (function(){ var m=$('modebadge'); if(DEMO){m.textContent='DEMO';m.className='mode demo';} else {m.textContent='LIVE';m.className='mode live';} if(/[?&]dev=1/.test(location.search)){ var db=$('demobar'); if(db) db.hidden=false; } })();
