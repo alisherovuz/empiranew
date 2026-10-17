@@ -359,9 +359,9 @@ input,select{font-family:inherit}
       <div class="tbar">
         <div class="brand-sm"><svg class="brand-img" viewBox="0 0 440 112" role="img" aria-label="Empira"><g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)"><path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/><path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/></g></g><text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text></svg></div>
         <div class="right">
-          <div class="who"><span class="av" id="dav">O</span><span class="nm" id="dnm">O‘qituvchi</span></div>
-          <button class="iconbtn" id="tourbtn" onclick="startTour()" title="Qo‘llanma">?</button>
-          <button class="iconbtn" id="logoutbtn" title="Chiqish" style="font-size:15px">⎋</button>
+          <div class="who" title="Profil va sozlamalar"><span class="av" id="dav">O</span><span class="nm" id="dnm">O‘qituvchi</span><svg class="who-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+          <button class="iconbtn" id="tourbtn" onclick="startTour()" title="Yordam / Qo‘llanma">?</button>
+          <button class="iconbtn" id="logoutbtn" title="Chiqish" style="font-size:15px;display:none">⎋</button>
         </div>
       </div>
       <div class="tbody">
@@ -503,6 +503,7 @@ input,select{font-family:inherit}
         <button class="btn btn-ghost" id="acc-signout">Hisobdan chiqish</button>
       </div>
       <div class="acc-saved" id="acc-saved" hidden>✓ Saqlandi</div>
+      <div class="acc-help">Savolingiz bormi? <a id="acc-support" href="#" target="_blank" rel="noopener">Yordam olish →</a></div>
     </div>
   </section>
 
@@ -560,6 +561,9 @@ input,select{font-family:inherit}
 .tg-hint{font-size:12.5px;text-align:center;color:var(--ink3);line-height:1.5;margin:-2px 0 2px}
 .who{cursor:pointer}
 .who:hover .nm{color:var(--ink)}
+.who-cog{width:15px;height:15px;color:var(--ink3);margin-left:1px;flex:0 0 auto}
+.acc-help{text-align:center;margin-top:16px;font-size:13px;color:var(--ink3)}
+.acc-help a{color:var(--blue);font-weight:600;text-decoration:none}
 .av.ph,.acc-av.ph{background-size:cover;background-position:center;color:transparent}
 .acc-head{display:flex;gap:16px;align-items:center;margin-bottom:22px}
 .acc-av{width:60px;height:60px;border-radius:50%;background:var(--blue);color:#fff;font-family:var(--sora);font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background-size:cover;background-position:center}
@@ -613,7 +617,8 @@ input,select{font-family:inherit}
 const CONFIG = {
   SUPABASE_URL:  "https://bxxpukjszidkcbuewbcf.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_OxQzGLAdRWcCX06JnzEN7A_cRrRyMBM",  // publishable (public) key
-  TG_BOT: "empirabot"   // bot username (@ belgisisiz)
+  TG_BOT: "empirabot",   // bot username (@ belgisisiz)
+  SUPPORT: "empirabot"   // yordam uchun Telegram username (@ belgisisiz)
 };
 /* Bo‘sh bo‘lsa — DEMO rejim (internetsiz ishlaydi). To‘ldirilsa — real Google auth + baza. */
 /* ======================================================= */
@@ -885,6 +890,7 @@ function openAccount(){
   show('account');
 }
 document.querySelector('.who').addEventListener('click', openAccount);
+(function(){ var sp=$('acc-support'); if(sp && CONFIG.SUPPORT){ sp.href='https://t.me/'+CONFIG.SUPPORT.replace(/^@/,''); } else if(sp){ sp.style.display='none'; } })();
 document.querySelectorAll('#acc-subjects .subj').forEach(function(b){
   b.addEventListener('click',function(){ b.classList.toggle('sel');
     var s=b.dataset.s, arr=state._subs||[], i=arr.indexOf(s);
