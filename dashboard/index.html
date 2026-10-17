@@ -584,8 +584,8 @@ document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('
 
 /* ---------- ROLE PICKER ---------- */
 function setLoginRole(){ var t=$('login-title'); if(t) t.textContent = state.role==='student' ? 'O‘quvchi sifatida kirish' : 'O‘qituvchi sifatida kirish'; }
-$('role-student').addEventListener('click',function(){ state.role='student'; try{localStorage.setItem('empira_role','student');}catch(e){} setLoginRole(); show('login'); });
-$('role-teacher').addEventListener('click',function(){ state.role='teacher'; try{localStorage.setItem('empira_role','teacher');}catch(e){} setLoginRole(); show('login'); });
+$('role-student').addEventListener('click',function(){ state.role='student'; state.rolePicked=true; try{localStorage.setItem('empira_role','student');}catch(e){} setLoginRole(); show('login'); });
+$('role-teacher').addEventListener('click',function(){ state.role='teacher'; state.rolePicked=true; try{localStorage.setItem('empira_role','teacher');}catch(e){} setLoginRole(); show('login'); });
 // O'quvchi kirishi → laboratoriyalar bosh sahifasi (test.empira.uz)
 function studentEnter(){ location.href='/'; }
 /* ---------- STUDENT: TELEGRAM KOD ---------- */
@@ -665,11 +665,17 @@ async function afterLogin(){
       verified:true }; }
   }
   var profile = await loadProfile();
-  var role = (profile&&profile.role) || storedRole() || state.role || 'teacher';
+  // Rol tanlashda: foydalanuvchi hozir tanlagan rol ustun. Sahifa qayta ochilganda — profildagi rol.
+  var picked = state.rolePicked ? state.role : '';
+  var role = picked || (profile&&profile.role) || storedRole() || 'teacher';
   state.role = role;
-  // Onboarding tugaganmi?
-  var done = profile && (profile.onboarded===true || (role==='teacher' && profile.school));
-  if(done){
+  // Agar yangi rol tanlangan bo‘lsa — profildagi rolni yangilaymiz
+  if(picked && profile && profile.role && profile.role!==picked && !DEMO && sb){
+    try{ var uu=(await sb.auth.getUser()).data.user; var ur=await sb.from('profiles').update({ role:picked }).eq('id',uu.id); if(!ur.error) profile.role=picked; }catch(e){}
+  }
+  state.rolePicked=false;
+  var onboarded = profile && profile.onboarded===true;
+  if(onboarded){
     state.profile=profile;
     if(role==='student'){ location.href='/'; return; }
     fillDashboard(profile); show('dashboard');
