@@ -1,21 +1,33 @@
 // Loads the same curriculum + content files the website uses, and matches a Gemini page reading to a topic.
+// Two books: 7-sinf (data-7.js, content-7.js) and 8-sinf (data.js, content.js). A reading is matched in one grade
+// (the book Gemini recognised, else the page's grade hint, else 8); if nothing fits there, the other book is tried
+// by heading only.
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..', '..', 'design-prototype');
+const DEFAULT_GRADE = 8;
 let cache = null;
 
 function load() {
   if (cache) return cache;
   const sandbox = {};
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'class-plan', 'data.js'), 'utf8'), sandbox);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'topic', 'content.js'), 'utf8'), sandbox);
-  const plan = sandbox.EMPIRA_PLAN, content = sandbox.EMPIRA_TOPICS;
-  const topics = plan.chapters.flatMap((c) => c.topics.map((t) => ({ ...t, chapter: c.n, chapterTitle: c.title, slug: slug(t.t) })));
-  topics.forEach((t, i) => { t.pEnd = (topics[i + 1] ? topics[i + 1].p : 171) - 1; });
-  cache = { plan, content, topics };
+  for (const f of ['class-plan/data.js', 'class-plan/data-7.js', 'topic/content.js', 'topic/content-7.js']) {
+    vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), sandbox, { filename: f });
+  }
+  const content = sandbox.EMPIRA_TOPICS;
+  const grades = {};
+  for (const plan of Object.values(sandbox.EMPIRA_PLANS)) {
+    const topics = plan.chapters.flatMap((c) => c.topics.map((t) => ({ ...t, grade: plan.grade, chapter: c.n, chapterTitle: c.title, slug: slug(t.t) })));
+    const lastPage = plan.lastPage || 170;
+    topics.forEach((t, i) => { t.pEnd = (topics[i + 1] ? topics[i + 1].p : lastPage + 1) - 1; });
+    grades[plan.grade] = { plan, topics, lastPage };
+  }
+  const def = grades[DEFAULT_GRADE];
+  // plan / topics: the 8-sinf book (kept for older callers)
+  cache = { grades, content, plan: def.plan, topics: def.topics };
   return cache;
 }
 
@@ -35,11 +47,25 @@ function scoreHeading(heading, title) {
   return (2 * hit) / (t.length + h.length);
 }
 
-// reading = { is_textbook_page, page_number, paragraph, heading, confidence }
-function match(reading) {
-  const { topics } = load();
+const gradeList = () => Object.keys(load().grades).map(Number).sort((a, b) => a - b);
+const validGrade = (g) => {
+  const n = typeof g === 'string' && /^\d+$/.test(g.trim()) ? Number(g) : g;
+  return Number.isInteger(n) && load().grades[n] ? n : null;
+};
+
+function byHeading(heading, topics) {
+  if (!heading) return null;
+  const best = topics.map((t) => ({ t, s: scoreHeading(heading, t.t) })).sort((a, b) => b.s - a.s)[0];
+  return best && best.s >= 0.6 ? best : null;
+}
+
+// reading = { is_textbook_page, grade, page_number, paragraph, heading, confidence }
+// gradeHint = the grade of the page the teacher scanned from (used when Gemini could not tell the book)
+function match(reading, gradeHint) {
   if (!reading || reading.is_textbook_page === false) return { status: 'notfound', reason: 'not_a_textbook_page' };
-  const page = Number.isInteger(reading.page_number) && reading.page_number >= 3 && reading.page_number <= 170 ? reading.page_number : null;
+  const grade = validGrade(reading.grade) || validGrade(gradeHint) || DEFAULT_GRADE;
+  const { topics, lastPage } = load().grades[grade];
+  const page = Number.isInteger(reading.page_number) && reading.page_number >= 3 && reading.page_number <= lastPage ? reading.page_number : null;
   const para = Number.isInteger(reading.paragraph) ? topics.find((t) => t.n === reading.paragraph) : null;
 
   // 1. Explicit section number (e.g. "19-§"), if consistent with the page number when both are present
@@ -50,15 +76,19 @@ function match(reading) {
     if (byPage) return found(byPage, 'page', 0.9);
   }
   // 3. Heading text → best fuzzy title match
-  if (reading.heading) {
-    const best = topics.map((t) => ({ t, s: scoreHeading(reading.heading, t.t) })).sort((a, b) => b.s - a.s)[0];
-    if (best && best.s >= 0.6) return found(best.t, 'heading', Math.min(0.85, best.s));
+  const best = byHeading(reading.heading, topics);
+  if (best) return found(best.t, 'heading', Math.min(0.85, best.s));
+  // 4. Nothing in that book: maybe it is the other book (heading only: page and § numbers mean nothing across books)
+  for (const g of gradeList().filter((x) => x !== grade)) {
+    const other = byHeading(reading.heading, load().grades[g].topics);
+    if (other) return found(other.t, 'heading', Math.min(0.8, other.s));
   }
   return { status: 'notfound', reason: 'no_match' };
 }
 
 function found(t, method, confidence) {
-  const { plan, content } = load();
+  const { grades, content } = load();
+  const plan = grades[t.grade].plan;
   const labs = (content[t.slug] ? content[t.slug].labs : []).map((l) => ({ slug: l.slug, title: l.title }));
   return {
     status: 'found', method, confidence,
@@ -68,8 +98,10 @@ function found(t, method, confidence) {
   };
 }
 
-function sectionList() {
-  return load().topics.map((t) => `${t.n}-§ (pages ${t.p}–${t.pEnd}): ${t.t}`).join('\n');
+// One book's sections, for the Gemini prompt (default: 8-sinf, as before)
+function sectionList(grade) {
+  const g = validGrade(grade) || DEFAULT_GRADE;
+  return load().grades[g].topics.map((t) => `${t.n}-§ (pages ${t.p}–${t.pEnd}): ${t.t}`).join('\n');
 }
 
-module.exports = { load, match, sectionList, norm };
+module.exports = { load, match, sectionList, norm, grades: gradeList };

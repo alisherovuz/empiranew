@@ -1,6 +1,7 @@
 // Empira — Scanner.
-// LIVE (https, e.g. test.empira.uz): the photo is resized and sent to /api/scan → Gemini reads the page → matched to 8-sinf.
-// OFFLINE (opened as a local file): detection is simulated, cycling through the topics that have a 3D lab.
+// LIVE (https, e.g. test.empira.uz): the photo is resized and sent to /api/scan → Gemini reads the page (7-sinf or 8-sinf
+// book) → matched topic. The page's grade goes along as a hint; a result from the other book switches the page to it.
+// OFFLINE (opened as a local file): detection is simulated, cycling through the current grade's topics that have a 3D lab.
 // Presenter mode or ?mavzu= always uses the chosen mock result (safe for live demos).
 // Prototype URL options: ?holat=kamera|aniqlanmoqda|natija|topilmadi shows a state directly;
 // ?mavzu=<topic slug> fixes the mock result (e.g. ?holat=natija&mavzu=om-qonuni); ?natija=yoq makes detection fail.
@@ -19,16 +20,17 @@
   let stream = null;
   let previewUrl = null;
 
-  // Mock results = exactly the topics that have a demo lab (same data as Class Plan, Topic and Lab)
-  const plan = window.EMPIRA_PLAN;
-  const content = window.EMPIRA_TOPICS;
-  const slug = (s) => s.toLowerCase().replace(/[‘’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const RESULTS = plan.chapters.flatMap((c) => c.topics)
-    .filter((t) => t.lab && content[slug(t.t)])
-    .map((t) => ({ n: t.n, slug: slug(t.t), topic: t.t, labs: content[slug(t.t)].labs.map((l) => ({ slug: l.slug, title: l.title })) }));
+  // Mock results = exactly the current grade's topics that have a demo lab (same data as Class Plan, Topic and Lab).
+  // The grade is the page's grade (availability.js: ?sinf= / ?mavzu= / the grade opened last).
+  const avail = window.EMPIRA_AVAIL;
+  let plan = window.EMPIRA_PLAN;
+  const RESULTS = avail.labTopics()
+    .map((t) => ({ n: t.n, slug: t.slug, topic: t.t, labs: avail.labsFor(t.slug).map((l) => ({ slug: l.slug, title: l.title })) }));
   // Presenter chooser: only the book's lab works / practicals (keys 1–9), not every lab topic
-  const PICKS = RESULTS.filter((r) => [6, 14, 19, 20, 23, 24, 33, 49, 58].includes(r.n));
+  const PICK_SECTIONS = { 7: [12, 25, 34, 40, 44], 8: [6, 14, 19, 20, 23, 24, 33, 49, 58] };
+  const PICKS = RESULTS.filter((r) => (PICK_SECTIONS[plan.grade] || []).includes(r.n));
   const LIVE = /^https?:$/.test(location.protocol);
+  $('[data-r-other]').href = `../class-plan/index.html?sinf=${plan.grade}`;
 
   // Presenter mode (session-wide, hidden from teachers)
   if (q.get('taqdimot') === '1') sessionStorage.setItem('empira-presenter', '1');
@@ -69,16 +71,28 @@
     return RESULTS[n % RESULTS.length];
   }
 
-  // m = { slug, topic, labs: [{ slug, title }] }
+  // m = { slug, topic, labs: [{ slug, title }], grade? }. A result from another grade's book switches the page to it,
+  // so the class label and the plan links follow the result.
   function showResult(m) {
+    if (m.grade && m.grade !== plan.grade && avail.use(m.grade)) plan = window.EMPIRA_PLAN;
     const cta = $('.result__cta');
     $('[data-r-class]').textContent = `${plan.grade}-sinf`;
     $('[data-r-subject]').textContent = plan.subjects[0].name;
     $('[data-r-topic]').textContent = m.topic;
-    $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Tez orada';
-    if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = '3D laboratoriyani ochish'; }
+    $('[data-r-lab]').textContent = m.labs.length ? m.labs.map((l) => l.title).join(' · ') : 'Bu mavzu uchun laboratoriya yo‘q';
+    // One lab with a Build Mode: offer both ways right here (ready lab, or build it yourself)
+    const buildCfg = m.labs.length === 1 && window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(m.labs[0].slug);
+    const buildBtn = $('[data-r-build]');
+    buildBtn.hidden = !buildCfg;
+    if (buildCfg) { buildBtn.href = `../lab/build/index.html?lab=${m.labs[0].slug}`; buildBtn.textContent = buildCfg.label; }
+    if (m.labs.length === 1) { cta.href = `../lab/index.html?lab=${m.labs[0].slug}`; cta.textContent = buildCfg ? 'Tayyor laboratoriya' : '3D laboratoriyani ochish'; }
     else if (m.labs.length > 1) { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = '3D laboratoriyalarni ko‘rish'; }
-    else { cta.href = `../topic/index.html?mavzu=${m.slug}`; cta.textContent = 'Mavzuni ochish'; }
+    else {
+      // No lab for this topic: say so plainly and open the annual plan (lab topics only) at the same chapter
+      const t = avail.findTopic(m.slug);
+      cta.href = `../class-plan/index.html?sinf=${plan.grade}${t ? `#bob-${t.chapter.n}` : ''}`;
+      cta.textContent = 'Yillik rejani ochish';
+    }
     $('[data-r-other]').href = `../class-plan/index.html?sinf=${plan.grade}`;
   }
 
@@ -111,10 +125,10 @@
     const started = Date.now();
     try {
       const image = await toJpegBase64(imageUrl);
-      const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image, mime: 'image/jpeg' }) });
+      const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image, mime: 'image/jpeg', grade: plan.grade }) });
       const data = await res.json().catch(() => ({}));
       await new Promise((r) => setTimeout(r, Math.max(0, 900 - (Date.now() - started))));   // keep the loading state readable
-      if (data.status === 'found') { showResult({ slug: data.topic.slug, topic: data.topic.title, labs: data.labs }); return setState('result'); }
+      if (data.status === 'found') { showResult({ slug: data.topic.slug, topic: data.topic.title, labs: data.labs, grade: data.grade }); return setState('result'); }
       if (data.status === 'notfound') return notFound('notfound');
       console.error('scan error', res.status, data);
       return notFound('error');

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>8-sinf · Fizika — Empira</title>
+  <title>Yillik reja — Empira</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/app-icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@
     <!-- Class + subject -->
     <section class="plan-head">
       <p class="eyebrow">Yillik o‘quv reja</p>
-      <h1 class="plan-head__title" data-grade-title>8-sinf</h1>
+      <h1 class="plan-head__title" data-grade-title></h1>
 
       <nav class="subjects" aria-label="Fan">
         <ul role="list" data-subjects></ul>
@@ -67,9 +67,10 @@
 
     <!-- Prototype only: grades without mock data -->
     <section class="empty" data-empty hidden>
-      <p class="empty__title">Bu sinfning yillik rejasi prototipda hali yo‘q.</p>
-      <p class="hint">Namuna sifatida faqat 8-sinf Fizika rejasi tayyorlangan.</p>
-      <a class="btn btn--secondary" href="../home/index.html">Bosh sahifaga qaytish</a>
+      <p class="empty__title">Bu sinf laboratoriyalari tayyorlanmoqda.</p>
+      <!-- Filled by app.js from the grades that are ready (../shared/availability.js) -->
+      <p class="hint" data-empty-hint>Hozircha tayyor sinflar laboratoriyalarini sinab ko‘ring.</p>
+      <a class="btn btn--secondary" href="../home/index.html" data-empty-home>Bosh sahifaga qaytish</a>
     </section>
 
     <!-- Chapters → topics -->
@@ -87,6 +88,10 @@
   </main>
 
   <script src="data.js"></script>
+  <script src="data-7.js"></script>
+  <script src="../topic/content.js"></script>
+  <script src="../topic/content-7.js"></script>
+  <script src="../shared/availability.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

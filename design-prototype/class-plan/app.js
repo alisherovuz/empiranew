@@ -1,4 +1,5 @@
-// Empira — Class Plan prototype. Renders the annual plan from data.js. Prototype only.
+// Empira — Class Plan prototype. Renders the annual plan of the page's grade (data.js / data-7.js, picked by
+// ../shared/availability.js from ?sinf=). Prototype only.
 (function () {
   const plan = window.EMPIRA_PLAN;
   const q = new URLSearchParams(location.search);
@@ -10,10 +11,8 @@
   const chevronRight = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
   const chevronDown = '<svg class="icon chapter__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 
-  const slug = (s) => s.toLowerCase()
-    .replace(/[‘’']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  const avail = window.EMPIRA_AVAIL;   // ../shared/availability.js: only topics that have a 3D lab are listed
+  const slug = avail.slug;
 
   /* ---------- Subjects ---------- */
   const subjects = plan.subjects.filter((s) => s.available || showAllSubjects);
@@ -24,47 +23,54 @@
   /* ---------- Grade ---------- */
   document.querySelector('[data-grade-title]').textContent = `${grade}-sinf`;
   document.title = `${grade}-sinf · ${subjects[0].name} — Empira`;
-  if (grade !== plan.grade) {
-    // Mock data exists only for 8-sinf: say so plainly instead of showing a fake plan
+  const ready = avail.grades();
+  if (!ready.includes(grade)) {
+    // No labs for this grade yet: say so plainly and point to every grade that is ready
     document.querySelector('[data-plan]').hidden = true;
     document.querySelector('[data-empty]').hidden = false;
+    const names = ready.map((g) => `${g}-sinf`);
+    document.querySelector('[data-empty-hint]').textContent =
+      `Hozircha ${names.length > 1 ? `${names.slice(0, -1).join(', ')} va ${names[names.length - 1]}` : names[0]} ${subjects[0].name} laboratoriyalarini sinab ko‘ring.`;
+    // The grade opened last gets the one primary button
+    document.querySelector('[data-empty-home]').insertAdjacentHTML('beforebegin', ready.map((g) => `
+      <a class="btn ${g === plan.grade ? 'btn--primary' : 'btn--secondary'}" href="../class-plan/index.html?sinf=${g}">${g}-sinf laboratoriyalari</a>`).join(''));
     return;
   }
 
-  // Every topic shows honestly whether its lab exists
-  const tag = (t) => t.lab
-    ? '<span class="tag">3D laboratoriya mavjud</span>'
-    : '<span class="tag tag--soon">Tez orada</span>';
+  // Only topics with a 3D lab are listed, so every row carries the same tag
+  const tag = () => '<span class="tag">3D laboratoriya mavjud</span>';
 
-  /* ---------- This week ---------- */
-  const nowChapter = plan.chapters.find((c) => c.topics.some((t) => t.w === thisWeek));
-  if (nowChapter) {
-    const t = nowChapter.topics.find((x) => x.w === thisWeek);
+  /* ---------- This week (always a topic that has a lab) ---------- */
+  const week = avail.weekTopic(thisWeek);
+  if (week) {
+    const t = week.topic;
+    const label = week.exact ? `Shu hafta · ${t.w}-hafta` : `Eng yaqin laboratoriya · ${t.w}-hafta`;
     const nowEl = document.querySelector('[data-now]');
-    nowEl.href = `../topic/index.html?mavzu=${slug(t.t)}`;
+    nowEl.href = `../topic/index.html?mavzu=${t.slug}`;
     nowEl.innerHTML = `
       <span class="now-row__text">
-        <span class="now-row__label"><span class="dot" aria-hidden="true"></span>Shu hafta · ${t.w}-hafta · ${nowChapter.title}</span>
+        <span class="now-row__label"><span class="dot" aria-hidden="true"></span>${label} · ${t.chapter.title}</span>
         <span class="now-row__title">${t.t}</span>
       </span>
       ${tag(t)}
       <span class="now-row__go">${chevronRight}</span>`;
     nowEl.hidden = false;
   }
+  const nowSlug = week && week.exact ? week.topic.slug : null;
 
-  /* ---------- Chapters ---------- */
+  /* ---------- Chapters (lab topics only; chapters without a lab are left out) ---------- */
   const listEl = document.querySelector('[data-chapters]');
 
-  listEl.innerHTML = plan.chapters.map((c) => {
-    const first = c.topics[0].w;
-    const last = c.topics[c.topics.length - 1].w;
-    const chLabs = c.topics.filter((t) => t.lab).length;
-    const isCurrent = c.topics.some((t) => t.w === thisWeek);
+  listEl.innerHTML = avail.labChapters().map((c) => {
+    const first = c.allTopics[0].w;
+    const last = c.allTopics[c.allTopics.length - 1].w;
+    const chLabs = c.topics.reduce((n, t) => n + avail.labsFor(slug(t.t)).length, 0);   // §24 has two labs
+    const isCurrent = c.topics.some((t) => slug(t.t) === nowSlug);
     const open = openAllOnLoad || isCurrent;
     const id = `bob-${c.n}`;
 
     const rows = c.topics.map((t) => {
-      const current = t.w === thisWeek;
+      const current = slug(t.t) === nowSlug;
       const week = `
         <span class="topic__week">
           <span>${t.w}-hafta</span>
@@ -73,7 +79,7 @@
 
       return `
         <li>
-          <a class="topic${t.lab ? ' topic--lab' : ''}${current ? ' topic--now' : ''}" href="../topic/index.html?mavzu=${slug(t.t)}">
+          <a class="topic topic--lab${current ? ' topic--now' : ''}" href="../topic/index.html?mavzu=${slug(t.t)}">
             ${week}
             <span class="topic__title">${t.t}</span>
             ${tag(t)}

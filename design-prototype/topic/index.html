@@ -16,7 +16,7 @@
   <!-- Top bar: identical to the Class Plan screen. Back goes one level up (to the plan). -->
   <header class="topbar">
     <div class="topbar__inner">
-      <a class="icon-btn" href="../class-plan/index.html?sinf=8" data-back aria-label="Orqaga — yillik reja">
+      <a class="icon-btn" href="../class-plan/index.html" data-back aria-label="Orqaga — yillik reja">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       </a>
 
@@ -48,7 +48,7 @@
   </header>
 
   <main class="page" data-page>
-    <!-- Rendered by app.js from ../class-plan/data.js (plan order) + content.js (topic content) -->
+    <!-- Rendered by app.js from the topic's grade plan (../class-plan/data.js, data-7.js) + content.js / content-7.js -->
   </main>
 
   <!-- Mobile only: the main action stays reachable once the lab card scrolls away -->
@@ -57,7 +57,11 @@
   </div>
 
   <script src="../class-plan/data.js"></script>
+  <script src="../class-plan/data-7.js"></script>
   <script src="content.js"></script>
+  <script src="content-7.js"></script>
+  <script src="../shared/availability.js"></script>
+  <script src="../lab/build/experiments.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

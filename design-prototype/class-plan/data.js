@@ -3,7 +3,8 @@
 //   Fizika. 8-sinf. Toshkent: «O‘qituvchi», 2019 (5 chapters, 60 sections).
 // Fields per topic: n = § number, t = title, p = first textbook page (used by scanning), w = week, lab = has a 3D lab.
 // Weeks are APPROXIMATE (2 lessons a week, in book order) until the official yearly plan (taqvim-mavzu reja) is added.
-// `lab: true` only for the 10 lab works / practicals that have a 3D lab in ../lab/. Everything else shows "Tez orada".
+// `lab: true` for the 42 topics that have a 3D lab in ../lab/ (see ../topic/content.js). Topics without a lab
+// stay in this file (the scanner needs every page range) but are not listed anywhere (../shared/availability.js).
 // Works in the browser (window) and on the server (api/scan.js reads this file).
 
 (typeof window !== 'undefined' ? window : globalThis).EMPIRA_PLAN = {
@@ -106,3 +107,9 @@
     }
   ]
 };
+// Every grade's plan, by grade number (data-7.js adds 7-sinf). shared/availability.js picks the current one.
+(function (root) {
+  root.EMPIRA_PLANS = root.EMPIRA_PLANS || {};
+  root.EMPIRA_PLANS[8] = root.EMPIRA_PLAN;
+  root.EMPIRA_PLAN.lastPage = 170;
+})(typeof window !== 'undefined' ? window : globalThis);

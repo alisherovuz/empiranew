@@ -1,38 +1,55 @@
 // Empira — Topic page prototype (S3). Prototype only.
-// ?mavzu=<slug> selects the topic (default: Nyutonning ikkinchi qonuni).
+// ?mavzu=<slug> selects the topic. An unknown slug shows "Mavzu topilmadi" (never a different topic).
+// Previous/next step through topics that have a 3D lab only (../shared/availability.js).
 (function () {
   const plan = window.EMPIRA_PLAN;
   const content = window.EMPIRA_TOPICS;
-
-  const slug = (s) => s.toLowerCase()
-    .replace(/[‘’']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  const avail = window.EMPIRA_AVAIL;
 
   const icon = {
     left: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>',
     right: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
   };
 
-  // Every curriculum topic has a page, in annual-plan order. Previous/next follow this order (no skipping).
-  const pages = plan.chapters.flatMap((c) =>
-    c.topics.map((t) => ({ ...t, slug: slug(t.t), chapter: c })));
-
-  const requested = new URLSearchParams(location.search).get('mavzu') || 'nyutonning-ikkinchi-qonuni';
-  const i = Math.max(0, pages.findIndex((p) => p.slug === requested));
-  const topic = pages[i];
-  const data = topic.lab ? content[topic.slug] : null;
-  const prev = pages[i - 1];
-  const next = pages[i + 1];
-
   const subject = plan.subjects[0].name;
+  // The page's grade is the topic's grade (availability.js picks it from ?mavzu=), so every link goes to that plan
   const planHref = `../class-plan/index.html?sinf=${plan.grade}`;
+  document.querySelector('[data-back]').href = planHref;
+
+  // Any curriculum topic can still be opened directly (scanner, old links), so resolve against the full plan
+  const requested = new URLSearchParams(location.search).get('mavzu') || '';
+  const topic = avail.findTopic(requested);
+
+  if (!topic) {
+    document.title = `Mavzu topilmadi — Empira`;
+    document.querySelector('[data-page]').innerHTML = `
+      <h1 class="title">Mavzu topilmadi</h1>
+      <section class="nolab" aria-live="polite">
+        <p class="nolab__text">Bu havola bo‘yicha mavzu topilmadi.</p>
+        <a class="btn btn--secondary btn--large" href="${planHref}">Yillik rejaga qaytish</a>
+      </section>`;
+    return;
+  }
+
+  const hasLab = avail.hasLab(topic);
+  const data = hasLab ? content[topic.slug] : null;
+  // A topic without a lab may still have a short explanation (e.g. 7-sinf §2 Fazo va vaqt): show it under the note
+  const study = data || content[topic.slug] || null;
+  const { prev, next } = avail.neighbours(topic.slug);
   const chapterHref = `${planHref}#bob-${topic.chapter.n}`;
   const topicHref = (p) => `?mavzu=${p.slug}`;
 
   document.title = `${topic.t} — ${plan.grade}-sinf ${subject} — Empira`;
 
-  /* ---------- Lab cards (first lab gets the page's one primary button) ---------- */
+  /* ---------- Lab cards (first lab gets the page's one primary button) ----------
+     Labs with a Build Mode (../lab/build/experiments.js) get two choices: the ready lab, or build it yourself. */
+  const buildFor = window.EMPIRA_BUILD_FOR || (() => null);
+  // Best result in Build Mode on this device (1–3 stars), so students see what they earned and can try for 3
+  const starsFor = (labSlug) => {
+    let n = 0;
+    try { n = Number(localStorage.getItem(`empira-build-best:${labSlug}`)) || 0; } catch (e) { /* storage blocked */ }
+    return n ? `<span class="lab-card__stars" aria-label="Eng yaxshi natija: ${n} ta yulduz">${'★'.repeat(n)}${'☆'.repeat(3 - n)}</span>` : '';
+  };
   const labCards = !data ? '' : data.labs.map((lab, n) => `
     <article class="lab-card">
       <h3 class="lab-card__title">${lab.title}</h3>
@@ -43,17 +60,21 @@
         <p class="question__text">${lab.task}</p>
       </div>
       <a class="btn ${n === 0 ? 'btn--primary' : 'btn--secondary'} btn--large" href="../lab/index.html?lab=${lab.slug}"${n === 0 ? ' data-main-cta' : ''}>
-        ${n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
+        ${buildFor(lab.slug) ? 'Tayyor laboratoriya' : n === 0 ? '3D laboratoriyani ochish' : 'Ochish'}
       </a>
+      ${buildFor(lab.slug) ? `<a class="btn btn--secondary btn--large lab-card__build" href="../lab/build/index.html?lab=${lab.slug}">${buildFor(lab.slug).label}${starsFor(lab.slug)}</a>` : ''}
     </article>`).join('');
 
   /* ---------- Formula panel ---------- */
-  const terms = !data ? '' : data.terms.map(([sym, name, unit]) => `
+  const terms = !study ? '' : (study.terms || []).map(([sym, name, unit]) => `
     <div class="term">
       <dt class="term__sym">${sym}</dt>
       <dd class="term__name">${name}</dd>
       <dd class="term__unit">${unit}</dd>
     </div>`).join('');
+
+  const nf = study ? (study.formulas || []).length : 0;
+  const formulaTitle = nf > 1 ? 'Asosiy formulalar' : nf === 1 ? 'Asosiy formula' : 'Asosiy kattaliklar';
 
   /* ---------- Previous / next ---------- */
   const pagerTile = (p, dir) => {
@@ -70,7 +91,7 @@
       <a class="pager__tile pager__tile--${dir}" href="${topicHref(p)}" rel="${dir}">
         <span class="pager__label">${dir === 'prev' ? icon.left + 'Oldingi mavzu' : 'Keyingi mavzu' + icon.right}</span>
         <span class="pager__title">${p.t}</span>
-        <span class="pager__meta">${p.w}-hafta · ${p.lab ? '3D laboratoriya mavjud' : 'Tez orada'}</span>
+        <span class="pager__meta">${p.w}-hafta · 3D laboratoriya mavjud</span>
       </a>`;
   };
 
@@ -87,29 +108,29 @@
 
     ${data ? '' : `
     <section class="nolab" aria-live="polite">
-      <p class="nolab__text">Bu mavzu uchun 3D laboratoriya hali mavjud emas.</p>
+      <p class="nolab__text">Bu mavzu uchun laboratoriya yo‘q.</p>
       <a class="btn btn--secondary btn--large" href="${chapterHref}">Yillik rejaga qaytish</a>
     </section>`}
 
-    <div class="layout"${data ? '' : ' hidden'}>
-      <section class="labs" aria-labelledby="labs-title">
+    <div class="layout"${study ? '' : ' hidden'}>
+      ${data ? `<section class="labs" aria-labelledby="labs-title">
         <h2 class="section-title" id="labs-title">3D laboratoriya</h2>
         ${labCards}
-      </section>
+      </section>` : ''}
 
       <div class="study">
         <section aria-labelledby="explain-title">
           <h2 class="section-title" id="explain-title">Qisqacha tushuntirish</h2>
-          <div class="explain">${data ? data.explain.map((p) => `<p>${p}</p>`).join('') : ''}</div>
+          <div class="explain">${study ? (study.explain || []).map((p) => `<p>${p}</p>`).join('') : ''}</div>
         </section>
 
-        <section class="formula" aria-labelledby="formula-title">
-          <h2 class="section-title" id="formula-title">${data && data.formulas.length > 1 ? 'Asosiy formulalar' : 'Asosiy formula'}</h2>
+        ${study && ((study.formulas || []).length || terms) ? `<section class="formula" aria-labelledby="formula-title">
+          <h2 class="section-title" id="formula-title">${formulaTitle}</h2>
           <div class="formula__panel">
-            ${data ? data.formulas.map((f) => `<p class="formula__expr">${f}</p>`).join('') : ''}
+            ${(study.formulas || []).map((f) => `<p class="formula__expr">${f}</p>`).join('')}
             <dl class="terms">${terms}</dl>
           </div>
-        </section>
+        </section>` : ''}
       </div>
     </div>
 

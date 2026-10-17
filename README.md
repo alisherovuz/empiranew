@@ -4,6 +4,13 @@ Empira turns textbook topics into interactive 3D laboratories for school lessons
 
 This repository contains the Empira **8-sinf Fizika** pilot: the full annual plan from the 2019 textbook, 43 interactive 3D labs (every lab work and practical in the book, plus one lab for every topic with a book experiment: 42 of 60 topics), and live textbook scanning with Gemini.
 
+### 7-sinf Fizika
+
+**7-sinf Fizika** is included too: the full annual plan from the 2017 textbook (7 chapters, 46 §) with 45 3D labs (every § except §2 «Fazo va vaqt»), in `class-plan/data-7.js`, `topic/content-7.js` and `lab/labs-7*.js`.
+
+- **Which grade a page shows:** `design-prototype/shared/availability.js` picks it from the URL (`?sinf=7`, or the grade of `?mavzu=` / `?lab=`), else the grade the teacher opened last (`localStorage` `empira.grade`), else 8. A grade is "ready" on Home once it has labs.
+- **Scanner:** Gemini is told about both books and says which one the page is from (`"grade": 7|8`); the page's grade is sent as a hint. The match runs in that book (§ number, page range, heading); if nothing fits, the other book is tried by heading, and the page switches to the result's grade.
+
 ## Run it
 
 - **Live:** **https://test.empira.uz** (also empiratest.vercel.app). It redeploys automatically on every push to `main`.
@@ -19,11 +26,11 @@ This repository contains the Empira **8-sinf Fizika** pilot: the full annual pla
 | Path | Contents |
 |---|---|
 | `design-prototype/home/` | Home (locked visual source of truth) |
-| `design-prototype/class-plan/` | 8-sinf annual plan (chapters → topics, "Shu hafta") |
+| `design-prototype/class-plan/` | 7-sinf and 8-sinf annual plans (chapters → topics, "Shu hafta") |
 | `design-prototype/topic/` | Topic page (with lab / "Tez orada") |
 | `design-prototype/scan/` | Textbook scanner (mock detection, presenter mode) |
 | `design-prototype/lab/` | 43 interactive 3D labs for 8-sinf Fizika (engine `app.js`, equipment `kit.js`, labs `labs-8.js` … `labs-8e.js`; three.js bundled locally) |
-| `api/scan.js` | Vercel function: textbook photo → Gemini → matched 8-sinf topic + lab (needs `GEMINI_API_KEY`) |
+| `api/scan.js` | Vercel function: textbook photo → Gemini → matched 7-sinf or 8-sinf topic + lab (needs `GEMINI_API_KEY`) |
 | `design-prototype/class-plan/data.js`, `topic/content.js` | Real 8-sinf curriculum (5 chapters, 60 topics) and lab-topic content |
 | `design-prototype/_simplicity-pass/` | Before/after screenshots of the simplicity pass |
 | `EMPIRA_PRODUCT_CONTEXT.md` | What Empira is, MVP scope, constraints |

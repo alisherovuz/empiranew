@@ -326,3 +326,18 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   * { transition: none !important; }
   .spinner { animation-duration: 3s; }
 }
+
+
+/* =====================================================================
+   Live feedback in the ready lab (same look as Build Mode; components from build/build.css)
+   ===================================================================== */
+.panel .block--feedback { order: -1; padding-top: 0; border-top: 0; }
+.pill.is-changed { animation: fb-pop 420ms var(--ease); box-shadow: var(--shadow-float), inset 0 0 0 2px var(--amber-500); }
+.runs tr.is-new td { animation: row-glow 1600ms ease-out; }
+@keyframes row-glow { 0% { background: rgba(255, 178, 30, .45); } 100% { background: transparent; } }
+.step.is-just-done .step__n { animation: fb-pop 520ms cubic-bezier(.2, 1.6, .4, 1); }
+@media (min-width: 640px) and (max-width: 1023px) {
+  .panel { grid-template-areas: "controls question" "feedback steps" "feedback runs" "feedback next"; }
+  .panel .block--feedback { grid-area: feedback; }
+}
+@media (prefers-reduced-motion: reduce) { .pill.is-changed, .runs tr.is-new td, .step.is-just-done .step__n { animation: none !important; } }

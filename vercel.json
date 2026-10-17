@@ -8,7 +8,7 @@
   ],
   "functions": {
     "api/scan.js": {
-      "includeFiles": "design-prototype/{class-plan/data.js,topic/content.js}",
+      "includeFiles": "design-prototype/{class-plan/data.js,class-plan/data-7.js,topic/content.js,topic/content-7.js}",
       "maxDuration": 30
     }
   }
