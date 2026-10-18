@@ -28,7 +28,7 @@
         if (current) window.EMPIRA_SESSION = current;
       });
       await onDOM();
-      const header = document.querySelector('.topbar__inner, .labbar, header');
+      const header = document.querySelector('.topbar__inner') || document.querySelector('.labbar') || document.querySelector('header');
       if (header) {
         const nav = document.createElement('nav'); nav.className = 'empira-nav'; nav.setAttribute('aria-label','Hisob va laboratoriyalar');
         nav.innerHTML = '<a href="/dashboard">Bosh sahifa</a><a href="/dashboard?account=1">Hisobim</a>';
