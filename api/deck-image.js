@@ -7,14 +7,19 @@ const IMG_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 const BUCKET = process.env.DECK_BUCKET || 'decks';
 const str = (v, n) => (typeof v === 'string' ? v : '').slice(0, n || 200);
 
-function imgPrompt(title, lines, visual, grade) {
+function imgPrompt(title, lines, visual, grade, idx) {
+  const isCover = Number(idx) === 0;
+  const pts = (lines && lines.length) ? lines.map((l) => '\u2022 ' + l).join('\n') : '';
   return [
-    'Create ONE clean, modern 16:9 presentation slide for an Uzbek school physics lesson (grade ' + (grade || '') + ').',
-    'Style: minimal, professional, flat vector, lots of whitespace, high contrast. Brand colors: deep blue #3B4CFF and amber #FFB21E accents on a light (#F6F7FB) background.',
-    'Big clear title at the top, in Uzbek (Latin script), spelled EXACTLY: "' + title + '".',
-    lines && lines.length ? 'Include this short Uzbek text, spelled exactly, as a few readable points: ' + lines.map((l) => '"' + l + '"').join(', ') + '.' : '',
-    'Add a simple, relevant physics illustration or diagram: ' + (visual || 'a clean physics diagram') + '.',
-    'Rules: no watermark, no logos, no random gibberish text, correct spelling only, legible typography, one slide only.'
+    'Design ONE polished, modern, visually rich 16:9 slide for a premium Uzbek school physics presentation (design quality like Gamma or Canva EDU decks).',
+    'Art direction: confident and designed, NOT plain. Use a strong color system \u2014 deep blue #3B4CFF with amber #FFB21E accents, soft gradients, color panels and geometric shapes \u2014 on a light base. Clear visual hierarchy, bold modern sans-serif, generous spacing, a large detailed illustration. Fill the slide tastefully; avoid big empty areas.',
+    isCover
+      ? 'This is the COVER slide: a bold oversized hero title, a large striking physics illustration, and a gradient/color band or shapes framing it. Minimal supporting text.'
+      : 'Content slide: use a designed two-part layout \u2014 a clear title, the key points on a high-contrast panel on one side, and a LARGE, detailed, accurate physics illustration or diagram on the other side.',
+    'TITLE (big, Uzbek Latin, spelled EXACTLY): "' + title + '".',
+    pts ? ('KEY POINTS (short Uzbek text, spelled EXACTLY, as clean legible bullets on a high-contrast area):\n' + pts) : '',
+    'ILLUSTRATION: ' + (visual || 'a detailed, relevant physics diagram') + ' \u2014 drawn clearly, accurately and prominently.',
+    'Strict rules: every piece of text must be perfectly legible and correctly spelled, no gibberish or invented words, no watermark, no logos. One single slide, 16:9, crisp and high quality.'
   ].filter(Boolean).join('\n');
 }
 
@@ -58,7 +63,7 @@ module.exports = async (req, res) => {
   } catch (_) { return res.status(503).json({ error: 'service_unavailable' }); }
 
   let img;
-  try { img = await genImage(imgPrompt(title, lines, visual, grade)); }
+  try { img = await genImage(imgPrompt(title, lines, visual, grade, idx)); }
   catch (e) { console.error('deck_image_failed', String(e).slice(0, 200)); return res.status(502).json({ error: 'image_failed' }); }
 
   // Try to store it (reusable). If the bucket/upload is unavailable, fall back to returning the image inline.
