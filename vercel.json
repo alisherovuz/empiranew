@@ -10,6 +10,9 @@
     "api/scan.js": {
       "includeFiles": "design-prototype/{class-plan/data.js,class-plan/data-7.js,topic/content.js,topic/content-7.js}",
       "maxDuration": 30
+    },
+    "api/catalog.js": {
+      "includeFiles": "design-prototype/{class-plan/data.js,class-plan/data-7.js,topic/content.js,topic/content-7.js}"
     }
   }
 }

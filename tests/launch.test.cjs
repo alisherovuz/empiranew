@@ -96,3 +96,10 @@ test('stored controls are validated before being used in an experiment',()=>{
   const v=p.values([{key:'R',min:1,max:10,value:5},{key:'mode',type:'choice',value:'a',options:[{v:'a'},{v:'b'}]}],{R:Infinity,mode:'invalid'});
   assert.equal(v.R,5);assert.equal(v.mode,'a');
 });
+
+test('public catalogue counts come from both deployed curricula',async()=>{
+  const handler=require('../api/catalog.js');
+  const result=await call(handler,{method:'GET'});
+  assert.equal(result.status,200);assert.equal(result.body.labs,88);
+  assert.equal(result.body.topics,87);assert.deepEqual(result.body.grades,[7,8]);
+});

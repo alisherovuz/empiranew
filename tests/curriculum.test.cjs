@@ -94,7 +94,7 @@ test('POST /api/scan passes the grade hint and returns reading.grade', async () 
       return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(geminiReading) }] } }] }) };
     };
     let out;
-    const res = { setHeader() {}, status(code) { return { json: (d) => { out = { code, ...d }; } }; } };
+    const res = { setHeader() {}, status(code) { return { json: (d) => { out = { code, ...JSON.parse(JSON.stringify(d)) }; } }; } };
     await handler({ method: 'POST', headers:{authorization:'Bearer test-token'}, body: { image: 'AAAA', mime: 'image/jpeg', ...body } }, res);
     return out;
   };
