@@ -35,7 +35,7 @@
         });
         Object.entries(rows).forEach(([k,r]) => { if (!remote[k] || Date.parse(r.updated_at) > Date.parse(remote[k].updated_at)) dirty.add(k); });
         persist();
-      } catch (_) { announce('Natijalar shu qurilmada. Hisobga sinxronlash keyinroq qayta uriniladi.'); }
+      } catch (_) { if(uid===userId)Object.keys(rows).forEach((k)=>dirty.add(k)); announce('Natijalar shu qurilmada. Hisobga sinxronlash keyinroq qayta uriniladi.'); }
     }
     if(uid!==userId)return;
     ready = true;

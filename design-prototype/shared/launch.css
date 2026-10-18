@@ -21,3 +21,5 @@
 @media(max-width:600px){.empira-nav{gap:6px}.empira-nav a{font-size:11px}.empira-results{grid-template-columns:1fr}.labbar{flex-wrap:wrap}.empira-catalog h2{font-size:20px}}
 
 .choices[hidden]{display:none!important}
+
+html.empira-auth-pending::after{content:'Hisobingiz yuklanmoqda…';position:fixed;inset:0;display:grid;place-items:center;z-index:9999;background:#F6F7FB;color:#0B1026;font:500 16px Sora,sans-serif}

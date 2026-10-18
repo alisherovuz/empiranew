@@ -103,3 +103,12 @@ test('public catalogue counts come from both deployed curricula',async()=>{
   assert.equal(result.status,200);assert.equal(result.body.labs,88);
   assert.equal(result.body.topics,87);assert.deepEqual(result.body.grades,[7,8]);
 });
+
+test('offline reload queues saved drafts for sync when the connection recovers',async()=>{
+  const original=progressFixture();await original.p.init('student-a',null);
+  original.p.save('om-qonuni','build',{placed:['battery']});
+  let saved=0;
+  const sb={from:()=>({select:()=>({eq:async()=>({error:{message:'offline'}})}),upsert:async()=>{saved++;return {};}})};
+  const resumed=progressFixture(original.storage);await resumed.p.init('student-a',sb);
+  await resumed.p.flush();assert.equal(saved,1);
+});
