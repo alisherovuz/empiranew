@@ -138,4 +138,48 @@ grant execute on function public.empira_teacher_classes()      to authenticated;
 grant execute on function public.empira_class_roster(uuid)     to authenticated;
 grant execute on function public.empira_my_classes()           to authenticated;
 
+-- ---- Reports: aggregate quiz answers for a teacher's class ----
+-- Each student's LATEST answer per (lab, question) counts, so re-dos don't double-count.
+create or replace function public.empira_class_report(p_class uuid)
+returns table(lab_id text, students bigint, answers bigint, correct bigint)
+language sql security definer set search_path = '' as $$
+  with latest as (
+    select distinct on (q.student_id, q.lab_id, q.question_idx)
+           q.student_id, q.lab_id, q.correct
+    from public.empira_quiz_answers q
+    join public.empira_enrollments e on e.student_id = q.student_id and e.class_id = p_class
+    where exists (select 1 from public.empira_classes c where c.id = p_class and c.teacher_id = auth.uid())
+    order by q.student_id, q.lab_id, q.question_idx, q.created_at desc
+  )
+  select lab_id, count(distinct student_id), count(*), count(*) filter (where correct)
+  from latest
+  group by lab_id
+  order by (count(*) filter (where correct))::numeric / nullif(count(*), 0) asc nulls last;
+$$;
+
+create or replace function public.empira_class_students(p_class uuid)
+returns table(student_id uuid, name text, labs bigint, answers bigint, correct bigint)
+language sql security definer set search_path = '' as $$
+  with latest as (
+    select distinct on (q.student_id, q.lab_id, q.question_idx)
+           q.student_id, q.lab_id, q.correct
+    from public.empira_quiz_answers q
+    join public.empira_enrollments e on e.student_id = q.student_id and e.class_id = p_class
+    where exists (select 1 from public.empira_classes c where c.id = p_class and c.teacher_id = auth.uid())
+    order by q.student_id, q.lab_id, q.question_idx, q.created_at desc
+  )
+  select l.student_id,
+         coalesce(nullif(btrim(p.full_name), ''), p.username, 'O''quvchi'),
+         count(distinct l.lab_id), count(*), count(*) filter (where l.correct)
+  from latest l
+  left join public.profiles p on p.id = l.student_id
+  group by l.student_id, p.full_name, p.username
+  order by 2;
+$$;
+
+revoke all on function public.empira_class_report(uuid)   from public, anon;
+revoke all on function public.empira_class_students(uuid) from public, anon;
+grant execute on function public.empira_class_report(uuid)   to authenticated;
+grant execute on function public.empira_class_students(uuid) to authenticated;
+
 commit;
