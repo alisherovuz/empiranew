@@ -35,4 +35,8 @@ end $$;
 revoke all on function public.empira_save_presentation(text,int,text,jsonb) from public, anon;
 grant execute on function public.empira_save_presentation(text,int,text,jsonb) to authenticated;
 
+-- Storage bucket for AI deck images (public read; writes via service key).
+insert into storage.buckets (id, name, public) values ('decks','decks',true)
+  on conflict (id) do update set public = true;
+
 commit;

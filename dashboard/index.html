@@ -1359,6 +1359,7 @@ function bullets(arr){ return '<div class="points">'+(arr||[]).map(function(b){ 
 function slideHTML(s){
   if(!s) return '<div class="slide"></div>';
   switch(s.type){
+    case 'image': return '<div class="slide slide-img"><img src="'+(s.url||'')+'" alt="'+escH(s.title||'')+'"></div>';
     case 'title': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Fizika')+'</div><h2>'+escH(s.heading||PRES.title)+'</h2>'+(s.lead?'<p class="lead">'+escH(s.lead)+'</p>':'')+'</div>';
     case 'objectives': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Dars maqsadi')+'</div><h2>'+escH(s.heading||'Dars maqsadi')+'</h2>'+bullets(s.bullets)+'</div>';
     case 'summary': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Xulosa')+'</div><h2>'+escH(s.heading||'Nimani o‘rgandik')+'</h2>'+bullets(s.bullets)+'</div>';
@@ -1381,7 +1382,7 @@ function startPresent(){ curSlides=presentSlides(); if(!curSlides.length) return
 function buildDots(){ var d=$('p-dots'); d.innerHTML=''; curSlides.forEach(function(s){ var x=document.createElement('span'); x.className='dot'+(s.type==='lab'?' lab':''); d.appendChild(x); }); }
 function renderStep(){
   var s=curSlides[ps]; $('p-slide').innerHTML=slideHTML(s);
-  $('p-stepname').textContent='· '+slideTypeName(s.type); $('p-count').textContent=(ps+1)+' / '+curSlides.length;
+  $('p-stepname').textContent='· '+((s.type==='image'&&s.title)?s.title:slideTypeName(s.type)); $('p-count').textContent=(ps+1)+' / '+curSlides.length;
   $('p-prev').disabled=ps===0; $('p-next').textContent=ps===curSlides.length-1?'Dars tugadi':'Keyingisi';
   [].forEach.call(document.querySelectorAll('#p-dots .dot'),function(x,i){ x.classList.toggle('on',i===ps); });
 }
@@ -1433,25 +1434,43 @@ function applyLessonState(hasSlides,loading){
 function renderSlidesPreview(){
   var box=$('les-slides-preview'); if(!box) return;
   if(!PRES.slides.length){ box.innerHTML=''; return; }
+  var imgs=PRES.slides.filter(function(s){return s.type==='image'&&s.url;});
+  if(imgs.length){ box.innerHTML='<div class="les-prev-lbl">Slaydlar</div><div class="les-thumbs">'+imgs.map(function(s){ return '<img src="'+s.url+'" alt="'+escH(s.title||'')+'" loading="lazy">'; }).join('')+'</div>'; return; }
   box.innerHTML='<div class="les-prev-lbl">Slaydlar</div><ol class="les-prev">'+PRES.slides.map(function(s){ return '<li><b>'+escH(slideTypeName(s.type))+'</b> '+escH(s.heading||s.formula||'')+'</li>'; }).join('')+'</ol>';
 }
 async function generateLesson(){
   if(!curLesson||DEMO) return;
   var note=$('les-gen-note'), gen=$('les-gen');
-  note.hidden=false; note.className='les-note'; note.textContent='AI dars tayyorlayapti… (10–20 soniya)'; gen.disabled=true;
+  note.hidden=false; note.className='les-note'; gen.disabled=true;
+  function prog(t){ note.textContent=t; }
   try{
     var tok=((await sb.auth.getSession()).data.session||{}).access_token; if(!tok) throw new Error('auth');
+    var H={'content-type':'application/json',Authorization:'Bearer '+tok};
     var T=window.EMPIRA_TOPICS||{}, c=T[curLesson.topicSlug]||{}, task=(c.labs&&c.labs[0]&&c.labs[0].task)||'';
-    var r=await fetch('/api/slides',{method:'POST',headers:{'content-type':'application/json',Authorization:'Bearer '+tok},
-      body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,title:curLesson.title,content:{explain:c.explain,formulas:c.formulas,terms:c.terms,task:task}})});
-    var j=await r.json();
-    if(!r.ok||!j.slides||!j.slides.length){ throw new Error((j&&j.error)||'gen'); }
-    PRES={title:j.title||curLesson.title,slides:j.slides};
-    try{ await sb.rpc('empira_save_presentation',{p_slug:curLesson.topicSlug,p_grade:curLesson.grade,p_title:PRES.title,p_slides:PRES.slides}); }catch(e){}
-    note.textContent='Tayyor! Saqlandi — “Sinfga ko‘rsatish” bilan boshlang.'; applyLessonState(true);
+    prog('Dars rejasi tuzilmoqda\u2026');
+    var pr=await fetch('/api/deck-plan',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,title:curLesson.title,content:{explain:c.explain,formulas:c.formulas,terms:c.terms,task:task}})});
+    var pj=await pr.json(); if(!pr.ok||!pj.slides||!pj.slides.length) throw new Error((pj&&pj.error)||'plan');
+    var plan=pj.slides, slides=[], anyTemp=false;
+    for(var i=0;i<plan.length;i++){
+      prog('Slayd '+(i+1)+' / '+plan.length+' chizilmoqda\u2026 (biroz kuting)');
+      try{
+        var ir=await fetch('/api/deck-image',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,idx:i,title:plan[i].title,lines:plan[i].lines,visual:plan[i].visual})});
+        var ij=await ir.json();
+        if(ir.ok && (ij.url||ij.dataUrl)){ slides.push({type:'image',title:plan[i].title,url:ij.url||ij.dataUrl,temp:!ij.url}); if(!ij.url) anyTemp=true; }
+      }catch(e){ /* skip a failed slide, keep going */ }
+    }
+    if(!slides.length) throw new Error('no_slides');
+    PRES={title:pj.title||curLesson.title,slides:slides};
+    if(!anyTemp){
+      try{ await sb.rpc('empira_save_presentation',{p_slug:curLesson.topicSlug,p_grade:curLesson.grade,p_title:PRES.title,p_slides:PRES.slides}); }catch(e){}
+      note.textContent='Tayyor va saqlandi! \u201cSinfga ko\u2018rsatish\u201d bilan boshlang.';
+    } else {
+      note.textContent='Tayyor! Saqlash uchun Supabase\u2019da \u201cdecks\u201d papka (bucket) kerak \u2014 hozircha faqat shu seansda ko\u2018rinadi.';
+    }
+    applyLessonState(true);
   }catch(e){
     note.className='les-note err';
-    note.textContent = (e.message==='teachers_only')?'Faqat o‘qituvchilar dars yaratadi.' : (e.message==='too_many')?'Juda ko‘p urinish. Birozdan keyin qaytadan.' : 'Hozircha yaratib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.';
+    note.textContent=(e.message==='teachers_only')?'Faqat o\u2018qituvchilar dars yaratadi.':(e.message==='too_many')?'Juda ko\u2018p urinish. Birozdan keyin qaytadan.':'Hozircha yaratib bo\u2018lmadi. Birozdan keyin qayta urinib ko\u2018ring.';
   }finally{ gen.disabled=false; }
 }
 (function(){
@@ -1525,6 +1544,10 @@ async function generateLesson(){
 .les-prev{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:7px}
 .les-prev li{font-size:15px;color:var(--ink2)}
 .les-prev li b{color:var(--ink);font-family:var(--sora)}
+.slide-img{width:100%;max-width:min(94vw,1180px)}
+.slide-img img{width:100%;height:auto;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:var(--shadow-lg);display:block;margin:0 auto}
+.les-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:8px}
+.les-thumbs img{width:100%;border:1px solid var(--line);border-radius:10px;display:block}
 </style>
 </body>
 </html>
