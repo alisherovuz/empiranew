@@ -148,6 +148,14 @@ let finaleShown = !!saved && L.steps.every((step)=>step.done(state));
 function finale() {
   const build = window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(labId);
   const next = window.EMPIRA_AVAIL ? window.EMPIRA_AVAIL.neighbours(topic.slug).next : null;
+  if (window.EMPIRA_QUIZ && window.EMPIRA_QUIZ.has(labId)) {
+    FX.Sound.play('win'); FX.confetti(110);
+    const _go = build ? { label: build.label, href: `build/index.html?lab=${labId}` }
+            : next ? { label: 'Keyingi mavzu', href: `../topic/index.html?mavzu=${next.slug}` }
+            : { label: 'Yillik rejaga qaytish', href: `../class-plan/index.html?sinf=${plan.grade}` };
+    window.EMPIRA_QUIZ.start(labId, topic.slug, plan.grade, _go);
+    return;
+  }
   FX.Sound.play('win'); FX.confetti(110);
   FX.coach({
     kind: 'done', step: 'Barcha bosqichlar bajarildi', title: 'Tajriba bajarildi!',
