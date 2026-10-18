@@ -368,8 +368,10 @@ input,select{font-family:inherit}
       <div class="tbody">
         <h1>Assalomu alaykum<span id="dhello"></span>!</h1>
         <p class="hi-sub">Bugun qaysi ishni boshlaymiz?</p>
+        <div id="student-classes"></div>
         <div id="student-catalog"></div>
         <div class="tiles">
+          <button class="tile tl0" id="tile-classes" data-go="classes"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><h3>Sinflarim</h3><p>Sinf oching, kod ulashing, natijani ko‘ring</p></button>
           <button class="tile tl1" id="tile-reja" onclick="location.href='/design-prototype/class-plan/index.html'"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h3"/></svg></span><h3>Mavzular rejasi</h3><p>7–8-sinf laboratoriya mavzulari</p></button>
           <button class="tile tl2" id="tile-prez" data-go="topics"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h7M7 12h4"/></svg></span><h3>Tayyor taqdimot</h3><p>Om qonuni · namuna dars</p></button>
           <button class="tile tl3" id="tile-lab" onclick="location.href='/'"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg></span><h3>Laboratoriyalar</h3><p>Hamma 3D tajribalar va skaner</p></button>
@@ -528,6 +530,43 @@ input,select{font-family:inherit}
     </div>
   </section>
 
+  <!-- CLASSES (teacher) -->
+  <section class="screen" id="sc-classes">
+    <div class="wrapn">
+      <button class="back" data-go="dashboard">← Dashboard</button>
+      <div class="phead">Sinflarim</div>
+      <h1 style="font-size:28px;font-weight:800">Sinflaringiz</h1>
+      <p class="hi-sub" style="margin-top:10px">Sinf oching — bir martalik kod paydo bo‘ladi. O‘quvchilar shu kod bilan qo‘shiladi.</p>
+      <div class="cl-new">
+        <input id="cl-title" class="cl-inp" type="text" maxlength="80" placeholder="Sinf nomi — masalan 8-A" autocomplete="off">
+        <select id="cl-grade" class="cl-inp cl-grade" aria-label="Sinf"><option value="">Sinf</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select>
+        <button class="btn btn-blue" id="cl-create">Sinf ochish</button>
+      </div>
+      <p id="cl-err" class="cl-err" hidden></p>
+      <div id="cl-list" class="cl-list"></div>
+    </div>
+  </section>
+
+  <!-- SINGLE CLASS (teacher) -->
+  <section class="screen" id="sc-class">
+    <div class="wrapn">
+      <button class="back" data-go="classes">← Sinflarim</button>
+      <div class="phead" id="cls-grade">Sinf</div>
+      <h1 id="cls-title" style="font-size:28px;font-weight:800">Sinf</h1>
+      <div class="cls-code">
+        <div><span class="cls-code-lbl">Qo‘shilish kodi</span><b id="cls-code">—</b></div>
+        <button class="btn btn-ghost btn-sm2" id="cls-copy">Nusxa olish</button>
+      </div>
+      <p class="cls-share">O‘quvchi <b>empira.uz</b> da kirib, “Sinfga qo‘shilish” → shu kodni kiritadi.</p>
+      <div class="cls-tabs">
+        <button class="cls-tab is-on" id="cls-roster-btn">O‘quvchilar (<span id="cls-count">0</span>)</button>
+        <button class="cls-tab" id="cls-report-btn">Hisobot</button>
+      </div>
+      <div id="cls-roster" class="cls-roster"></div>
+      <div id="cls-report" class="cls-report" hidden></div>
+    </div>
+  </section>
+
 </div>
 
 <!-- PRESENT -->
@@ -655,7 +694,7 @@ var $=function(id){return document.getElementById(id);};
 var initialRoute = location.hash.slice(1);
 var routeInitialized = false;
 function show(id, fromHistory){
-  var protectedRoutes=['dashboard','account','topics','overview','present','reports','admin'];
+  var protectedRoutes=['dashboard','account','topics','overview','present','reports','classes','class','admin'];
   if(protectedRoutes.indexOf(id)>=0 && !DEMO && !(state.profile && (state.profile.onboarded || state.profile.school || state.profile.role==='admin'))) id='role';
   if(!$('sc-'+id)) id='role';
   if(!fromHistory){
@@ -888,7 +927,8 @@ function applyRoleUI(role){
   $('tile-lab').style.display=isStu?'none':'';
   $('student-catalog').hidden=!isStu;
   if(isStu)window.EMPIRA_CATALOG.mount($('student-catalog'));
-  ['tile-reja','tile-prez','tile-rep'].forEach(function(id){ var e=$(id); if(e) e.style.display=isStu?'none':''; });
+  var scw=$('student-classes'); if(scw){ scw.hidden=!isStu; if(isStu) renderMyClasses(); }
+  ['tile-reja','tile-prez','tile-rep','tile-classes'].forEach(function(id){ var e=$(id); if(e) e.style.display=isStu?'none':''; });
   var tb=$('tourbtn'); if(tb) tb.style.display=isStu?'none':'';
   var sub=document.querySelector('#sc-dashboard .hi-sub'); if(sub) sub.textContent = isStu ? 'Mavzuni toping, tajribani boshlang va kashf qiling.' : 'Bugun qaysi ishni boshlaymiz?';
 }
@@ -1130,6 +1170,176 @@ if(sb)sb.auth.onAuthStateChange(function(event,session){
   try{ if(localStorage.getItem('empira_tg_pending')){ state.role=storedRole()||'teacher'; setLoginRole(); show('login'); showTgFlow(true); return; } }catch(e){}
   show('role');
 })();
+
+/* ===== SINFLAR (classes / join codes) ===== */
+function escH(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmtJoin(iso){ try{ return new Date(iso).toLocaleDateString('uz-UZ',{day:'numeric',month:'short'}); }catch(e){ return ''; } }
+var curClass=null;
+
+(function(){ // re-render the class list whenever we enter that screen
+  if(typeof show==='function'){ var _show=show; show=function(id,fh){ _show(id,fh); if(id==='classes') renderClasses(); }; }
+})();
+
+async function renderClasses(){
+  var box=$('cl-list'); if(!box) return;
+  if(DEMO){ box.innerHTML='<p class="empty-note">Demo rejimida sinflar ishlamaydi.</p>'; return; }
+  box.innerHTML='<div class="cl-load">Yuklanmoqda…</div>';
+  try{
+    var r=await sb.rpc('empira_teacher_classes'); if(r.error) throw r.error;
+    var rows=r.data||[];
+    if(!rows.length){ box.innerHTML='<div class="cl-empty">Hali sinf yo‘q. Yuqorida birinchi sinfingizni oching — kodni o‘quvchilarga berasiz.</div>'; return; }
+    box.innerHTML=rows.map(function(c){
+      return '<button class="cl-card" data-id="'+c.id+'" data-title="'+escH(c.title)+'" data-grade="'+(c.grade||'')+'" data-code="'+escH(c.code)+'">'+
+        '<span class="cl-card-main"><strong>'+escH(c.title)+'</strong><small>'+(c.grade?c.grade+'-sinf · ':'')+c.students+' o‘quvchi</small></span>'+
+        '<span class="cl-card-code">'+escH(c.code)+'</span></button>';
+    }).join('');
+    box.querySelectorAll('.cl-card').forEach(function(b){ b.addEventListener('click',function(){ openClass(b.dataset); }); });
+  }catch(e){ box.innerHTML='<p class="empty-note">Yuklab bo‘lmadi. Qayta urinib ko‘ring.</p>'; }
+}
+
+async function createClass(){
+  if(DEMO) return;
+  var title=($('cl-title').value||'').trim(), grade=parseInt($('cl-grade').value,10)||null, err=$('cl-err');
+  err.hidden=true;
+  if(!title){ err.textContent='Sinf nomini kiriting.'; err.hidden=false; return; }
+  var btn=$('cl-create'); btn.disabled=true;
+  try{
+    var r=await sb.rpc('empira_create_class',{p_title:title,p_grade:grade}); if(r.error) throw r.error;
+    var row=Array.isArray(r.data)?r.data[0]:r.data;
+    $('cl-title').value=''; $('cl-grade').value='';
+    await renderClasses();
+    if(row) openClass({id:row.id,title:row.title,grade:row.grade||'',code:row.code});
+  }catch(e){ err.textContent='Saqlab bo‘lmadi. Qayta urinib ko‘ring.'; err.hidden=false; }
+  finally{ btn.disabled=false; }
+}
+
+async function openClass(d){
+  curClass=d; show('class');
+  $('cls-title').textContent=d.title;
+  $('cls-grade').textContent=d.grade?d.grade+'-sinf':'Sinf';
+  $('cls-code').textContent=d.code;
+  switchClsTab('roster');
+  await renderRoster(d.id);
+}
+function switchClsTab(which){
+  var isR=which!=='report';
+  $('cls-roster-btn').classList.toggle('is-on',isR);
+  $('cls-report-btn').classList.toggle('is-on',!isR);
+  $('cls-roster').hidden=!isR; $('cls-report').hidden=isR;
+  if(!isR) renderClassReport();
+}
+async function renderRoster(id){
+  var box=$('cls-roster'); box.innerHTML='<div class="cl-load">Yuklanmoqda…</div>';
+  try{
+    var r=await sb.rpc('empira_class_roster',{p_class:id}); if(r.error) throw r.error;
+    var rows=r.data||[]; $('cls-count').textContent=rows.length;
+    if(!rows.length){ box.innerHTML='<div class="cl-empty">Hali o‘quvchi qo‘shilmagan. Kodni ulashing: <b>'+escH(curClass.code)+'</b></div>'; return; }
+    box.innerHTML='<ul class="rost">'+rows.map(function(s,i){
+      return '<li><span class="rost-n">'+(i+1)+'</span><span class="rost-nm">'+escH(s.name)+'</span><span class="rost-when">'+fmtJoin(s.joined_at)+'</span></li>';
+    }).join('')+'</ul>';
+  }catch(e){ box.innerHTML='<p class="empty-note">Yuklab bo‘lmadi.</p>'; }
+}
+function renderClassReport(){
+  var box=$('cls-report'); if(!box) return;
+  box.innerHTML='<div class="rep-empty"><div class="rep-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h3>Hisobot tez orada</h3><p>O‘quvchilar tajribadan keyingi savolga javob bera boshlagach, bu yerda kim tushundi, kim qiynalgani ko‘rinadi.</p></div>';
+}
+
+/* ----- STUDENT: my classes + join by code ----- */
+async function renderMyClasses(){
+  var wrap=$('student-classes'); if(!wrap) return;
+  wrap.innerHTML='<div class="myc"><div class="myc-head"><h3>Sinflarim</h3>'+
+    '<button class="myc-join" id="myc-join-btn" type="button">+ Sinfga qo‘shilish</button></div>'+
+    '<div id="myc-list" class="myc-list"></div>'+
+    '<div id="myc-form" class="myc-form" hidden><input id="myc-code" class="cl-inp" maxlength="10" placeholder="Sinf kodi" autocomplete="off">'+
+    '<button class="btn btn-blue" id="myc-go" type="button">Qo‘shilish</button></div>'+
+    '<p id="myc-err" class="cl-err" hidden></p></div>';
+  $('myc-join-btn').addEventListener('click',function(){ var fm=$('myc-form'); fm.hidden=!fm.hidden; if(!fm.hidden) $('myc-code').focus(); });
+  $('myc-go').addEventListener('click',joinClass);
+  $('myc-code').addEventListener('keydown',function(e){ if(e.key==='Enter') joinClass(); });
+  await loadMyClasses();
+}
+async function loadMyClasses(){
+  var list=$('myc-list'); if(!list) return;
+  if(DEMO){ list.innerHTML='<div class="myc-empty">Demo rejimi.</div>'; return; }
+  list.innerHTML='<div class="cl-load">…</div>';
+  try{
+    var r=await sb.rpc('empira_my_classes'); if(r.error) throw r.error;
+    var rows=r.data||[];
+    if(!rows.length){ list.innerHTML='<div class="myc-empty">Hali sinfga qo‘shilmagansiz. O‘qituvchingiz bergan kodni kiriting.</div>'; return; }
+    list.innerHTML=rows.map(function(c){
+      return '<div class="myc-item"><strong>'+escH(c.title)+'</strong><small>'+(c.grade?c.grade+'-sinf · ':'')+escH(c.teacher)+'</small></div>';
+    }).join('');
+  }catch(e){ list.innerHTML='<div class="myc-empty">Yuklab bo‘lmadi.</div>'; }
+}
+async function joinClass(){
+  if(DEMO) return;
+  var code=($('myc-code').value||'').trim(), err=$('myc-err'); err.hidden=true;
+  if(code.length<4){ err.textContent='Kodni to‘liq kiriting.'; err.hidden=false; return; }
+  var btn=$('myc-go'); btn.disabled=true;
+  try{
+    var r=await sb.rpc('empira_join_class',{p_code:code}); if(r.error) throw r.error;
+    $('myc-code').value=''; $('myc-form').hidden=true;
+    await loadMyClasses();
+  }catch(e){ err.textContent='Bunday kodli sinf topilmadi.'; err.hidden=false; }
+  finally{ btn.disabled=false; }
+}
+
+(function(){ // wire static buttons once (elements exist at load)
+  var c=$('cl-create'); if(c) c.addEventListener('click',createClass);
+  var t=$('cl-title'); if(t) t.addEventListener('keydown',function(e){ if(e.key==='Enter') createClass(); });
+  var rb=$('cls-roster-btn'); if(rb) rb.addEventListener('click',function(){ switchClsTab('roster'); });
+  var pb=$('cls-report-btn'); if(pb) pb.addEventListener('click',function(){ switchClsTab('report'); });
+  var cp=$('cls-copy'); if(cp) cp.addEventListener('click',function(){
+    if(!curClass) return;
+    try{ navigator.clipboard.writeText(curClass.code); cp.textContent='Nusxa olindi ✓'; setTimeout(function(){ cp.textContent='Nusxa olish'; },1500); }catch(e){}
+  });
+})();
+
 </script>
+<style id="classes-css">
+.wrapn{max-width:820px;margin:0 auto}
+.tl0 .ti{background:rgba(255,106,77,.12);color:#FF6A4D}
+.cl-new{display:flex;gap:10px;margin:22px 0 4px;flex-wrap:wrap}
+.cl-inp{height:52px;padding:0 16px;border:1.5px solid var(--line);border-radius:13px;font-family:inherit;font-size:15.5px;color:var(--ink);background:#fff;box-sizing:border-box}
+.cl-inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,76,255,.12)}
+.cl-new #cl-title{flex:1;min-width:160px}
+.cl-grade{width:96px;flex:none}
+.cl-err{color:#D64533;font-size:14px;margin:8px 0 0}
+.cl-list{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.cl-card{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;padding:16px 18px;border:1.5px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease}
+.cl-card:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 8px 20px rgba(59,76,255,.1)}
+.cl-card-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cl-card-main strong{font-size:17px;font-weight:700}
+.cl-card-main small{font-size:13.5px;color:var(--ink3)}
+.cl-card-code{font-family:var(--sora);font-weight:800;font-size:18px;letter-spacing:.14em;color:var(--blue);background:var(--blue-050);padding:8px 14px;border-radius:11px;flex:none}
+.cl-empty,.myc-empty{padding:18px;border:1px dashed var(--line);border-radius:14px;color:var(--ink3);font-size:14.5px;line-height:1.55;background:#fff}
+.cl-load{padding:16px;color:var(--ink3);font-size:14px}
+.cls-code{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px;padding:18px 20px;border:1.5px solid var(--blue);border-radius:18px;background:var(--blue-050)}
+.cls-code-lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+.cls-code b{font-family:var(--sora);font-weight:800;font-size:34px;letter-spacing:.2em;color:var(--ink)}
+.btn-sm2{height:44px;padding:0 18px;font-size:14.5px}
+.cls-share{margin-top:12px;color:var(--ink3);font-size:14.5px;line-height:1.55}
+.cls-tabs{display:flex;gap:8px;margin:24px 0 16px;border-bottom:1px solid var(--line)}
+.cls-tab{appearance:none;border:0;background:none;font-family:var(--sora);font-weight:600;font-size:15px;color:var(--ink3);padding:10px 4px;margin-bottom:-1px;border-bottom:2px solid transparent;cursor:pointer}
+.cls-tab.is-on{color:var(--blue);border-bottom-color:var(--blue)}
+.rost{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.rost li{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid var(--mist)}
+.rost li:last-child{border-bottom:0}
+.rost-n{width:26px;height:26px;border-radius:999px;background:var(--mist);color:var(--ink3);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.rost-nm{flex:1;font-weight:600;font-size:15px}
+.rost-when{font-size:13px;color:var(--ink3)}
+.myc{margin-bottom:26px;padding:18px 20px;border:1.5px solid var(--line);border-radius:18px;background:#fff}
+.myc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.myc-head h3{font-size:17px;font-weight:700}
+.myc-join{appearance:none;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:9px 14px;font-family:var(--sora);font-weight:600;font-size:14px;color:var(--blue);cursor:pointer}
+.myc-join:hover{border-color:var(--blue)}
+.myc-list{display:flex;flex-direction:column;gap:9px}
+.myc-item{padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:#fff}
+.myc-item strong{display:block;font-size:15.5px;font-weight:700}
+.myc-item small{font-size:13px;color:var(--ink3)}
+.myc-form{display:flex;gap:10px;margin-top:12px}
+.myc-form #myc-code{flex:1;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+@media(max-width:520px){ .cl-new #cl-title{flex-basis:100%} .cls-code b{font-size:28px} }
+</style>
 </body>
 </html>
