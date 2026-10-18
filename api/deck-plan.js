@@ -1,9 +1,10 @@
 // POST /api/deck-plan  { topic_slug, grade, title, content:{explain[],formulas[],terms[],task} }
-// -> { title, slides:[ {title, lines:[..], visual} ] }   (5-7 slides, grounded on textbook content)
-// Fast text step; images are made one-by-one by /api/deck-image. Auth: Supabase bearer (teachers). Rate-limited.
+// -> { title, slides:[ {type,title,lead?,points[]?,formula?,visual} ] }  (accurate Uzbek text; rendered as HTML)
+// "visual" is an ENGLISH description of a text-free illustration for /api/deck-image.
 'use strict';
 const { createClient } = require('@supabase/supabase-js');
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const TYPES = { cover: 1, content: 1, formula: 1, summary: 1 };
 const str = (v, n) => (typeof v === 'string' ? v : '').slice(0, n || 200);
 
 function prompt(title, grade, c) {
@@ -12,14 +13,15 @@ function prompt(title, grade, c) {
   const terms = Array.isArray(c.terms) ? c.terms.map((t) => (Array.isArray(t) ? t.join(' — ') : '')).join('; ') : '';
   const task = str(c.task, 300);
   return [
-    'Siz O‘zbek maktab fizika o‘qituvchisisiz. "' + title + '" (' + (grade || '') + '-sinf) mavzusi uchun vizual taqdimot rejasini tuzasiz.',
+    'Siz O‘zbek maktab fizika o‘qituvchisisiz. "' + title + '" (' + (grade || '') + '-sinf) mavzusi uchun dars taqdimoti matnini tayyorlaysiz.',
     'Faqat quyidagi darslik materialiga tayaning (hech narsa o‘ylab topmang):',
     'Tushuntirish: ' + explain, 'Formulalar: ' + formulas, 'Atamalar: ' + terms, 'Tajriba savoli: ' + task,
     '',
     '5 dan 7 gacha slayd. QATIY JSON qaytaring:',
-    '{"slides":[{"title":"<qisqa sarlavha, 2-5 so‘z>","lines":["<juda qisqa qator, 8 so‘zdan kam>"],"visual":"<ingliz tilida: bu slaydda qanday oddiy fizik rasm/diagramma bo‘lsin>"}]}',
-    'Qoidalar: 1-slayd mavzu kirishi, oxirgisi qisqa xulosa. Kamida bitta slaydda formula bo‘lsin.',
-    'Har slaydda 1-3 ta juda qisqa qator (lines). "visual" ingliz tilida va aniq (masalan: "simple circuit with battery, resistor and ammeter, flat vector").',
+    '{"slides":[{"type":"cover|content|formula|summary","title":"...","lead":"...","points":["..."],"formula":"I = U / R","visual":"ENGLISH description"}]}',
+    'Tuzilma: 1-slayd type="cover" (title + bitta qisqa lead jumla). Formulalar bo‘lsa, kamida bitta type="formula" (title, formula matni, qisqa lead). Oxirgi slayd type="summary". Qolganlari type="content".',
+    'content va summary slaydlarida 2-3 ta juda qisqa "points" (har biri 9 so‘zdan kam). Butun matn O‘zbek (lotin), to‘g‘ri yozilgan, qisqa.',
+    '"visual" har doim INGLIZ tilida va MATNSIZ rasmni tasvirlaydi (masalan: "simple circuit with battery, resistor and ammeter, flat vector, no text"). Rasmda hech qanday yozuv bo‘lmasligi kerak.',
     'Faqat JSON chiqaring.'
   ].join('\n');
 }
@@ -41,14 +43,16 @@ function parse(raw) {
   const out = [];
   for (const s of arr) {
     if (!s || !s.title) continue;
-    out.push({
-      title: str(s.title, 90),
-      lines: Array.isArray(s.lines) ? s.lines.map((l) => str(l, 120)).filter(Boolean).slice(0, 3) : [],
-      visual: str(s.visual, 200)
-    });
+    const type = TYPES[s.type] ? s.type : 'content';
+    const o = { type: type, title: str(s.title, 90), visual: str(s.visual, 200) };
+    if (s.lead) o.lead = str(s.lead, 180);
+    if (type === 'formula' && s.formula) o.formula = str(s.formula, 100);
+    if (Array.isArray(s.points)) o.points = s.points.map((p) => str(p, 120)).filter(Boolean).slice(0, 4);
+    out.push(o);
     if (out.length >= 8) break;
   }
   if (out.length < 3) throw new Error('too_few');
+  if (out[0]) out[0].type = 'cover';
   return out;
 }
 

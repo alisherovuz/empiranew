@@ -7,20 +7,14 @@ const IMG_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 const BUCKET = process.env.DECK_BUCKET || 'decks';
 const str = (v, n) => (typeof v === 'string' ? v : '').slice(0, n || 200);
 
-function imgPrompt(title, lines, visual, grade, idx) {
-  const isCover = Number(idx) === 0;
-  const pts = (lines && lines.length) ? lines.map((l) => '\u2022 ' + l).join('\n') : '';
+function imgPrompt(visual) {
   return [
-    'Design ONE polished, modern, visually rich 16:9 slide for a premium Uzbek school physics presentation (design quality like Gamma or Canva EDU decks).',
-    'Art direction: confident and designed, NOT plain. Use a strong color system \u2014 deep blue #3B4CFF with amber #FFB21E accents, soft gradients, color panels and geometric shapes \u2014 on a light base. Clear visual hierarchy, bold modern sans-serif, generous spacing, a large detailed illustration. Fill the slide tastefully; avoid big empty areas.',
-    isCover
-      ? 'This is the COVER slide: a bold oversized hero title, a large striking physics illustration, and a gradient/color band or shapes framing it. Minimal supporting text.'
-      : 'Content slide: use a designed two-part layout \u2014 a clear title, the key points on a high-contrast panel on one side, and a LARGE, detailed, accurate physics illustration or diagram on the other side.',
-    'TITLE (big, Uzbek Latin, spelled EXACTLY): "' + title + '".',
-    pts ? ('KEY POINTS (short Uzbek text, spelled EXACTLY, as clean legible bullets on a high-contrast area):\n' + pts) : '',
-    'ILLUSTRATION: ' + (visual || 'a detailed, relevant physics diagram') + ' \u2014 drawn clearly, accurately and prominently.',
-    'Strict rules: every piece of text must be perfectly legible and correctly spelled, no gibberish or invented words, no watermark, no logos. One single slide, 16:9, crisp and high quality.'
-  ].filter(Boolean).join('\n');
+    'Create a clean, modern, friendly flat-vector ILLUSTRATION for a school physics lesson slide.',
+    'Subject: ' + (visual || 'a simple, relevant physics diagram') + '.',
+    'Style: minimal flat vector, smooth shapes, subtle depth; color palette deep blue #3B4CFF with amber #FFB21E accents; plain white or transparent background; centered composition with margin.',
+    'CRITICAL: the image must contain NO text of any kind \u2014 no words, no letters, no numbers, no labels, no captions, no watermark, no logo. Illustration only.',
+    'High quality, crisp, 4:3.'
+  ].join('\n');
 }
 
 async function genImage(p) {
@@ -63,7 +57,7 @@ module.exports = async (req, res) => {
   } catch (_) { return res.status(503).json({ error: 'service_unavailable' }); }
 
   let img;
-  try { img = await genImage(imgPrompt(title, lines, visual, grade, idx)); }
+  try { img = await genImage(imgPrompt(visual)); }
   catch (e) { console.error('deck_image_failed', String(e).slice(0, 200)); return res.status(502).json({ error: 'image_failed' }); }
 
   // Try to store it (reusable). If the bucket/upload is unavailable, fall back to returning the image inline.

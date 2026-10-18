@@ -1353,23 +1353,28 @@ async function joinClass(){
 
 /* ===== AI DARS TAQDIMOTI ===== */
 var PRES={title:'',slides:[]}, curLesson=null, topicGrade='all', curSlides=[];
-function slideTypeName(t){ return ({title:'Kirish',objectives:'Maqsad',concept:'Tushuncha',formula:'Formula',example:'Masala',summary:'Xulosa',lab:'3D tajriba'})[t]||'Slayd'; }
+function slideTypeName(t){ return ({cover:'Kirish',content:'Mavzu',title:'Kirish',objectives:'Maqsad',concept:'Tushuncha',formula:'Formula',example:'Masala',summary:'Xulosa',lab:'3D tajriba'})[t]||'Slayd'; }
 var CK='<span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
 function bullets(arr){ return '<div class="points">'+(arr||[]).map(function(b){ return '<div class="pt2">'+CK+'<span>'+escH(b)+'</span></div>'; }).join('')+'</div>'; }
+function dIll(s){ return s.imgUrl?'<div class="d-ill"><img src="'+s.imgUrl+'" alt="" loading="lazy"></div>':'<div class="d-ill d-ill-x"></div>'; }
+function dPoints(s){ return (s.points&&s.points.length)?'<ul class="d-pts'+(s.type==='summary'?' chk':'')+'">'+s.points.map(function(p){return '<li>'+escH(p)+'</li>';}).join('')+'</ul>':''; }
 function slideHTML(s){
   if(!s) return '<div class="slide"></div>';
-  switch(s.type){
-    case 'image': return '<div class="slide slide-img"><img src="'+(s.url||'')+'" alt="'+escH(s.title||'')+'"></div>';
-    case 'title': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Fizika')+'</div><h2>'+escH(s.heading||PRES.title)+'</h2>'+(s.lead?'<p class="lead">'+escH(s.lead)+'</p>':'')+'</div>';
-    case 'objectives': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Dars maqsadi')+'</div><h2>'+escH(s.heading||'Dars maqsadi')+'</h2>'+bullets(s.bullets)+'</div>';
-    case 'summary': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Xulosa')+'</div><h2>'+escH(s.heading||'Nimani o‘rgandik')+'</h2>'+bullets(s.bullets)+'</div>';
-    case 'example': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Masala')+'</div><h2>'+escH(s.heading||'Masala')+'</h2>'+bullets(s.bullets)+'</div>';
-    case 'concept': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Tushuncha')+'</div><h2>'+escH(s.heading||'')+'</h2><div class="concept">'+(s.items||[]).slice(0,3).map(function(it){ return '<div class="cc"><div class="ci">'+escH(it.sym||'')+'</div><div class="cn">'+escH(it.name||'')+'</div><div class="cd">'+escH(it.desc||'')+'</div></div>'; }).join('')+'</div></div>';
-    case 'formula': return '<div class="slide"><div class="ey">'+escH(s.eyebrow||'Asosiy formula')+'</div><div class="formula">'+escH(s.formula||'')+'</div>'+(s.lead?'<p class="lead">'+escH(s.lead)+'</p>':'')+'</div>';
-    case 'lab': return '<div class="slide"><div class="ey" style="color:var(--amber-tx)">Endi o‘zimiz ko‘ramiz</div><h2>3D tajriba</h2><div class="labframe"><img src="'+LAB_IMG+'" alt="3D laboratoriya"></div><div style="margin-top:22px"><a class="btn btn-blue" href="/design-prototype/lab/index.html?lab='+encodeURIComponent((curLesson&&curLesson.labSlug)||'')+'">Laboratoriyani ochish</a></div></div>';
-    default: return '<div class="slide"><h2>'+escH(s.heading||'')+'</h2>'+(s.lead?'<p class="lead">'+escH(s.lead)+'</p>':'')+'</div>';
-  }
+  if(s.type==='lab') return '<div class="slide"><div class="ey" style="color:var(--amber-tx)">Endi o\u2018zimiz ko\u2018ramiz</div><h2>3D tajriba</h2><div class="labframe"><img src="'+LAB_IMG+'" alt="3D laboratoriya"></div><div style="margin-top:22px"><a class="btn btn-blue" href="/design-prototype/lab/index.html?lab='+encodeURIComponent((curLesson&&curLesson.labSlug)||'')+'">Laboratoriyani ochish</a></div></div>';
+  if(s.type==='image'&&s.url) return '<div class="slide slide-img"><img src="'+s.url+'" alt="'+escH(s.title||'')+'"></div>'; // legacy decks
+  var ey='';
+  if(s.type==='cover') ey=(curLesson?((curLesson.grade?curLesson.grade+'-sinf · ':'')+'Fizika'):'Fizika');
+  else if(s.type==='formula') ey='Asosiy formula';
+  else if(s.type==='summary') ey='Xulosa';
+  else ey='Mavzu';
+  var txt='<div class="d-txt"><div class="d-ey">'+escH(ey)+'</div><h2>'+escH(s.title||'')+'</h2>';
+  if(s.type==='formula'&&s.formula) txt+='<div class="d-formula">'+escH(s.formula)+'</div>';
+  txt+=dPoints(s);
+  if(s.lead) txt+='<p class="d-lead">'+escH(s.lead)+'</p>';
+  txt+='</div>';
+  return '<div class="dslide'+(s.type==='cover'?' cover':'')+'"><div class="band"></div><div class="d-body">'+txt+dIll(s)+'</div></div>';
 }
+
 function presentSlides(){
   var arr=(PRES.slides||[]).slice();
   if(curLesson&&curLesson.labSlug){
@@ -1378,11 +1383,11 @@ function presentSlides(){
   }
   return arr;
 }
-function startPresent(){ curSlides=presentSlides(); if(!curSlides.length) return; ps=0; document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')}); $('sc-present').classList.add('active'); buildDots(); renderStep(); }
+function startPresent(){ curSlides=presentSlides(); if(!curSlides.length) return; ps=0; var _pt=document.querySelector('#sc-present .pt'); if(_pt&&_pt.firstChild&&_pt.firstChild.nodeType===3) _pt.firstChild.nodeValue=(PRES.title||'Dars')+' '; document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')}); $('sc-present').classList.add('active'); buildDots(); renderStep(); }
 function buildDots(){ var d=$('p-dots'); d.innerHTML=''; curSlides.forEach(function(s){ var x=document.createElement('span'); x.className='dot'+(s.type==='lab'?' lab':''); d.appendChild(x); }); }
 function renderStep(){
   var s=curSlides[ps]; $('p-slide').innerHTML=slideHTML(s);
-  $('p-stepname').textContent='· '+((s.type==='image'&&s.title)?s.title:slideTypeName(s.type)); $('p-count').textContent=(ps+1)+' / '+curSlides.length;
+  $('p-stepname').textContent='· '+(s.title||slideTypeName(s.type)); $('p-count').textContent=(ps+1)+' / '+curSlides.length;
   $('p-prev').disabled=ps===0; $('p-next').textContent=ps===curSlides.length-1?'Dars tugadi':'Keyingisi';
   [].forEach.call(document.querySelectorAll('#p-dots .dot'),function(x,i){ x.classList.toggle('on',i===ps); });
 }
@@ -1434,10 +1439,12 @@ function applyLessonState(hasSlides,loading){
 function renderSlidesPreview(){
   var box=$('les-slides-preview'); if(!box) return;
   if(!PRES.slides.length){ box.innerHTML=''; return; }
-  var imgs=PRES.slides.filter(function(s){return s.type==='image'&&s.url;});
-  if(imgs.length){ box.innerHTML='<div class="les-prev-lbl">Slaydlar</div><div class="les-thumbs">'+imgs.map(function(s){ return '<img src="'+s.url+'" alt="'+escH(s.title||'')+'" loading="lazy">'; }).join('')+'</div>'; return; }
-  box.innerHTML='<div class="les-prev-lbl">Slaydlar</div><ol class="les-prev">'+PRES.slides.map(function(s){ return '<li><b>'+escH(slideTypeName(s.type))+'</b> '+escH(s.heading||s.formula||'')+'</li>'; }).join('')+'</ol>';
+  box.innerHTML='<div class="les-prev-lbl">Slaydlar ('+PRES.slides.length+')</div><div class="les-thumbs">'+PRES.slides.map(function(s){
+    var pic=s.imgUrl?'<img src="'+s.imgUrl+'" loading="lazy" alt="">':(s.url?'<img src="'+s.url+'" loading="lazy" alt="">':'<span class="les-thumb-x"></span>');
+    return '<figure class="les-thumb">'+pic+'<figcaption>'+escH(s.title||slideTypeName(s.type))+'</figcaption></figure>';
+  }).join('')+'</div>';
 }
+
 async function generateLesson(){
   if(!curLesson||DEMO) return;
   var note=$('les-gen-note'), gen=$('les-gen');
@@ -1447,25 +1454,24 @@ async function generateLesson(){
     var tok=((await sb.auth.getSession()).data.session||{}).access_token; if(!tok) throw new Error('auth');
     var H={'content-type':'application/json',Authorization:'Bearer '+tok};
     var T=window.EMPIRA_TOPICS||{}, c=T[curLesson.topicSlug]||{}, task=(c.labs&&c.labs[0]&&c.labs[0].task)||'';
-    prog('Dars rejasi tuzilmoqda\u2026');
+    prog('Dars matni tuzilmoqda\u2026');
     var pr=await fetch('/api/deck-plan',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,title:curLesson.title,content:{explain:c.explain,formulas:c.formulas,terms:c.terms,task:task}})});
     var pj=await pr.json(); if(!pr.ok||!pj.slides||!pj.slides.length) throw new Error((pj&&pj.error)||'plan');
-    var plan=pj.slides, slides=[], anyTemp=false;
+    var plan=pj.slides, anyTemp=false;
     for(var i=0;i<plan.length;i++){
-      prog('Slayd '+(i+1)+' / '+plan.length+' chizilmoqda\u2026 (biroz kuting)');
+      prog('Rasm '+(i+1)+' / '+plan.length+' chizilmoqda\u2026');
       try{
-        var ir=await fetch('/api/deck-image',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,idx:i,title:plan[i].title,lines:plan[i].lines,visual:plan[i].visual})});
+        var ir=await fetch('/api/deck-image',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,idx:i,visual:plan[i].visual,title:plan[i].title})});
         var ij=await ir.json();
-        if(ir.ok && (ij.url||ij.dataUrl)){ slides.push({type:'image',title:plan[i].title,url:ij.url||ij.dataUrl,temp:!ij.url}); if(!ij.url) anyTemp=true; }
-      }catch(e){ /* skip a failed slide, keep going */ }
+        if(ir.ok && (ij.url||ij.dataUrl)){ plan[i].imgUrl=ij.url||ij.dataUrl; if(!ij.url) anyTemp=true; }
+      }catch(e){ /* keep slide without illustration */ }
     }
-    if(!slides.length) throw new Error('no_slides');
-    PRES={title:pj.title||curLesson.title,slides:slides};
+    PRES={title:pj.title||curLesson.title,slides:plan};
     if(!anyTemp){
       try{ await sb.rpc('empira_save_presentation',{p_slug:curLesson.topicSlug,p_grade:curLesson.grade,p_title:PRES.title,p_slides:PRES.slides}); }catch(e){}
       note.textContent='Tayyor va saqlandi! \u201cSinfga ko\u2018rsatish\u201d bilan boshlang.';
     } else {
-      note.textContent='Tayyor! Saqlash uchun Supabase\u2019da \u201cdecks\u201d papka (bucket) kerak \u2014 hozircha faqat shu seansda ko\u2018rinadi.';
+      note.textContent='Tayyor! Rasmlarni saqlash uchun Supabase\u2019da \u201cdecks\u201d papka kerak \u2014 matn to\u2018g\u2018ri, hozircha shu seansda.';
     }
     applyLessonState(true);
   }catch(e){
@@ -1547,7 +1553,30 @@ async function generateLesson(){
 .slide-img{width:100%;max-width:min(94vw,1180px)}
 .slide-img img{width:100%;height:auto;max-height:78vh;object-fit:contain;border-radius:14px;box-shadow:var(--shadow-lg);display:block;margin:0 auto}
 .les-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:8px}
-.les-thumbs img{width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+.les-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:8px}
+.les-thumb{margin:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.les-thumb img{width:100%;aspect-ratio:4/3;object-fit:contain;background:var(--paper);display:block}
+.les-thumb .les-thumb-x{display:block;width:100%;aspect-ratio:4/3;background:var(--mist)}
+.les-thumb figcaption{font-size:12.5px;font-weight:600;color:var(--ink2);padding:8px 10px;line-height:1.3}
+/* hybrid deck slide */
+.dslide{container-type:inline-size;width:min(94vw,1120px);aspect-ratio:16/9;background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column}
+.dslide .band{height:1cqw;min-height:7px;background:linear-gradient(90deg,#3B4CFF,#5563FF)}
+.d-body{flex:1;display:grid;grid-template-columns:1.12fr .88fr;gap:4cqw;align-items:center;padding:5cqw 6cqw;min-height:0}
+.dslide.cover .d-body{align-items:center}
+.d-txt{min-width:0;text-align:left}
+.d-ey{font-family:var(--sora);font-weight:700;font-size:1.7cqw;letter-spacing:.04em;text-transform:uppercase;color:var(--blue);margin-bottom:1.6cqw}
+.dslide h2{font-family:var(--sora);font-weight:800;font-size:4.1cqw;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:0}
+.dslide.cover h2{font-size:5.2cqw}
+.d-lead{font-size:2.05cqw;color:var(--ink2);margin-top:2cqw;line-height:1.45}
+.d-pts{list-style:none;margin:2.6cqw 0 0;padding:0;display:flex;flex-direction:column;gap:1.5cqw}
+.d-pts li{position:relative;padding-left:3cqw;font-size:2.15cqw;line-height:1.4;color:var(--ink2)}
+.d-pts li::before{content:"";position:absolute;left:0;top:.8cqw;width:1.3cqw;height:1.3cqw;border-radius:.35cqw;background:var(--blue)}
+.d-pts.chk li::before{background:var(--amber)}
+.d-formula{font-family:var(--sora);font-weight:800;font-size:5cqw;color:var(--ink);margin-top:1.4cqw}
+.d-ill{display:flex;align-items:center;justify-content:center;height:100%;min-width:0}
+.d-ill img{max-width:100%;max-height:72cqh;object-fit:contain}
+.d-ill-x{width:100%;height:60cqh;border-radius:2cqw;background:var(--paper)}
+@media(max-width:700px){.dslide{aspect-ratio:auto}.d-body{grid-template-columns:1fr;gap:3cqw;padding:6cqw}.dslide h2{font-size:7cqw}.dslide.cover h2{font-size:8cqw}.d-ey{font-size:3cqw}.d-lead{font-size:3.4cqw}.d-pts li{font-size:3.6cqw;padding-left:5cqw}.d-pts li::before{width:2.4cqw;height:2.4cqw;top:1.3cqw}.d-formula{font-size:8cqw}.d-ill img{max-height:40vh}}
 </style>
 </body>
 </html>
