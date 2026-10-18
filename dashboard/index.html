@@ -1409,7 +1409,7 @@ function renderTopicsList(){
     var labs=A.labsFor(x.slug), labSlug=(labs[0]&&labs[0].slug)||'';
     return '<button class="topic" data-slug="'+escH(x.slug)+'" data-grade="'+x.grade+'" data-title="'+escH(x.t.t)+'" data-lab="'+escH(labSlug)+'">'+
       '<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h7M7 12h4"/></svg></span>'+
-      '<span><span class="tt">'+escH(x.t.t)+'</span><span class="ts">'+x.grade+'-sinf · Fizika</span></span></button>';
+      '<span class="t-main"><span class="tt">'+escH(x.t.t)+'</span><span class="ts">'+x.grade+'-sinf · Fizika</span></span><svg class="t-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';
   }).join('');
   box.querySelectorAll('.topic').forEach(function(b){ b.addEventListener('click',function(){ openLesson(b.dataset.slug,Number(b.dataset.grade),b.dataset.title,b.dataset.lab); }); });
 }
@@ -1438,7 +1438,10 @@ function applyLessonState(hasSlides,loading){
 }
 function renderSlidesPreview(){
   var box=$('les-slides-preview'); if(!box) return;
-  if(!PRES.slides.length){ box.innerHTML=''; return; }
+  if(!PRES.slides.length){
+    box.innerHTML='<div class="les-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>\u201cAI bilan dars yaratish\u201d tugmasini bosing \u2014 chiroyli slaydlar shu yerda paydo bo\u2018ladi, bir necha soniyada.</span></div>';
+    return;
+  }
   box.innerHTML='<div class="les-prev-lbl">Slaydlar ('+PRES.slides.length+')</div><div class="les-thumbs">'+PRES.slides.map(function(s){
     var pic=s.imgUrl?'<img src="'+s.imgUrl+'" loading="lazy" alt="">':(s.url?'<img src="'+s.url+'" loading="lazy" alt="">':'<span class="les-thumb-x"></span>');
     return '<figure class="les-thumb">'+pic+'<figcaption>'+escH(s.title||slideTypeName(s.type))+'</figcaption></figure>';
@@ -1447,34 +1450,41 @@ function renderSlidesPreview(){
 
 async function generateLesson(){
   if(!curLesson||DEMO) return;
-  var note=$('les-gen-note'), gen=$('les-gen');
-  note.hidden=false; note.className='les-note'; gen.disabled=true;
-  function prog(t){ note.textContent=t; }
+  var note=$('les-gen-note'), gen=$('les-gen'), pres=$('les-present');
+  var genLabel=gen.textContent;
+  note.hidden=false; note.className='les-note'; gen.disabled=true; gen.textContent='Yaratilmoqda\u2026'; pres.hidden=true;
+  function skel(plan,done){
+    var box=$('les-slides-preview'); if(!box) return;
+    box.innerHTML='<div class="les-prev-lbl">Tayyorlanmoqda\u2026</div><div class="les-thumbs">'+plan.map(function(s,i){
+      var pic=s.imgUrl?'<img src="'+s.imgUrl+'" alt="">':'<span class="les-thumb-x'+(i<done?'':' is-skel')+'"></span>';
+      return '<figure class="les-thumb">'+pic+'<figcaption>'+escH(s.title||'\u2026')+'</figcaption></figure>';
+    }).join('')+'</div>';
+  }
+  function bar(done,total){ note.innerHTML='<div class="gen-bar"><i style="width:'+Math.round(100*done/Math.max(total,1))+'%"></i></div><div class="gen-txt">Slayd '+done+' / '+total+' tayyor</div>'; }
   try{
     var tok=((await sb.auth.getSession()).data.session||{}).access_token; if(!tok) throw new Error('auth');
     var H={'content-type':'application/json',Authorization:'Bearer '+tok};
     var T=window.EMPIRA_TOPICS||{}, c=T[curLesson.topicSlug]||{}, task=(c.labs&&c.labs[0]&&c.labs[0].task)||'';
-    prog('Dars matni tuzilmoqda\u2026');
+    note.textContent='Dars matni tuzilmoqda\u2026';
     var pr=await fetch('/api/deck-plan',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,title:curLesson.title,content:{explain:c.explain,formulas:c.formulas,terms:c.terms,task:task}})});
     var pj=await pr.json(); if(!pr.ok||!pj.slides||!pj.slides.length) throw new Error((pj&&pj.error)||'plan');
     var plan=pj.slides, anyTemp=false;
+    skel(plan,0); bar(0,plan.length);
     for(var i=0;i<plan.length;i++){
-      prog('Rasm '+(i+1)+' / '+plan.length+' chizilmoqda\u2026');
       try{
         var ir=await fetch('/api/deck-image',{method:'POST',headers:H,body:JSON.stringify({topic_slug:curLesson.topicSlug,grade:curLesson.grade,idx:i,visual:plan[i].visual,title:plan[i].title})});
         var ij=await ir.json();
         if(ir.ok && (ij.url||ij.dataUrl)){ plan[i].imgUrl=ij.url||ij.dataUrl; if(!ij.url) anyTemp=true; }
-      }catch(e){ /* keep slide without illustration */ }
+      }catch(e){}
+      skel(plan,i+1); bar(i+1,plan.length);
     }
     PRES={title:pj.title||curLesson.title,slides:plan};
-    if(!anyTemp){
-      try{ await sb.rpc('empira_save_presentation',{p_slug:curLesson.topicSlug,p_grade:curLesson.grade,p_title:PRES.title,p_slides:PRES.slides}); }catch(e){}
-      note.textContent='Tayyor va saqlandi! \u201cSinfga ko\u2018rsatish\u201d bilan boshlang.';
-    } else {
-      note.textContent='Tayyor! Rasmlarni saqlash uchun Supabase\u2019da \u201cdecks\u201d papka kerak \u2014 matn to\u2018g\u2018ri, hozircha shu seansda.';
-    }
-    applyLessonState(true);
+    if(!anyTemp){ try{ await sb.rpc('empira_save_presentation',{p_slug:curLesson.topicSlug,p_grade:curLesson.grade,p_title:PRES.title,p_slides:PRES.slides}); }catch(e){} }
+    gen.textContent=genLabel; applyLessonState(true);
+    note.className='les-note';
+    note.textContent=anyTemp ? 'Tayyor! Rasmlar shu seansda ko\u2018rinadi (saqlash uchun Supabase\u2019da decks papka kerak). Matn to\u2018g\u2018ri.' : 'Tayyor va saqlandi! \u201cSinfga ko\u2018rsatish\u201d bilan boshlang.';
   }catch(e){
+    gen.textContent=genLabel;
     note.className='les-note err';
     note.textContent=(e.message==='teachers_only')?'Faqat o\u2018qituvchilar dars yaratadi.':(e.message==='too_many')?'Juda ko\u2018p urinish. Birozdan keyin qaytadan.':'Hozircha yaratib bo\u2018lmadi. Birozdan keyin qayta urinib ko\u2018ring.';
   }finally{ gen.disabled=false; }
@@ -1577,6 +1587,21 @@ async function generateLesson(){
 .d-ill img{max-width:100%;max-height:72cqh;object-fit:contain}
 .d-ill-x{width:100%;height:60cqh;border-radius:2cqw;background:var(--paper)}
 @media(max-width:700px){.dslide{aspect-ratio:auto}.d-body{grid-template-columns:1fr;gap:3cqw;padding:6cqw}.dslide h2{font-size:7cqw}.dslide.cover h2{font-size:8cqw}.d-ey{font-size:3cqw}.d-lead{font-size:3.4cqw}.d-pts li{font-size:3.6cqw;padding-left:5cqw}.d-pts li::before{width:2.4cqw;height:2.4cqw;top:1.3cqw}.d-formula{font-size:8cqw}.d-ill img{max-height:40vh}}
+.topic{align-items:center;min-height:72px}
+.topic .t-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.topic .tt{display:block;line-height:1.3}
+.topic .ts{display:block;margin-top:0}
+.topic .t-go{width:20px;height:20px;color:var(--ink3);flex:none;margin-left:10px}
+.topic:hover .t-go{color:var(--blue)}
+.gen-bar{height:8px;border-radius:999px;background:var(--mist);overflow:hidden;margin-bottom:9px}
+.gen-bar i{display:block;height:100%;background:var(--blue);border-radius:999px;transition:width .35s ease}
+.gen-txt{font-size:13.5px;color:var(--ink2);font-weight:500}
+.les-thumb .is-skel{background:linear-gradient(90deg,var(--mist),#e9edf6,var(--mist));background-size:200% 100%;animation:skel 1.2s linear infinite}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.les-empty{display:flex;align-items:center;gap:14px;margin-top:8px;padding:20px 22px;border:1px dashed var(--line);border-radius:16px;background:#fff;color:var(--ink3);font-size:14.5px;line-height:1.5}
+.les-empty svg{width:34px;height:34px;color:var(--blue-300);flex:none}
+.les-actions [hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.les-thumb .is-skel{animation:none}}
 </style>
 </body>
 </html>
