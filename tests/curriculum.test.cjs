@@ -81,7 +81,9 @@ test('section lists per book for the Gemini prompt', () => {
 
 // api/scan.js end to end with a fake Gemini answer: the grade hint and reading.grade reach the matcher
 test('POST /api/scan passes the grade hint and returns reading.grade', async () => {
-  const handler = require('../api/scan.js');
+  const { loadHandler } = require('./helpers.cjs');
+  const sb={auth:{getUser:async()=>({data:{user:{id:'test-user'}}})},rpc:async()=>({data:true})};
+  const handler=loadHandler('api/scan.js',sb,(...args)=>globalThis.fetch(...args));
   const realFetch = globalThis.fetch, key = process.env.GEMINI_API_KEY, log = console.log;
   let sentPrompt = '';
   process.env.GEMINI_API_KEY = 'test';
@@ -93,7 +95,7 @@ test('POST /api/scan passes the grade hint and returns reading.grade', async () 
     };
     let out;
     const res = { setHeader() {}, status(code) { return { json: (d) => { out = { code, ...d }; } }; } };
-    await handler({ method: 'POST', body: { image: 'AAAA', mime: 'image/jpeg', ...body } }, res);
+    await handler({ method: 'POST', headers:{authorization:'Bearer test-token'}, body: { image: 'AAAA', mime: 'image/jpeg', ...body } }, res);
     return out;
   };
   try {

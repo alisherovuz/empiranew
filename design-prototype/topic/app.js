@@ -1,7 +1,8 @@
 // Empira — Topic page prototype (S3). Prototype only.
 // ?mavzu=<slug> selects the topic. An unknown slug shows "Mavzu topilmadi" (never a different topic).
 // Previous/next step through topics that have a 3D lab only (../shared/availability.js).
-(function () {
+(async function () {
+  if(!await window.EMPIRA_READY)return;
   const plan = window.EMPIRA_PLAN;
   const content = window.EMPIRA_TOPICS;
   const avail = window.EMPIRA_AVAIL;
@@ -47,7 +48,7 @@
   // Best result in Build Mode on this device (1–3 stars), so students see what they earned and can try for 3
   const starsFor = (labSlug) => {
     let n = 0;
-    try { n = Number(localStorage.getItem(`empira-build-best:${labSlug}`)) || 0; } catch (e) { /* storage blocked */ }
+    n = Math.max(0,Math.min(3,Number(window.EMPIRA_PROGRESS.get(labSlug,'build')?.bestStars)||0));
     return n ? `<span class="lab-card__stars" aria-label="Eng yaxshi natija: ${n} ta yulduz">${'★'.repeat(n)}${'☆'.repeat(3 - n)}</span>` : '';
   };
   const labCards = !data ? '' : data.labs.map((lab, n) => `

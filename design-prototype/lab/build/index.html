@@ -10,6 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="build.css">
+  <link rel="stylesheet" href="/design-prototype/shared/launch.css">
+  <script src="/design-prototype/shared/progress.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/design-prototype/shared/session.js"></script>
 </head>
 <body>
 
@@ -31,6 +35,7 @@
     </button>
   </header>
 
+  <p data-save-status role="status" aria-live="polite"></p>
   <main class="lab lab--build" data-main>
 
     <!-- Workspace: empty board, the student's tools and wires -->

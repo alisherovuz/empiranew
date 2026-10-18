@@ -1,4 +1,6 @@
-(function () {
+(async function () {
+if (!await window.EMPIRA_READY) return;
+const P = window.EMPIRA_PROGRESS;
 // Empira — 3D Laboratory engine. One screen design, many labs.
 //   ?lab=<lab slug>   e.g. ?lab=om-qonuni   (definitions in labs-8.js, 3D equipment in kit.js)
 //   &holat=tugadi     documentation state: the lab's demo measurements already taken
@@ -21,11 +23,15 @@ const allTopics = plan.chapters.flatMap((c) => c.topics.map((t) => ({ ...t, slug
 const labIndex = {};
 Object.entries(content).forEach(([topicSlug, c]) => c.labs.forEach((lab) => { labIndex[lab.slug] = { lab, topicSlug }; }));
 
-const firstLab = Object.keys(LABS)[0];
-const labId = LABS[q.get('lab')] && labIndex[q.get('lab')] ? q.get('lab') : firstLab;
+const labId = q.get('lab') || '';
 const L = LABS[labId];
-const info = labIndex[labId].lab;
-const topic = allTopics.find((t) => t.slug === labIndex[labId].topicSlug);
+const info = labIndex[labId]?.lab;
+const topic = allTopics.find((t) => t.slug === labIndex[labId]?.topicSlug);
+if (!L || !info || !topic) {
+  document.querySelector('main').innerHTML = '<section class="empira-recovery"><h1>Tajriba topilmadi</h1><p>Bu havola eskirgan yoki noto‘g‘ri. Mavzular ro‘yxatidan tajribani tanlang.</p><a href="/dashboard">Mavzularni ochish</a></section>';
+  $('[data-title]').textContent='Tajriba topilmadi';
+  return;
+}
 
 document.title = `${info.title} — 3D laboratoriya — Empira`;
 $('[data-title]').textContent = info.title;
@@ -55,6 +61,16 @@ $('[data-stage]').setAttribute('aria-label', `3D laboratoriya: ${info.title}`);
 const values = Object.fromEntries(L.controls.map((c) => [c.key, c.value]));
 const state = { phase: 'ready', t: 0, dur: 1, runs: [], touched: new Set() };
 const calc = () => (L.compute ? L.compute(values) : {});
+const saved = P.get(labId,'ready');
+if (saved) {
+  Object.assign(values,P.values(L.controls,saved.values));
+  state.runs=(Array.isArray(saved.runs)?saved.runs:[]).slice(-50).map((r)=>{const v=P.values(L.controls,r);return {...v,...(L.compute?L.compute(v):{})};});
+  state.touched=new Set((Array.isArray(saved.touched)?saved.touched:[]).filter((k)=>L.controls.some((c)=>c.key===k)));
+  state.phase=saved.phase==='done'&&state.runs.length?'done':'ready';
+}
+function saveDraft() {
+  P.save(labId,'ready',{values:{...values},runs:state.runs.slice(-50),touched:[...state.touched],phase:state.phase==='running'?'ready':state.phase});
+}
 
 $('[data-fields]').innerHTML = L.controls.map((c) => c.type === 'choice' ? `
   <div class="field">
@@ -128,7 +144,7 @@ function announceControl(ctl) {
     feedback('info', `${ctl.label}: ${text}`, `«${L.run[0]}» tugmasini bosing va natija qanday o‘zgarishini kuzating.`);
   }, 250);
 }
-let finaleShown = false;
+let finaleShown = !!saved && L.steps.every((step)=>step.done(state));
 function finale() {
   const build = window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(labId);
   const next = window.EMPIRA_AVAIL ? window.EMPIRA_AVAIL.neighbours(topic.slug).next : null;
@@ -148,6 +164,7 @@ function paintRange(input) {
 }
 
 function render() {
+  saveDraft();
   const c = calc();
   const done = state.phase === 'done';
   ui.inputs.forEach((input) => {
@@ -182,7 +199,7 @@ function render() {
   state.justMeasured = false;
 
   const running = state.phase === 'running';
-  ui.run.disabled = running;
+  ui.run.disabled = running || !scene3d;
   ui.inputs.forEach((i) => { i.disabled = running; });
   ui.choices.forEach((b) => { b.disabled = running; });
   ui.run.textContent = L.run[running ? 1 : done ? 2 : 0];
@@ -209,6 +226,7 @@ ui.choices.forEach((b) => b.addEventListener('click', () => {
 }));
 
 ui.run.addEventListener('click', () => {
+  if(!scene3d || state.phase==='running')return;
   if (state.phase === 'done') scene3d?.update(values, calc());
   state.t = 0;
   state.dur = L.duration ? L.duration(values, calc()) : 1;
@@ -281,7 +299,7 @@ async function build3D() {
 
   const canvas = $('[data-canvas]');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.matchMedia('(max-width: 700px)').matches ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -297,7 +315,8 @@ async function build3D() {
   const sun = new THREE.DirectionalLight(0xffffff, 1.6);
   sun.position.set(0.8, 2.2, 1.4);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  const shadowSize=window.matchMedia('(max-width: 700px)').matches?1024:2048;
+  sun.shadow.mapSize.set(shadowSize, shadowSize);
   Object.assign(sun.shadow.camera, { left: -1, right: 1.6, top: 1, bottom: -1 });
   sun.shadow.radius = 4;
   scene.add(sun);
@@ -345,6 +364,7 @@ async function build3D() {
   const clock = new THREE.Clock();
   let firstFrame = true;
   renderer.setAnimationLoop(() => {
+    if(document.hidden){clock.getDelta();return;}
     const dt = Math.min(clock.getDelta(), 0.05);
     tick(dt);
     api.animate?.(dt, state.phase);
@@ -370,6 +390,7 @@ feedback('info', 'Tajribani boshlang', `Boshqaruvni tanlab, «${L.run[0]}» tugm
 
 build3D().then((api) => {
   scene3d = api;
+  ui.inputs.forEach((i)=>{i.value=values[i.dataset.ctl];});
   api.update(values, calc());
 
   if (q.get('holat') === 'tugadi' && L.demo) {
@@ -385,5 +406,8 @@ build3D().then((api) => {
   console.error(err);
   $('[data-loading]').hidden = true;
   $('[data-fallback]').hidden = false;
+  ui.run.disabled=true;
+  $('[data-fallback]').innerHTML='3D ko‘rinish yuklanmadi. <button type="button" data-retry-scene>Qayta urinish</button> <a href="/dashboard">Boshqa tajriba</a>';
+  $('[data-retry-scene]').onclick=()=>location.reload();
 });
 })();

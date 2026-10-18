@@ -77,8 +77,9 @@ const ART = {
 };
 const STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
 const coachEl = $('[data-coach]');
-let coachGo = null, coachCloseFn = null;
+let coachGo = null, coachCloseFn = null, coachPreviousFocus=null;
 function coach({ kind, step = '', title, text = '', plan = null, stars = 0, meta = '', go, onGo, close = '', onClose = null }) {
+  if(coachEl.hidden)coachPreviousFocus=document.activeElement;
   coachEl.dataset.kind = kind;
   $('[data-coach-art]').innerHTML = ART[kind];
   $('[data-coach-step]').textContent = step;
@@ -101,13 +102,24 @@ function closeCoach(run) {
   if (coachEl.hidden) return;
   coachEl.classList.remove('is-open'); coachEl.hidden = true;
   const fn = run ? coachGo : coachCloseFn; coachGo = coachCloseFn = null;
+  if(coachPreviousFocus?.isConnected)coachPreviousFocus.focus({preventScroll:true});
   if (fn) fn();
 }
 if (coachEl) {
   $('[data-coach-go]').addEventListener('click', () => closeCoach(true));
   $('[data-coach-close]').addEventListener('click', () => closeCoach(false));
   coachEl.addEventListener('click', (e) => { if (e.target === coachEl) closeCoach(false); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !coachEl.hidden) closeCoach(false); });
+  document.addEventListener('keydown',(e)=>{
+    if(coachEl.hidden)return;
+    if(e.key==='Escape'){e.preventDefault();closeCoach(false);}
+    if(e.key==='Tab'){
+      const buttons=[...coachEl.querySelectorAll('button:not([hidden]):not(:disabled),a[href]')].filter((el)=>el.getClientRects().length);
+      if(!buttons.length)return;
+      const first=buttons[0],last=buttons[buttons.length-1];
+      if(e.shiftKey&&(document.activeElement===first||!coachEl.contains(document.activeElement))){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&(document.activeElement===last||!coachEl.contains(document.activeElement))){e.preventDefault();first.focus();}
+    }
+  });
 }
 
 

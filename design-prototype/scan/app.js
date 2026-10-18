@@ -7,7 +7,10 @@
 // ?mavzu=<topic slug> fixes the mock result (e.g. ?holat=natija&mavzu=om-qonuni); ?natija=yoq makes detection fail.
 // PRESENTER MODE: ?taqdimot=1 (remembered for the browser session, ?taqdimot=0 to leave) shows a small chooser for the
 // next result, so the mock matches the page actually being scanned. Number keys 1–9 also choose it.
-(function () {
+(async function () {
+  if(!await window.EMPIRA_READY)return;
+  let scanGeneration=0, scanController=null, scanTimer=null;
+  function cancelScan(){scanGeneration++;if(scanController)scanController.abort();clearTimeout(scanTimer);}
   const page = document.querySelector('[data-state]');
   const q = new URLSearchParams(location.search);
   const $ = (sel) => document.querySelector(sel);
@@ -35,7 +38,7 @@
   // Presenter mode (session-wide, hidden from teachers)
   if (q.get('taqdimot') === '1') sessionStorage.setItem('empira-presenter', '1');
   if (q.get('taqdimot') === '0') { sessionStorage.removeItem('empira-presenter'); sessionStorage.removeItem('empira-scan-pick'); }
-  const presenter = sessionStorage.getItem('empira-presenter') === '1';
+  const presenter = q.get('taqdimot') === '1';
 
   function renderPresenter() {
     const pick = sessionStorage.getItem('empira-scan-pick');
@@ -122,20 +125,31 @@
   }
 
   async function recognise(imageUrl) {
+    const generation=scanGeneration, controller=new AbortController();scanController=controller;
+    const timeout=setTimeout(()=>controller.abort(),22000);
     const started = Date.now();
     try {
       const image = await toJpegBase64(imageUrl);
-      const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image, mime: 'image/jpeg', grade: plan.grade }) });
+      if(generation!==scanGeneration)return;
+      const sessionResult=await window.EMPIRA_SB.auth.getSession();
+      const token=sessionResult.data?.session?.access_token;
+      if(sessionResult.error || !token)throw new Error('sign_in_required');
+      if(generation!==scanGeneration)return;
+      const res = await fetch('/api/scan', { method:'POST', signal:controller.signal, headers:{'Content-Type':'application/json',Authorization:'Bearer '+token}, body:JSON.stringify({image,mime:'image/jpeg',grade:plan.grade}) });
       const data = await res.json().catch(() => ({}));
       await new Promise((r) => setTimeout(r, Math.max(0, 900 - (Date.now() - started))));   // keep the loading state readable
+      if(generation!==scanGeneration)return;
+      if(res.status===429){notFound('error');nfHint.textContent='Biroz kutib, qayta skanerlang yoki mavzuni ro‘yxatdan tanlang.';return;}
+      if(res.status===401){notFound('error');nfHint.textContent='Hisobingizga qayta kiring, so‘ng skanerlang.';return;}
       if (data.status === 'found') { showResult({ slug: data.topic.slug, topic: data.topic.title, labs: data.labs, grade: data.grade }); return setState('result'); }
       if (data.status === 'notfound') return notFound('notfound');
       console.error('scan error', res.status, data);
       return notFound('error');
     } catch (err) {
+      if(generation!==scanGeneration)return;
       console.error('scan failed', err);
       return notFound('error');
-    }
+    } finally {clearTimeout(timeout);}
   }
 
   function setState(state) {
@@ -159,6 +173,7 @@
   }
 
   function detect(imageUrl) {
+    cancelScan();
     stopCamera();
     showAlert('');
     if (previewUrl && previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
@@ -166,10 +181,11 @@
     if (previewUrl) preview.src = previewUrl; else preview.removeAttribute('src');
     setState('processing');
 
-    const mockChosen = q.get('mavzu') || (presenter && sessionStorage.getItem('empira-scan-pick'));
-    if (LIVE && !mockChosen && q.get('natija') !== 'yoq') return recognise(imageUrl);
+    const mockChosen = presenter;
+    if (LIVE && !mockChosen) return recognise(imageUrl);
 
-    setTimeout(() => {
+    showAlert('DEMO: bu natija namuna. Haqiqiy skanerlash uchun sahifani taqdimot rejimisiz oching.');
+    scanTimer=setTimeout(() => {
       if (q.get('natija') === 'yoq') return notFound('notfound');
       showResult(nextMatch());
       setState('result');
@@ -222,10 +238,11 @@
   });
 
   /* ---------- Result / retry ---------- */
-  document.querySelectorAll('[data-rescan]').forEach((b) => b.addEventListener('click', () => setState('idle')));
+  document.querySelectorAll('[data-rescan]').forEach((b) => b.addEventListener('click', () => {cancelScan();setState('idle');}));
 
   /* ---------- Prototype: jump to a state ---------- */
-  const forced = { kamera: 'camera', aniqlanmoqda: 'processing', natija: 'result', topilmadi: 'notfound' }[q.get('holat')];
+  window.addEventListener('pagehide',()=>{cancelScan();stopCamera();});
+  const forced = presenter && { kamera: 'camera', aniqlanmoqda: 'processing', natija: 'result', topilmadi: 'notfound' }[q.get('holat')];
   if (forced === 'camera') { drop.hidden = true; camera.hidden = false; page.dataset.state = 'camera'; }
   else if (forced) {
     if (forced === 'result') showResult(RESULTS.find((r) => r.slug === q.get('mavzu')) || RESULTS[0]);

@@ -1,0 +1,42 @@
+name: Launch checks
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: empira-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: empira-test-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --ignore-scripts
+      - run: npm test
+      - run: psql -v ON_ERROR_STOP=1 -f tests/launch-db-setup.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018_launch_readiness.sql
+      - run: psql -v ON_ERROR_STOP=1 -f tests/launch-db-checks.sql
+      - run: node --test tests-db/*.cjs
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failures
+          path: test-results/

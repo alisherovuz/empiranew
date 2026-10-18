@@ -4,10 +4,12 @@
 // 7-sinf or 8-sinf curriculum. `grade` is the grade of the page the teacher scanned from: a hint used only when
 // Gemini cannot tell which book the page is from.
 // Env: GEMINI_API_KEY (required), GEMINI_MODEL (optional, default below).
+const { createClient } = require('@supabase/supabase-js');
+const { limit } = require('./_lib/security');
 const { match, sectionList } = require('./_lib/curriculum');
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-const MAX_BASE64 = 6 * 1024 * 1024;
+const MAX_BASE64 = 3 * 1024 * 1024;
 
 function prompt() {
   return [
@@ -35,6 +37,7 @@ function prompt() {
 async function askGemini(base64, mime) {
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: 'POST',
+    signal: AbortSignal.timeout(20000),
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
     body: JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt() }, { inline_data: { mime_type: mime, data: base64 } }] }],
@@ -52,12 +55,26 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ status: 'error', error: 'method_not_allowed' });
   if (!process.env.GEMINI_API_KEY) return res.status(503).json({ status: 'error', error: 'not_configured' });
 
-  const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  let body;
+  try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); }
+  catch (_) { return res.status(400).json({ status:'error', error:'invalid_json' }); }
+  if (!body || typeof body !== 'object') return res.status(400).json({ status:'error', error:'invalid_body' });
   const base64 = String(body.image || '').replace(/^data:[^;]+;base64,/, '');
   const mime = /^image\/(jpeg|png|webp)$/.test(body.mime) ? body.mime : 'image/jpeg';
   if (!base64) return res.status(400).json({ status: 'error', error: 'no_image' });
   if (base64.length > MAX_BASE64) return res.status(413).json({ status: 'error', error: 'image_too_large' });
 
+  const token = /^Bearer (\S+)$/.exec(req.headers.authorization || '')?.[1];
+  if (!token) return res.status(401).json({ status:'error', error:'sign_in_required' });
+  try {
+    const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession:false, autoRefreshToken:false } });
+    const { data, error } = await sb.auth.getUser(token);
+    if (error || !data?.user) return res.status(401).json({ status:'error', error:'sign_in_required' });
+    if (!await limit(sb, 'scan-user:' + data.user.id, 10, 60) || !await limit(sb, 'scan-global', 120, 60)) {
+      res.setHeader('Retry-After','60');
+      return res.status(429).json({ status:'error', error:'too_many_scans' });
+    }
+  } catch (_) { return res.status(503).json({ status:'error', error:'service_unavailable' }); }
   const started = Date.now();
   try {
     const hint = [7, 8].includes(Number(body.grade)) ? Number(body.grade) : null;

@@ -1,0 +1,21 @@
+.empira-auth-pending body{visibility:hidden}
+.empira-nav{display:flex;gap:12px;margin-left:auto;align-items:center;flex-wrap:wrap;font:600 13px Sora,sans-serif}
+.empira-nav a{color:#3B4CFF;text-decoration:none;padding:10px 4px;min-height:44px;display:inline-flex;align-items:center}
+.empira-recovery{max-width:580px;margin:15vh auto;padding:24px;font-family:Sora,sans-serif;color:#0B1026}
+.empira-recovery a,.empira-recovery button{display:inline-block;margin:12px;padding:12px}
+[data-save-status]{font:400 12px Sora,sans-serif;color:#536079;margin:8px 16px;min-height:18px}
+.empira-catalog{margin:24px 0;font-family:inherit;color:#0B1026}
+.empira-catalog [hidden]{display:none!important}
+.empira-catalog h2{font-size:22px;margin:0 0 8px}
+.empira-catalog p{color:#59647c;line-height:1.6}
+.empira-search{width:100%;padding:14px 16px;border:1px solid #ccd2e3;border-radius:12px;font:inherit;background:white;box-sizing:border-box}
+.empira-filters{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.empira-filters button,.empira-scan{padding:10px 16px;border:1px solid #d9dff0;border-radius:12px;background:white;color:#3B4CFF;font:600 14px inherit;min-height:44px;text-decoration:none}
+.empira-filters button[aria-pressed=true]{background:#3B4CFF;color:white;border-color:#3B4CFF}
+.empira-results{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
+.empira-results a{display:block;height:100%;box-sizing:border-box;padding:18px;border:1px solid #e0e4ee;border-radius:16px;background:white;color:#0B1026;text-decoration:none}
+.empira-results strong{display:block;line-height:1.5}.empira-results small{display:block;color:#667089;margin-top:8px}
+.empira-continue{display:block;padding:20px;border-radius:16px;background:#eef0ff;color:#2534bd;text-decoration:none;margin:14px 0}
+.empira-continue strong,.empira-continue span{display:block;line-height:1.6}
+.empira-catalog :focus-visible,.empira-nav :focus-visible{outline:3px solid #FFB21E;outline-offset:3px}
+@media(max-width:600px){.empira-nav{gap:6px}.empira-nav a{font-size:11px}.empira-results{grid-template-columns:1fr}.labbar{flex-wrap:wrap}.empira-catalog h2{font-size:20px}}

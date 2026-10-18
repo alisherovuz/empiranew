@@ -1,4 +1,6 @@
-(function () {
+(async function () {
+if(!await window.EMPIRA_READY)return;
+const P=window.EMPIRA_PROGRESS;
 // Empira — Build Mode ("…o‘zingiz yig‘ing"). ?lab=<lab id>, e.g. ?lab=om-qonuni or ?lab=reostat
 // The student starts from an empty board, picks the needed tools from a library (wrong ones are explained),
 // wires terminals by tapping one, then another (in 3D or with the terminal buttons), gets an amber ✓ for a correct
@@ -56,6 +58,47 @@ const state = {
   values: Object.fromEntries(L.controls.map((c) => [c.key, c.value])),
   runs: [], touched: new Set(), mphase: 'ready', t: 0, dur: 1
 };
+let restoring = true;
+const draft = P.get(labId,'build');
+let earnedStars = Math.max(0,Math.min(3,Number(draft?.bestStars)||0));
+function saveDraft(){
+  if(restoring || !M)return;
+  P.save(labId,'build',{placed:[...state.placed],wires:state.wires,phase:state.phase,
+    values:state.values,runs:state.runs.slice(-50),touched:[...state.touched],mphase:state.mphase==='running'?'ready':state.mphase,
+    mistakes:state.mistakes,hints:state.hints,bestStars:earnedStars,introSeen:true,finaleShown:state.finaleShown});
+}
+function restoreDraft(){
+  if(!draft)return false;
+  const ids=Array.isArray(draft.placed)?draft.placed:[];
+  M.entries.filter((e)=>e.need&&ids.includes(e.id)).forEach((e)=>{
+    state.placed.add(e.id);M.place(e.id);
+    if(M.wiring)e.insts.forEach((i)=>M.keys(i).forEach((k)=>addMarker(i+'.'+k)));
+  });
+  let complete=false;
+  if(M.wiring&&allPlaced()){
+    M.junctions.forEach(addMarker);
+    const terminals=new Set(allTerminals());
+    for(const w of (Array.isArray(draft.wires)?draft.wires:[]).slice(0,200)){
+      if(!Array.isArray(w)||w.length!==2||!w.every((t)=>terminals.has(t)))continue;
+      const checked=M.checker.check(state.wires,w);
+      if(checked.status==='ok'){state.wires.push(w);complete=!!checked.complete;}
+    }
+  }
+  state.mistakes=Math.max(0,Math.min(10000,Number(draft.mistakes)||0));
+  state.hints=Math.max(0,Math.min(10000,Number(draft.hints)||0));
+  state.values=P.values(L.controls,draft.values);
+  if(allPlaced()&&(!M.wiring||complete))state.phase='ready';
+  redrawWires();
+  if(draft.phase==='measure'&&state.phase==='ready'){
+    state.runs=(Array.isArray(draft.runs)?draft.runs:[]).slice(-50).map((r)=>{const v=P.values(L.controls,r);return {...v,...(L.compute?L.compute(v):{})};});
+    state.touched=new Set((Array.isArray(draft.touched)?draft.touched:[]).filter((k)=>L.controls.some((c)=>c.key===k)));
+    state.mphase=draft.mphase==='done'&&state.runs.length?'done':'ready';
+    state.finaleShown=!!draft.finaleShown;
+    startMeasure();
+    if(state.mphase==='done')M.progress(1,state.values,calc());
+  }
+  return state.placed.size>0;
+}
 const needed = () => M.entries.filter((e) => e.need);
 const allPlaced = () => needed().every((e) => state.placed.has(e.id));
 const placedInstances = () => M.entries.filter((e) => state.placed.has(e.id)).flatMap((e) => e.insts);
@@ -106,9 +149,8 @@ const PRAISE = ['To‘g‘ri!', 'Zo‘r!', 'Ajoyib!', 'Barakalla!', 'Juda yaxshi
 let praiseI = 0;
 const praise = () => PRAISE[praiseI++ % PRAISE.length];
 const mark = () => { if (!state.startedAt) state.startedAt = performance.now(); };
-const bestKey = `empira-build-best:${labId}`;
-function bestStars() { try { return Number(localStorage.getItem(bestKey)) || 0; } catch (e) { return 0; } }
-function saveBest(n) { try { if (n > bestStars()) localStorage.setItem(bestKey, String(n)); } catch (e) { /* ignore */ } }
+function bestStars(){return earnedStars;}
+function saveBest(n){earnedStars=Math.max(earnedStars,n);saveDraft();}
 
 function showIntro() {
   coach({
@@ -121,6 +163,7 @@ function showIntro() {
   });
 }
 function showConnect() {
+  if(!M || state.phase!=='build' || !allPlaced())return;
   Sound.play('step');
   const startHere = () => { state.guide = M.guideStart(); state.guide2 = null; render(); };
   coach({
@@ -130,7 +173,8 @@ function showConnect() {
   });
 }
 function showWin() {
-  const slips = state.mistakes + state.hints;
+  if(state.phase!=='ready')return;
+  const slips = state.mistakes;
   const stars = slips === 0 ? 3 : slips <= 2 ? 2 : 1;
   const prev = bestStars(); saveBest(stars);
   const secs = Math.max(1, Math.round((performance.now() - (state.startedAt || performance.now())) / 1000));
@@ -212,6 +256,7 @@ function renderReadouts() {
 
 function render() {
   if (!M) return;
+  saveDraft();
   const n = needed();
   $('[data-tools-count]').textContent = `${n.filter((e) => state.placed.has(e.id)).length} / ${n.length}`;
   $('[data-wires-count]').textContent = M.wiring ? `${progress()} / ${M.checker.required}` : '';
@@ -498,7 +543,7 @@ function chooseTool(id) {
   if (!t.need) {
     flashEl(btn, 'is-wrong'); Sound.play('error'); state.mistakes++;
     feedback('error', 'Bu asbob kerak emas', t.why);
-    return;
+    saveDraft();return;
   }
   if (state.placed.has(id)) { feedback('info', `${t.name} allaqachon stolda`, ''); return; }
   state.placed.add(id);
@@ -573,6 +618,8 @@ function undo() {
 
 function restart() {
   if (!S || !M) return;
+  if((state.placed.size||state.runs.length)&&!window.confirm('Bu tajribani boshidan boshlaysizmi? Joriy yig‘ish va o‘lchovlar tozalanadi. Eng yaxshi yulduzlaringiz saqlanadi.'))return;
+  closeCoach(false);
   M.unplaceAll(); clearMarkers(); S.drops = [];
   Object.assign(state, { phase: 'build', placed: new Set(), wires: [], pending: null, hover: null, guide: null, guide2: null, mistakes: 0, hints: 0, startedAt: 0, finaleShown: false, runs: [], touched: new Set(), mphase: 'ready', t: 0 });
   S.flow.forEach((f) => f.dots.forEach((d) => { S.flowGroup.remove(d); }));
@@ -677,7 +724,7 @@ function build3D() {
   const { THREE, OrbitControls } = window.EMPIRA_THREE;
   const canvas = $('[data-canvas]');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.matchMedia('(max-width: 700px)').matches ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -769,6 +816,7 @@ function build3D() {
 
   const clock = new THREE.Clock(); let first = true;
   renderer.setAnimationLoop(() => {
+    if(document.hidden){clock.getDelta();return;}
     const dt = Math.min(clock.getDelta(), 0.05), now = performance.now();
     // tools dropping onto the board
     S.drops = S.drops.filter((d) => {
@@ -811,11 +859,15 @@ function build3D() {
 }
 
 try {
-  build3D(); render();
+  build3D(); const resumed=restoreDraft(); restoring=false; render();
   // Step 1 card: shown on a student's first visit to this lab (remembered on this device)
-  let seen = false;
-  try { seen = localStorage.getItem(`empira-build-intro:${labId}`) === '1'; localStorage.setItem(`empira-build-intro:${labId}`, '1'); } catch (e) { /* ignore */ }
-  if (!seen) setTimeout(showIntro, 350);
-  else feedback('info', '1-qadam: kerakli asboblarni tanlang', `Ro‘yxatdagi ${M.entries.length} ta asbobdan faqat ${needed().length} tasi kerak.`);
-} catch (err) { console.error(err); $('[data-loading]').hidden = true; $('[data-fallback]').hidden = false; }
+  if(resumed)feedback('info','Davom etamiz!','Saqlangan tajribangiz tiklandi. Maslahat olish yulduzlarni kamaytirmaydi.');
+  else if(!draft?.introSeen)setTimeout(showIntro,350);
+  else feedback('info','Kerakli asboblarni tanlang','Maslahat olish yulduzlarni kamaytirmaydi.');
+ } catch (err) {
+  console.error(err); $('[data-loading]').hidden=true; $('[data-fallback]').hidden=false;
+  $('[data-fallback]').innerHTML='3D ko‘rinish yuklanmadi. <button type="button" data-retry-scene>Qayta urinish</button> <a href="/dashboard">Boshqa tajriba</a>';
+  $('[data-retry-scene]').onclick=()=>location.reload();
+  $('[data-start],[data-run],[data-tool],[data-hint-btn]').forEach((b)=>{b.disabled=true;});
+}
 })();

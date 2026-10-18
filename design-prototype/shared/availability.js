@@ -92,7 +92,7 @@
     const q = new URLSearchParams(root.location.search);
     let last = null;
     try { last = Number(root.localStorage.getItem('empira.grade')) || null; } catch (e) { /* private mode */ }
-    const pick = [Number(q.get('sinf')) || null, q.get('mavzu') && gradeOfTopic(q.get('mavzu')), q.get('lab') && gradeOfLab(q.get('lab')), last]
+    const pick = [q.get('lab') && gradeOfLab(q.get('lab')), q.get('mavzu') && gradeOfTopic(q.get('mavzu')), Number(q.get('sinf')) || null, last]
       .find((g) => g && plans()[g]);
     if (pick) {
       root.EMPIRA_PLAN = plans()[pick];

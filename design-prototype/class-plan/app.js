@@ -6,7 +6,8 @@
   const showAllSubjects = q.get('fanlar') === '3'; // preview: how more subjects will appear
   const openAllOnLoad = q.get('ochiq') === 'hammasi'; // documentation: all chapters open
   const grade = Number(q.get('sinf')) || plan.grade;   // prototype route: ?sinf=6…11 from Home
-  const thisWeek = Number(q.get('hafta')) || plan.demoThisWeek; // prototype setting (see data.js), not a calendar
+  const requestedWeek=Number(q.get('hafta'));
+  const thisWeek=Number.isInteger(requestedWeek)&&requestedWeek>=1&&requestedWeek<=40?requestedWeek:null;
 
   const chevronRight = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
   const chevronDown = '<svg class="icon chapter__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
@@ -41,10 +42,11 @@
   const tag = () => '<span class="tag">3D laboratoriya mavjud</span>';
 
   /* ---------- This week (always a topic that has a lab) ---------- */
-  const week = avail.weekTopic(thisWeek);
+  const week = thisWeek ? avail.weekTopic(thisWeek) : null;
+  if(!week)document.querySelector('[data-now]').hidden=true;
   if (week) {
     const t = week.topic;
-    const label = week.exact ? `Shu hafta · ${t.w}-hafta` : `Eng yaqin laboratoriya · ${t.w}-hafta`;
+    const label = week.exact ? `Tanlangan hafta · ${t.w}-hafta` : `Eng yaqin laboratoriya · ${t.w}-hafta`;
     const nowEl = document.querySelector('[data-now]');
     nowEl.href = `../topic/index.html?mavzu=${t.slug}`;
     nowEl.innerHTML = `
@@ -74,7 +76,7 @@
       const week = `
         <span class="topic__week">
           <span>${t.w}-hafta</span>
-          ${current ? '<span class="now">Shu hafta</span>' : ''}
+          ${current ? '<span class="now">Tanlangan hafta</span>' : ''}
         </span>`;
 
       return `

@@ -3,6 +3,7 @@
 // Shunday qilib Google ham, Telegram ham BITTA sessiya + RLS ustida ishlaydi.
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { clientBucket, limit, noStore } = require('../_lib/security');
 
 const URL     = process.env.SUPABASE_URL;
 const SERVICE = process.env.SUPABASE_SERVICE_KEY;     // secret (admin) key
@@ -15,7 +16,7 @@ const tgEmail = (id) => 'tg' + id + '@tg.empira.app';
 const tgPass  = (id) => crypto.createHmac('sha256', SECRET).update('tg:' + String(id)).digest('hex');
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  noStore(res);
   res.setHeader('Access-Control-Allow-Headers', 'content-type');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -24,15 +25,17 @@ module.exports = async (req, res) => {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     const code = body.code && String(body.code).trim();
-    if (!code) return res.status(400).json({ error: 'Kod kiritilmadi' });
+    if (!code || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Kod kiritilmadi' });
 
-    // 1) Kodni tekshiramiz
-    const { data: row } = await admin.from('telegram_codes').select('*').eq('code', code).single();
-    if (!row) return res.status(404).json({ error: 'Kod topilmadi' });
-    if (new Date(row.expires_at) < new Date()) {
-      await admin.from('telegram_codes').delete().eq('code', row.code);
-      return res.status(410).json({ error: 'Kod muddati tugagan' });
+    if (!await limit(admin, clientBucket(req, 'tg-verify'), 10, 300) || !await limit(admin, 'tg-verify-global', 300, 60)) {
+      res.setHeader('Retry-After', '300');
+      return res.status(429).json({ error: 'Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring.' });
     }
+    // DELETE ... RETURNING consumes an OTP exactly once, before session creation.
+    const consumed = await admin.rpc('empira_consume_telegram_code', { p_code: code });
+    if (consumed.error) throw new Error('code_store_unavailable');
+    const row = consumed.data;
+    if (!row) return res.status(400).json({ error: 'Kod noto‘g‘ri yoki muddati tugagan. Botdan yangi kod oling.' });
 
     const email     = tgEmail(row.telegram_id);
     const password  = tgPass(row.telegram_id);
@@ -59,7 +62,6 @@ module.exports = async (req, res) => {
       { telegram_id: row.telegram_id, username: row.username, first_name: row.first_name, last_seen: new Date().toISOString() },
       { onConflict: 'telegram_id' }
     );
-    await admin.from('telegram_codes').delete().eq('code', row.code);
     return res.status(200).json({
       ok: true,
       access_token: s.access_token,
@@ -68,6 +70,6 @@ module.exports = async (req, res) => {
       first_name: full_name
     });
   } catch (e) {
-    return res.status(500).json({ error: 'Server xatosi: ' + (e.message || e) });
+    return res.status(500).json({ error: 'Kirish xizmati vaqtincha ishlamayapti. Botdan yangi kod olib, qayta urinib ko‘ring.' });
   }
 };

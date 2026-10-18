@@ -3,5 +3,12 @@
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.cjs",
+    "test:ui": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
   }
 }
