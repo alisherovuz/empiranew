@@ -34,7 +34,7 @@ test('direct lab URL without session returns to login with destination',async({p
 });
 test('invalid grade 7 lab URL displays a recovery screen',async({page})=>{
   await auth(page);await page.goto('/design-prototype/lab/index.html?lab=missing&sinf=7');
-  await expect(page.getByRole('heading',{name:'Tajriba topilmadi'})).toBeVisible();
+  await expect(page.getByRole('main').getByRole('heading',{name:'Tajriba topilmadi'})).toBeVisible();
   await expect(page.getByRole('link',{name:'Mavzularni ochish'})).toBeVisible();
 });
 test('failed 3D initialization disables Run and offers retry',async({page})=>{
@@ -65,4 +65,21 @@ test('mobile catalogue fits the viewport and account is reachable',async({page})
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.locator('.who[role=button]').press('Enter');
   await expect(page.locator('#sc-account')).toBeVisible();
+});
+
+test('ready measurements survive reload',async({page})=>{
+  await auth(page);await page.goto('/design-prototype/lab/index.html?lab=om-qonuni');
+  await expect(page.locator('[data-run]')).toBeEnabled();
+  await page.locator('[data-run]').click();
+  await expect(page.locator('[data-runs-body] tr')).toHaveCount(1,{timeout:15000});
+  await page.reload();
+  await expect(page.locator('[data-runs-body] tr')).toHaveCount(1);
+});
+test('browser Back returns from account to the student dashboard',async({page})=>{
+  await auth(page);await page.goto('/dashboard');
+  await expect(page.locator('#student-catalog')).toBeVisible();
+  await page.locator('.who[role=button]').click();
+  await expect(page.locator('#sc-account')).toBeVisible();
+  await page.goBack();
+  await expect(page.locator('#sc-dashboard')).toBeVisible();
 });

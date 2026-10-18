@@ -17,7 +17,7 @@
       }
       const p = await deadline(sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
       if (p.error) throw p.error;
-      if (!p.data || !(p.data.onboarded || p.data.school)) {
+      if (!p.data || !(p.data.onboarded || p.data.school || p.data.role==='admin')) {
         location.replace('/dashboard?next=' + encodeURIComponent(location.pathname + location.search));
         return null;
       }

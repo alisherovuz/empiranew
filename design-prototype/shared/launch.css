@@ -19,3 +19,5 @@
 .empira-continue strong,.empira-continue span{display:block;line-height:1.6}
 .empira-catalog :focus-visible,.empira-nav :focus-visible{outline:3px solid #FFB21E;outline-offset:3px}
 @media(max-width:600px){.empira-nav{gap:6px}.empira-nav a{font-size:11px}.empira-results{grid-template-columns:1fr}.labbar{flex-wrap:wrap}.empira-catalog h2{font-size:20px}}
+
+.choices[hidden]{display:none!important}
