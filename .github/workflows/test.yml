@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Read-only Telegram endpoint diagnostics
+        run: node scripts/check-telegram-service.cjs
       - run: npm install --ignore-scripts
       - run: npm test
       - run: psql -v ON_ERROR_STOP=1 -f tests/launch-db-setup.sql

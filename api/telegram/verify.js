@@ -10,7 +10,7 @@ const SERVICE = process.env.SUPABASE_SERVICE_KEY;     // secret (admin) key
 const ANON    = process.env.SUPABASE_ANON_KEY;        // publishable (public) key
 const SECRET  = process.env.APP_SECRET || SERVICE;    // parol hosil qilish uchun (barqaror bo'lsin!)
 
-const admin = createClient(URL, SERVICE, { auth: { autoRefreshToken: false, persistSession: false } });
+// Create clients inside the handler so missing Preview variables return JSON.
 
 const tgEmail = (id) => 'tg' + id + '@tg.empira.app';
 const tgPass  = (id) => crypto.createHmac('sha256', SECRET).update('tg:' + String(id)).digest('hex');
@@ -22,9 +22,14 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
+  if (!URL || !SERVICE || !ANON) {
+    console.error('telegram_verify_not_configured');
+    return res.status(503).json({ ok:false, code:'AUTH_NOT_CONFIGURED', error:'Telegram orqali kirish bu saytda hali sozlanmagan. Hozir Google orqali kiring yoki yordam xizmatiga murojaat qiling.' });
+  }
   try {
+    const admin = createClient(URL, SERVICE, { auth: { autoRefreshToken:false, persistSession:false } });
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const code = body.code && String(body.code).trim();
+    const code = body && body.code && String(body.code).trim();
     if (!code || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Kod kiritilmadi' });
 
     if (!await limit(admin, clientBucket(req, 'tg-verify'), 10, 300) || !await limit(admin, 'tg-verify-global', 300, 60)) {
@@ -53,7 +58,7 @@ module.exports = async (req, res) => {
       si = await pub.auth.signInWithPassword({ email, password });
     }
     if (si.error || !si.data || !si.data.session) {
-      return res.status(500).json({ error: 'Sessiya yaratilmadi. Email provider yoqilganini tekshiring.' });
+      return res.status(503).json({ok:false,code:'AUTH_SESSION_FAILED',error:'Telegram hisobi bilan kirib bo‘lmadi. Hozir Google orqali kiring yoki yordam xizmatiga murojaat qiling.'});
     }
     const s = si.data.session;
 
@@ -70,6 +75,9 @@ module.exports = async (req, res) => {
       first_name: full_name
     });
   } catch (e) {
-    return res.status(500).json({ error: 'Kirish xizmati vaqtincha ishlamayapti. Botdan yangi kod olib, qayta urinib ko‘ring.' });
+    const storage = ['rate_limit_unavailable','code_store_unavailable'].includes(e.message);
+    console.error(storage ? 'telegram_verify_storage_unavailable' : 'telegram_verify_failed');
+    return res.status(503).json({ok:false,code:storage?'AUTH_STORAGE_UNAVAILABLE':'AUTH_UNAVAILABLE',
+      error:storage?'Telegram kirish xizmati vaqtincha tayyor emas. Hozir Google orqali kiring yoki yordam xizmatiga murojaat qiling.':'Telegram orqali kirish hozir ishlamayapti. Birozdan so‘ng botdan yangi kod olib urinib ko‘ring.'});
   }
 };

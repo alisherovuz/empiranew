@@ -2,7 +2,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { randomInt } = require('node:crypto');
 const { sameSecret, limit, noStore } = require('../_lib/security');
-const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+// Validate configuration before creating the client.
 module.exports = async (req, res) => {
   noStore(res);
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
@@ -15,7 +15,9 @@ module.exports = async (req, res) => {
   const msg = upd?.message, u = msg?.from;
   if (!msg?.text || !/^\/start(?:@empirabot)?(?:\s|$)/i.test(msg.text)) return res.status(200).json({ ok: true });
   if (!Number.isSafeInteger(u?.id) || u.id <= 0 || u.is_bot || msg.chat?.type !== 'private' || msg.chat.id !== u.id) return res.status(200).json({ ok: true });
+  if(!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.TELEGRAM_BOT_TOKEN)return res.status(503).json({ok:false});
   try {
+    const sb=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY);
     if (!await limit(sb, 'tg-issue:' + u.id, 3, 300)) return res.status(200).json({ ok: true });
     let code;
     for (let attempt = 0; attempt < 5; attempt++) {

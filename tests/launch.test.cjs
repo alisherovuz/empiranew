@@ -112,3 +112,17 @@ test('offline reload queues saved drafts for sync when the connection recovers',
   const resumed=progressFixture(original.storage);await resumed.p.init('student-a',sb);
   await resumed.p.flush();assert.equal(saved,1);
 });
+
+test('missing Preview environment returns a setup error without initializing a client',async()=>{
+  for(const key of ['SUPABASE_URL','SUPABASE_SERVICE_KEY','SUPABASE_ANON_KEY']){
+    const handler=loadHandler('api/telegram/verify.js',{},null,{[key]:''});
+    const out=await call(handler,{body:{code:'123456'}});
+    assert.equal(out.status,503);assert.equal(out.body.code,'AUTH_NOT_CONFIGURED');
+  }
+});
+test('missing OTP migration returns an actionable storage error',async()=>{
+  const handler=loadHandler('api/telegram/verify.js',{rpc:async()=>({error:{code:'PGRST202'}})},null);
+  const out=await call(handler,{body:{code:'123456'}});
+  assert.equal(out.status,503);assert.equal(out.body.code,'AUTH_STORAGE_UNAVAILABLE');
+  assert.equal(out.body.error.includes('PGRST'),false);
+});

@@ -723,17 +723,22 @@ async function verifyTgCode(){
   m.style.color='var(--ink3)'; m.textContent='Tekshirilmoqda…';
   try{
     var r=await fetch('/api/telegram/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:code})});
-    var d=await r.json();
+    var d=await r.json().catch(function(){return null;});
+    if(!d || typeof d!=='object'){
+      var responseError=new Error('telegram_response');
+      responseError.tgMessage=r.status>=500?'Telegram kirish serveri hozir javob bermayapti. Google orqali kiring yoki yordam xizmatiga murojaat qiling.':'Telegram kirish xizmati ochilmadi. Sahifani yangilang yoki Google orqali kiring.';
+      throw responseError;
+    }
     if(d.ok){
       m.style.color='#0a7d33'; m.textContent='✓ Tasdiqlandi — '+(d.first_name||'')+'…';
       try{ localStorage.setItem('empira_role', state.role||'student'); localStorage.removeItem('empira_tg_pending'); }catch(e){}
-      if(!d.access_token || !sb) throw new Error('session_missing');
+      if(!d.access_token || !sb){var unavailable=new Error('session_missing');unavailable.tgMessage='Kirish kutubxonasi yuklanmadi. Sahifani yangilab, botdan yangi kod oling.';throw unavailable;}
       var sessionResult=await sb.auth.setSession({access_token:d.access_token,refresh_token:d.refresh_token});
-      if(sessionResult.error) throw sessionResult.error;
+      if(sessionResult.error){var sessionError=new Error('session_failed');sessionError.tgMessage='Kod tasdiqlandi, lekin hisob brauzerda ochilmadi. Sahifani yangilab, botdan yangi kod oling.';throw sessionError;}
       await afterLogin();
     }
     else { m.style.color='#FF6A4D'; m.textContent=d.error||'Kod xato.'; clearOtp(); }
-  }catch(e){ m.style.color='#FF6A4D'; m.textContent='Ulanishda xato. Qayta urinib ko‘ring.'; }
+  }catch(e){ m.style.color='#FF6A4D'; m.textContent=e.tgMessage||'Telegram kirish serveriga ulanib bo‘lmadi. Internetni tekshiring yoki Google orqali kiring.'; }
   finally{ tgVerifying=false; }
 }
 
