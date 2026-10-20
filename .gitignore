@@ -2,3 +2,6 @@
 .claude/
 books/
 *.pdf
+node_modules/
+.bak-*/
+*.orig

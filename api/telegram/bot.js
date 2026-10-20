@@ -1,8 +1,8 @@
 'use strict';
-const { createClient } = require('@supabase/supabase-js');
+const { one } = require('../_lib/db');
 const { randomInt } = require('node:crypto');
 const { sameSecret, limit, noStore } = require('../_lib/security');
-// Validate configuration before creating the client.
+
 module.exports = async (req, res) => {
   noStore(res);
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
@@ -15,19 +15,17 @@ module.exports = async (req, res) => {
   const msg = upd?.message, u = msg?.from;
   if (!msg?.text || !/^\/start(?:@empirabot)?(?:\s|$)/i.test(msg.text)) return res.status(200).json({ ok: true });
   if (!Number.isSafeInteger(u?.id) || u.id <= 0 || u.is_bot || msg.chat?.type !== 'private' || msg.chat.id !== u.id) return res.status(200).json({ ok: true });
-  if(!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.TELEGRAM_BOT_TOKEN)return res.status(503).json({ok:false});
+  if (!process.env.TELEGRAM_BOT_TOKEN) return res.status(503).json({ ok: false });
   try {
-    const sb=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY);
-    if (!await limit(sb, 'tg-issue:' + u.id, 3, 300)) return res.status(200).json({ ok: true });
+    if (!await limit('tg-issue:' + u.id, 3, 300)) return res.status(200).json({ ok: true });
     let code;
     for (let attempt = 0; attempt < 5; attempt++) {
       code = String(randomInt(100000, 1000000));
-      const r = await sb.rpc('empira_issue_telegram_code', {
-        p_code: code, p_telegram_id: u.id, p_username: u.username || null,
-        p_first_name: [u.first_name, u.last_name].filter(Boolean).join(' ') || null
-      });
-      if (r.error) throw new Error('code_store_failed');
-      if (r.data === true) break;
+      const r = await one(`SELECT empira_issue_telegram_code($1, $2, $3, $4) AS ok`, [
+        code, u.id, u.username || null,
+        [u.first_name, u.last_name].filter(Boolean).join(' ') || null
+      ]);
+      if (r && r.ok === true) break;
       code = null;
     }
     if (!code) throw new Error('code_generation_failed');
