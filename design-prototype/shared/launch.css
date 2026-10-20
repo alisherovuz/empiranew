@@ -8,7 +8,9 @@
 
 .choices[hidden]{display:none!important}
 
-html.empira-auth-pending::after{content:'Hisobingiz yuklanmoqda…';position:fixed;inset:0;display:grid;place-items:center;z-index:9999;background:#F6F7FB;color:#0B1026;font:500 16px Sora,sans-serif}
+html.empira-auth-pending::after{content:'Empira';position:fixed;inset:0;display:grid;place-items:center;z-index:9999;background:#F6F7FB;color:#3B4CFF;font:800 30px Sora,sans-serif;letter-spacing:-.5px}
+html.empira-auth-pending::before{content:'';position:fixed;left:50%;top:calc(50% + 32px);width:34px;height:34px;margin-left:-17px;border:3px solid #E7E9FF;border-top-color:#3B4CFF;border-radius:50%;animation:empAuthSpin .8s linear infinite;z-index:10000}
+@keyframes empAuthSpin{to{transform:rotate(360deg)}}
 
 /* ===== Lab home v2 (catalog.js) ===== */
 .ec{--b:#3B4CFF;--b6:#2F3DE0;--b50:#EEF0FF;--amber:#FFB21E;--ink:#0B1026;--ink7:#3A4166;--ink5:#5A6285;--line:#D9DCE8;--mist:#EEF0F5;color:var(--ink);font-family:Sora,system-ui,sans-serif;margin:28px 0 8px}

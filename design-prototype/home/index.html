@@ -12,8 +12,9 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="/design-prototype/shared/launch.css">
   <script src="/design-prototype/shared/progress.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+  <script src="/design-prototype/shared/empira-sb.js"></script>
   <script src="/design-prototype/shared/session.js"></script>
+  <script src="/design-prototype/shared/stars.js"></script>
 </head>
 <body>
 
@@ -30,6 +31,10 @@
           <text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text>
         </svg>
       </a>
+      <div data-home-stars hidden style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#FFF3DC;border-radius:999px;padding:7px 13px;">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="#FFB21E"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>
+        <b data-stars-count style="font:700 14px Sora,sans-serif;color:#C98400;">0</b>
+      </div>
     </div>
   </header>
 
@@ -40,6 +45,9 @@
       <h1 class="intro__title">Fizikani tajribada o‘rganing</h1>
       <p class="intro__meta"><span class="dot" aria-hidden="true"></span><span data-availability>Laboratoriyalar tayyor: 7-sinf, 8-sinf Fizika</span></p>
     </section>
+
+    <!-- Joriy chorak — current quarter's topics, auto-detected by date -->
+    <section data-chorak data-chorak-mode="student"></section>
 
     <!-- E. Continue (returning teachers only; hidden on first visit) -->
     <a class="continue" href="../topic/index.html?mavzu=laboratoriya-ishi-om-qonunini-organish" hidden data-continue>
@@ -98,6 +106,7 @@
   <script src="../topic/content-7.js"></script>
   <script src="../shared/availability.js"></script>
   <script src="/design-prototype/shared/catalog.js"></script>
+  <script src="/design-prototype/shared/chorak-section.js"></script>
   <script>
     // Every grade is listed. Grades whose labs are not ready yet carry a quiet "Tayyorlanmoqda" note
     // and open an honest page that points to the grades that are ready.
@@ -124,7 +133,14 @@
       if (tile) tile.setAttribute('aria-current', 'true');
     })();
 
-    window.EMPIRA_READY.then(function(session){ if(session) window.EMPIRA_CATALOG.mount(document.querySelector('[data-catalog]')); });
+    window.EMPIRA_READY.then(function(session){
+      if(!session) return;
+      window.EMPIRA_CATALOG.mount(document.querySelector('[data-catalog]'));
+      try{
+        var box = document.querySelector('[data-home-stars]');
+        if(box && window.EMPIRA_STARS){ box.querySelector('[data-stars-count]').textContent = window.EMPIRA_STARS.total(); box.hidden = false; }
+      }catch(e){}
+    });
   </script>
 </body>
 </html>

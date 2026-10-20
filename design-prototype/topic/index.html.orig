@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mavzu — Empira</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/app-icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/design-prototype/shared/launch.css">
+  <script src="/design-prototype/shared/progress.js"></script>
+  <script src="/design-prototype/shared/empira-sb.js"></script>
+  <script src="/design-prototype/shared/session.js"></script>
+</head>
+<body>
+
+  <!-- Top bar: identical to the Class Plan screen. Back goes one level up (to the plan). -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="icon-btn" href="../class-plan/index.html" data-back aria-label="Orqaga — yillik reja">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </a>
+
+      <a class="logo" href="../home/index.html" aria-label="Empira — bosh sahifa">
+        <svg class="logo__full" viewBox="0 0 440 112" aria-hidden="true" focusable="false">
+          <g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)">
+            <path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/>
+            <path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/>
+          </g></g>
+          <text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text>
+        </svg>
+        <svg class="logo__symbol" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <g transform="translate(-2.5 0)">
+            <path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/>
+            <path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/>
+          </g>
+        </svg>
+      </a>
+
+      <a class="scan-btn" href="../scan/index.html" aria-label="Kitobni skanerlash">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <path d="M7 12h10"/>
+        </svg>
+        <span class="scan-btn__label">Skanerlash</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="page" data-page>
+    <!-- Rendered by app.js from the topic's grade plan (../class-plan/data.js, data-7.js) + content.js / content-7.js -->
+  </main>
+
+  <!-- Mobile only: the main action stays reachable once the lab card scrolls away -->
+  <div class="sticky-cta" data-sticky hidden>
+    <a class="btn btn--primary btn--large" href="../lab/index.html" data-sticky-link>3D laboratoriyani ochish</a>
+  </div>
+
+  <script src="../class-plan/data.js"></script>
+  <script src="../class-plan/data-7.js"></script>
+  <script src="content.js"></script>
+  <script src="content-7.js"></script>
+  <script src="../shared/availability.js"></script>
+  <script src="../lab/build/experiments.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

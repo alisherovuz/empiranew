@@ -148,6 +148,7 @@ let finaleShown = !!saved && L.steps.every((step)=>step.done(state));
 function finale() {
   const build = window.EMPIRA_BUILD_FOR && window.EMPIRA_BUILD_FOR(labId);
   const next = window.EMPIRA_AVAIL ? window.EMPIRA_AVAIL.neighbours(topic.slug).next : null;
+  const reward = window.EMPIRA_STARS ? window.EMPIRA_STARS.award(labId) : { total: 0, stars: 3 };
   if (window.EMPIRA_QUIZ && window.EMPIRA_QUIZ.has(labId)) {
     FX.Sound.play('win'); FX.confetti(110);
     const _go = build ? { label: build.label, href: `build/index.html?lab=${labId}` }
@@ -159,7 +160,9 @@ function finale() {
   FX.Sound.play('win'); FX.confetti(110);
   FX.coach({
     kind: 'done', step: 'Barcha bosqichlar bajarildi', title: 'Tajriba bajarildi!',
+    stars: reward.stars,
     text: `Tajriba savoli: «${info.task}» O‘lchovlaringizga qarab javob bering.`,
+    meta: reward.total ? `Jami <b>${reward.total}</b> yulduz` : '',
     go: build ? build.label : next ? 'Keyingi mavzu' : 'Yillik rejaga qaytish',
     onGo: () => { location.href = build ? `build/index.html?lab=${labId}` : next ? `../topic/index.html?mavzu=${next.slug}` : `../class-plan/index.html?sinf=${plan.grade}`; },
     close: 'Shu yerda qolish'

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Empira — 3D laboratoriya</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/app-icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/design-prototype/shared/launch.css">
+  <script src="/design-prototype/shared/progress.js"></script>
+  <script src="/design-prototype/shared/empira-sb.js"></script>
+  <script src="/design-prototype/shared/session.js"></script>
+</head>
+<body>
+
+  <!-- A. Top bar: logo only on Home (Scan lives in section D) -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="logo" href="./" aria-label="Empira — bosh sahifa">
+        <!-- Official Flask E full logo (brand/logo-flask-e/full-logo-light.svg), inlined so the Sora wordmark renders with the loaded font -->
+        <svg viewBox="0 0 440 112" role="img" aria-hidden="true" focusable="false">
+          <g transform="translate(16 8) scale(1.5)"><g transform="translate(-2.5 0)">
+            <path d="M12 6 H32 V11 H30 V22 L36 30 H24 V36 H40.5 L45 42 H24 V46 H14 V11 H12 Z" fill="#3B4CFF"/>
+            <path d="M14 49 H50.25 L57 58 H14 Z" fill="#FFB21E"/>
+          </g></g>
+          <text x="126" y="82" font-family="Sora, sans-serif" font-weight="700" font-size="84" letter-spacing="-1.7" fill="#0B1026">Empira</text>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- B. What Empira is -->
+    <section class="intro">
+      <h1 class="intro__title">Fizikani tajribada o‘rganing</h1>
+      <p class="intro__meta"><span class="dot" aria-hidden="true"></span><span data-availability>Laboratoriyalar tayyor: 7-sinf, 8-sinf Fizika</span></p>
+    </section>
+
+    <!-- Joriy chorak — current quarter's topics, auto-detected by date -->
+    <section data-chorak data-chorak-mode="student"></section>
+
+    <!-- E. Continue (returning teachers only; hidden on first visit) -->
+    <a class="continue" href="../topic/index.html?mavzu=laboratoriya-ishi-om-qonunini-organish" hidden data-continue>
+      <span class="continue__text">
+        <span class="continue__label">Davom ettirish</span>
+        <span class="continue__topic">8-sinf · Fizika › Om qonuni</span>
+      </span>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+
+    <div data-catalog></div>
+    <div class="choices" hidden>
+
+      <!-- C. Mavzuni tanlash (main path, Flow A) -->
+      <section class="choice choice--topic" aria-labelledby="topic-title">
+        <h2 class="choice__title" id="topic-title">Mavzuni tanlash</h2>
+        <p class="choice__hint">Sinfingizni tanlang — yillik reja ochiladi.</p>
+
+        <ul class="grades" role="list">
+          <li><a class="grade" href="../class-plan/index.html?sinf=6"><span class="grade__num">6</span><span class="grade__unit">-sinf</span></a></li>
+          <li><a class="grade" href="../class-plan/index.html?sinf=7"><span class="grade__num">7</span><span class="grade__unit">-sinf</span></a></li>
+          <li><a class="grade" href="../class-plan/index.html?sinf=8"><span class="grade__num">8</span><span class="grade__unit">-sinf</span></a></li>
+          <li><a class="grade" href="../class-plan/index.html?sinf=9"><span class="grade__num">9</span><span class="grade__unit">-sinf</span></a></li>
+          <li><a class="grade" href="../class-plan/index.html?sinf=10"><span class="grade__num">10</span><span class="grade__unit">-sinf</span></a></li>
+          <li><a class="grade" href="../class-plan/index.html?sinf=11"><span class="grade__num">11</span><span class="grade__unit">-sinf</span></a></li>
+        </ul>
+      </section>
+
+      <!-- "yoki" (or): tells the teacher these are alternatives, not steps -->
+      <div class="or" aria-hidden="true"><span>yoki</span></div>
+
+      <!-- D. Kitobni skanerlash (Flow B) -->
+      <section class="choice choice--scan" aria-labelledby="scan-title">
+        <h2 class="choice__title" id="scan-title">Kitobni skanerlash</h2>
+        <p class="choice__hint">Darslik sahifasini suratga oling — Empira mavzuni topib, laboratoriyani ochadi.</p>
+
+        <a class="scan" href="../scan/index.html">
+          <span class="scan__icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <path d="M7 12h10"/>
+            </svg>
+          </span>
+          <span class="scan__label">Skanerlash</span>
+          <span class="scan__note">Kamera yoki rasm yuklash orqali</span>
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="../class-plan/data.js"></script>
+  <script src="../class-plan/data-7.js"></script>
+  <script src="../topic/content.js"></script>
+  <script src="../topic/content-7.js"></script>
+  <script src="../shared/availability.js"></script>
+  <script src="/design-prototype/shared/catalog.js"></script>
+  <script src="/design-prototype/shared/chorak-section.js"></script>
+  <script>
+    // Every grade is listed. Grades whose labs are not ready yet carry a quiet "Tayyorlanmoqda" note
+    // and open an honest page that points to the grades that are ready.
+    (function () {
+      const avail = window.EMPIRA_AVAIL;
+      if (!avail) return;
+      const ready = avail.grades();
+      document.querySelectorAll('.grades .grade').forEach((a) => {
+        const g = Number(new URL(a.href, location.href).searchParams.get('sinf'));
+        if (ready.includes(g)) return;
+        a.classList.add('grade--soon');
+        a.insertAdjacentHTML('beforeend', '<span class="grade__note">Tayyorlanmoqda</span>');
+        a.setAttribute('aria-label', `${g}-sinf, laboratoriyalar tayyorlanmoqda`);
+      });
+      // Subject names come from each ready grade's own plan (one name when they all match)
+      const plans = window.EMPIRA_PLANS || {};
+      const subjects = [...new Set(ready.map((g) => plans[g] && plans[g].subjects[0].name).filter(Boolean))];
+      document.querySelector('[data-availability]').textContent =
+        `Laboratoriyalar tayyor: ${ready.map((g) => `${g}-sinf`).join(', ')} ${subjects.join(', ')}`;
+      // The grade the teacher opened last is shown as selected (nothing is selected on a first visit)
+      let last = null;
+      try { last = Number(localStorage.getItem('empira.grade')) || null; } catch (e) { /* private mode */ }
+      const tile = ready.includes(last) && document.querySelector(`.grades a[href$="?sinf=${last}"]`);
+      if (tile) tile.setAttribute('aria-current', 'true');
+    })();
+
+    window.EMPIRA_READY.then(function(session){ if(session) window.EMPIRA_CATALOG.mount(document.querySelector('[data-catalog]')); });
+  </script>
+</body>
+</html>
