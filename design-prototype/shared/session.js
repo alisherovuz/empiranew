@@ -1,5 +1,7 @@
 /* Page access is UX gating; database RLS and API authentication enforce data access. */
 (function () {
+  const IS_PUBLIC = location.pathname === '/' || /\/home(\/|\b)/.test(location.pathname) || location.pathname.indexOf('/design-prototype/home') !== -1;
+  const reveal = () => document.documentElement.classList.remove('empira-auth-pending');
   document.documentElement.classList.add('empira-auth-pending');
   const onDOM = () => document.readyState === 'loading' ? new Promise((r) => document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
   const deadline = (p) => Promise.race([p, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 12000))]);
@@ -12,19 +14,21 @@
       if (result.error) throw result.error;
       const session = result.data.session;
       if (!session) {
+        if (IS_PUBLIC) { reveal(); return null; }
         location.replace('/dashboard?next=' + encodeURIComponent(location.pathname + location.search));
         return null;
       }
       const p = await deadline(sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle());
       if (p.error) throw p.error;
       if (!p.data || !(p.data.onboarded || p.data.school || p.data.role==='admin')) {
+        if (IS_PUBLIC) { reveal(); return null; }
         location.replace('/dashboard?next=' + encodeURIComponent(location.pathname + location.search));
         return null;
       }
       window.EMPIRA_SESSION = session;
       await window.EMPIRA_PROGRESS.init(session.user.id, sb);
       sb.auth.onAuthStateChange((event, current) => {
-        if (event === 'SIGNED_OUT' || (current && current.user.id !== session.user.id)) location.replace('/dashboard');
+        if (!IS_PUBLIC && (event === 'SIGNED_OUT' || (current && current.user.id !== session.user.id))) location.replace('/dashboard');
         if (current) window.EMPIRA_SESSION = current;
       });
       await onDOM();
