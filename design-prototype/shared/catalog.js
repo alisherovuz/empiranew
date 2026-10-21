@@ -10,7 +10,7 @@
     build: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4Z"/></svg>',
     ready: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.3A1.6 1.6 0 0 0 5.9 21h12.2a1.6 1.6 0 0 0 1.4-2.7L14 9V3"/></svg>'
   };
-  const SHOWN = [6, 7, 8, 9, 10, 11];
+  const SHOWN = [7, 8];
 
   function ago(iso) {
     const d = (Date.now() - Date.parse(iso)) / 86400000;
